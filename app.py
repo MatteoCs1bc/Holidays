@@ -17,10 +17,10 @@ df = carica()
 
 COLORI = {"decollo": "#e63946", "atterraggio": "#2a9d8f", "cima": "#264653",
           "rifugio": "#e76f51", "parcheggio": "#f4a261", "impianto": "#9d4edd",
-          "zona": "#000000"}
+          "zona": "#000000", "logistica": "#0077ff"}
 ICONE = {"decollo": "🪂", "atterraggio": "🎯", "cima": "⛰️", "rifugio": "🏠",
-         "parcheggio": "🅿️", "impianto": "🚡", "zona": "⚠️"}
-CAMPI_TESTO = ["nome", "note", "vento", "difficolta", "partenza", "categoria"]
+         "parcheggio": "🅿️", "impianto": "🚡", "zona": "⚠️", "logistica": "🚐"}
+CAMPI_TESTO = ["nome", "note", "vento", "difficolta", "partenza", "categoria", "fonte"]
 
 def dist_km(la1, lo1, la2, lo2):
     return math.hypot((la1 - la2) * 111,
@@ -37,7 +37,8 @@ with st.sidebar:
     zone = sorted(df["zona"].unique())
     z_sel = st.multiselect("Zona", zone, default=zone)
     tipi = sorted(df["tipo"].unique())
-    default_tipi = [t for t in ["decollo", "cima", "atterraggio", "zona", "rifugio"] if t in tipi]
+    default_tipi = [t for t in ["decollo", "cima", "atterraggio", "zona", "rifugio", "logistica"]
+                    if t in tipi]
     t_sel = st.multiselect("Tipo", tipi, default=default_tipi)
     solo_note = st.checkbox("Solo punti con note vere", value=True,
                             help="Esclude i punti del KML senza descrizione")
@@ -87,7 +88,7 @@ with t1:
         c[i % 4].markdown(f"<small>{v} {k}</small>", unsafe_allow_html=True)
 
 with t2:
-    q = st.text_input("Cerca", placeholder="crepaccia, rotore, navetta, cavi, doppia...")
+    q = st.text_input("Cerca", placeholder="lorenzo, crepaccia, rotore, navetta, cavi, doppia...")
     vis = sel
     if q and len(vis):
         ql = q.lower()
@@ -146,6 +147,7 @@ with t4:
     st.markdown("#### Fonti")
     st.dataframe(pd.DataFrame(FONTI, columns=["Fonte", "Cosa dà", "Area"]), hide_index=True)
     st.markdown("---")
-    st.caption("✅ verificato con fonte · 🟡 presente solo nel KML di Lorenzo Delbene, senza note "
-               "· ❓ da verificare prima di andarci. Condizioni di ghiacciaio e decolli non "
-               "ufficiali vanno sempre confermati sul posto.")
+    st.caption("✅ verificato con fonte · 🧑 raccontato da un pilota che c'è stato · "
+               "🟡 presente solo nel KML di Lorenzo Delbene, senza note · ❓ da verificare prima di "
+               "andarci. Condizioni di ghiacciaio e decolli non ufficiali vanno sempre confermati "
+               "sul posto.")

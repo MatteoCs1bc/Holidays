@@ -251,18 +251,30 @@ dict(zona="3 Oberland", tipo="cima", nome="Eiger (nota)", lat=46.5775, lon=8.005
           "Anche Moench e Jungfrau hanno lo stesso vincolo di rifugio.", fonte="ricerca web"),
 
 # ============ 4. ANNECY ============
-dict(zona="4 Annecy", tipo="decollo", nome="Planfait", lat=45.8210, lon=6.2160, quota=1250,
+dict(zona="4 Annecy", tipo="decollo", nome="Planfait", lat=45.8532, lon=6.2230, quota=1250,
      vento="W-NW", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato sintetico molto bello, quasi sempre affollato.", fonte="KML Delbene"),
-dict(zona="4 Annecy", tipo="decollo", nome="La Forclaz", lat=45.8130, lon=6.2350, quota=1240,
+     note="Tutto l'anno. Prato sintetico molto bello, quasi sempre affollato. "
+          "LORENZO: e' il decollo a meta' lago, piu' BASSO della Forclaz. "
+          "SI ARRIVA IN DECOLLO IN AUTO e si parcheggia bene. Alcuni giorni della settimana ci sono "
+          "anche bus gratuiti che partono dall'atterraggio. "
+          "Per partire in XC meglio la Forclaz.", fonte="KML Delbene + Lorenzo"),
+dict(zona="4 Annecy", tipo="decollo", nome="La Forclaz", lat=45.8142, lon=6.2468, quota=1240,
      vento="SW-W-NW", diff="4/5", aff="V", cat="Parapendio",
      note="Tutto l'anno. Stesse caratteristiche di Planfait, quasi sempre affollato. "
-          "Salita da Doussard (490 m) = ~750 m.", fonte="KML Delbene"),
-dict(zona="4 Annecy", tipo="decollo", nome="Col des Fretes", lat=45.8280, lon=6.2050, quota=1584,
+          "Salita da Doussard (490 m) = ~750 m. "
+          "LORENZO: e' a SUD e piu' ALTO di Planfait. PER PARTIRE IN XC VAI QUI. "
+          "MA non ci arrivi in auto: la strada e' privata, devi parcheggiare un bel pezzo prima. "
+          "In compenso dall'atterraggio a sud del lago partono navette organizzate benissimo.",
+     fonte="KML Delbene + Lorenzo"),
+dict(zona="4 Annecy", tipo="decollo", nome="Col des Fretes", lat=45.8564, lon=6.2466, quota=1584,
      vento="S-SW / W-SW", diff="4/5", aff="V", cat="Hike & Fly",
      note="Pendio erboso grande e bello. Dall'atterraggio ufficiale di Perroix (550 m) sono D+ 1030. "
-          "La prima parte della salita e quella che porta al decollo di Planfait.",
-     fonte="KML Delbene + lespiedssurterre"),
+          "La prima parte della salita e quella che porta al decollo di Planfait. "
+          "LORENZO: L'HIKE & FLY BELLO DELLA ZONA. Il punto di partenza e' il PARCHEGGIO ALTO DEL "
+          "DECOLLO PLANFAIT (45.8526, 6.2237): puoi arrivare li' con navetta o bus e camminare solo "
+          "l'ultimo pezzo, oppure farla tutta a piedi da sotto. Da li' a piedi si raggiungono "
+          "comunque tutti i decolli della zona.",
+     fonte="KML Delbene + lespiedssurterre + Lorenzo"),
 dict(zona="4 Annecy", tipo="decollo", nome="Sambuy", lat=45.7500, lon=6.2800, quota=2100,
      vento="N / NE-E", diff="", aff="V", cat="Parapendio",
      note="Pendio erboso. Dall'atterraggio del Val de Tamie (780 m): D+ 1420 per la cima 2198 m, "
@@ -272,7 +284,7 @@ dict(zona="4 Annecy", tipo="atterraggio", nome="Doussard", lat=45.7880, lon=6.22
      note="Grande e bello. In primavera ed estate attenzione alle bolle nelle ore centrali. "
           "NAVETTA MOLTO BEN ORGANIZZATA: punto d'attesa dove il parcheggio incontra l'atterraggio, "
           "massimo 8 persone per corsa, la fila si fa con gli zaini.", fonte="KML Delbene"),
-dict(zona="4 Annecy", tipo="atterraggio", nome="Planfait (atterraggio)", lat=45.8330, lon=6.1950, quota=460,
+dict(zona="4 Annecy", tipo="atterraggio", nome="Planfait (atterraggio)", lat=45.8486, lon=6.2138, quota=460,
      vento="", diff="5/5", aff="V", cat="Parapendio",
      note="Stesse note sulle bolle. Navette solo bus urbani nei weekend estivi, gratuiti. "
           "MOLTO BUONO PER L'AUTOSTOP.", fonte="KML Delbene"),
@@ -435,21 +447,30 @@ dict(zona="6 Ecrins", tipo="zona", nome="Regola volo parco Ecrins", lat=44.9200,
      note="Il volo libero sopra il CUORE del parco degli Ecrins e autorizzato dal 1 LUGLIO al 31 OTTOBRE. "
           "Il 21-23 settembre sei dentro. Bivacco tollerato in prossimita dei rifugi, da confermare con "
           "i gardien.", fonte="Parc national des Ecrins"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard High", lat=44.8200, lon=6.7350, quota=2360,
+dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard High", lat=44.8143, lon=6.7224, quota=2360,
      vento="SW-S-SE", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato bello.", fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard 2", lat=44.8210, lon=6.7320, quota=2300,
+     note="Tutto l'anno. Prato bello. "
+          "LORENZO: la zona dell'Izoard e' bellissima (parco del Queyras) MA e' LA RAMPA DI LANCIO "
+          "PER I VOLI DA 300 KM. D'estate e' davvero forte forte; A SETTEMBRE MOLTO MEGLIO. "
+          "C'e' anche una scuola di volo, quindi puo' essere un posto tranquillo oppure il delirio.",
+     fonte="KML Delbene + Lorenzo"),
+dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard 2", lat=44.8036, lon=6.7472, quota=2300,
      vento="NW-W-SW-S-SE", diff="3/5", aff="V", cat="Parapendio",
      note="Prato ripido sul lato NW. IL LATO SUD E ROCCIOSO CON SASSI PICCOLI CHE TAGLIANO FACILMENTE "
           "LE FUNI.", fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard (basso)", lat=44.8230, lon=6.7300, quota=2250,
+dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard (basso)", lat=44.8191, lon=6.7288, quota=2250,
      vento="SE", diff="2,5/5", aff="V", cat="Parapendio",
      note="Piccolo. Serve solo a evitare di camminare fino a quello bello.", fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud", lat=44.8500, lon=6.4900, quota=1650,
+dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud", lat=44.8503, lon=6.4791, quota=1650,
      vento="SE-E", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato non enorme ma con spazio. C'e anche un hike & fly a 5 km.",
-     fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud 2", lat=44.8510, lon=6.4880, quota=1680,
+     note="Tutto l'anno. Prato non enorme ma con spazio. "
+          "E' IL DECOLLO UFFICIALE DI VALLOUISE. "
+          "LORENZO: Vallouise e' uno dei due posti che consiglia vivamente nel Brianconnese. "
+          "Dal decollo ufficiale SI PUO SALIRE ANCORA PIU SU per hike & fly molto belli. "
+          "Dietro c'e il parco nazionale degli Ecrins con i ghiacciai. "
+          "Hike & fly Puy Aillaud a 44.8526, 6.4556. Atterraggio a 44.8416, 6.4888.",
+     fonte="KML Delbene + Lorenzo"),
+dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud 2", lat=44.8503, lon=6.4781, quota=1680,
      vento="S", diff="3,5/5", aff="V", cat="Parapendio",
      note="Bello ma stretto.", fonte="KML Delbene"),
 dict(zona="6 Ecrins", tipo="decollo", nome="Prorel", lat=44.8900, lon=6.6100, quota=2566,
@@ -486,6 +507,49 @@ dict(zona="7 Val Susa/Chisone", tipo="atterraggio", nome="Prali", lat=44.8900, l
      vento="", diff="", aff="V", cat="Parapendio",
      note="Stretto ma lungo. NAVETTE: raramente organizzate in Val di Susa. Chiedere ai local di "
           "'BICIO', il tizio che gestisce le navette dei decolli della valle.", fonte="KML Delbene"),
+# ---- aggiunte da Lorenzo (pilota, c'e stato) ----
+dict(zona="6 Ecrins", tipo="decollo", nome="Ceillac", lat=44.6670, lon=6.7854, quota=1900,
+     vento="", diff="", aff="L", cat="Parapendio",
+     note="LORENZO: proprio PARADISO VAN LIFE. Valle alpina con mega pianoro e paesino super "
+          "caratteristico. DECOLLO A 200 m DALL'ATTERRAGGIO, con SEMPRE DINAMICA che stai su. "
+          "Ci sono anche hike & fly belli alti con viste spettacolari. "
+          "UNICO CONTRO: partire per fare XC da li NON E NIENTE FACILE. Sei molto in alto e giri in "
+          "valli alpine. Pero anche solo un giretto e bellissimo. "
+          "Atterraggio a 44.6636, 6.7809, parcheggio atterraggio a 44.6650, 6.7761.",
+     fonte="Lorenzo"),
+dict(zona="6 Ecrins", tipo="atterraggio", nome="Ceillac (atterraggio)", lat=44.6636, lon=6.7809, quota=1640,
+     vento="", diff="", aff="L", cat="Parapendio",
+     note="A 200 m dal decollo. Parcheggio a 44.6650, 6.7761.", fonte="Lorenzo + KML"),
+dict(zona="6 Ecrins", tipo="logistica", nome="Vallouise e Ceillac (i due consigli)", lat=44.8500, lon=6.4900, quota=0,
+     vento="", diff="", aff="L", cat="Base",
+     note="LORENZO consiglia vivamente DUE POSTI nel Brianconnese: VALLOUISE e CEILLAC. "
+          "Vallouise: decollo ufficiale (Puy Aillaud) e hike & fly molto belli salendo piu su, "
+          "con gli Ecrins e i ghiacciai dietro. "
+          "Ceillac: paradiso van life, decollo a 200 m dall'atterraggio, dinamica costante, hike & fly "
+          "alti con viste spettacolari, ma XC difficile. "
+          "L'Izoard/Queyras e bellissimo ma e la rampa dei 300 km: a settembre e molto piu gestibile "
+          "che d'estate.", fonte="Lorenzo"),
+dict(zona="4 Annecy", tipo="logistica", nome="Dormire ad Annecy", lat=45.8000, lon=6.2100, quota=0,
+     vento="", diff="", aff="L", cat="Pernottamento",
+     note="LORENZO: MEGLIO NON STARE IN ZONA LAGO, rischio multe. Uscire un pochino: a sud del lago "
+          "da qualche parte defilata, o in qualche valle. "
+          "Usare l'app PARK4NIGHT, ci sono tante soluzioni.", fonte="Lorenzo"),
+dict(zona="4 Annecy", tipo="logistica", nome="Affollamento e XC ad Annecy", lat=45.8300, lon=6.2200, quota=0,
+     vento="", diff="", aff="L", cat="Note generali",
+     note="LORENZO: posto molto famoso e bello, si fanno CROSS FACILI - piu che altro c'e cosi tanta "
+          "gente che basta seguire gli altri come paperelle. Il contro e proprio la quantita di gente, "
+          "ma dipende dalla stagione: A SETTEMBRE probabilmente MOLTA MENO GENTE (ma comunque ce n'e). "
+          "I decolli ufficiali sono due: Planfait (meta lago, piu basso) e La Forclaz (sud, piu alto). "
+          "PER PARTIRE IN XC: LA FORCLAZ.", fonte="Lorenzo"),
+dict(zona="4 Annecy", tipo="parcheggio", nome="Parcheggio alto Planfait / Col de Fretes", lat=45.8526, lon=6.2237, quota=1150,
+     vento="", diff="", aff="L", cat="",
+     note="PUNTO DI PARTENZA dell'hike & fly al Col de Fretes. Ci si arriva in auto, in navetta o "
+          "col bus gratuito dall'atterraggio.", fonte="Lorenzo + KML"),
+dict(zona="4 Annecy", tipo="parcheggio", nome="Parcheggio La Forclaz", lat=45.8081, lon=6.2459, quota=1050,
+     vento="", diff="", aff="L", cat="",
+     note="LA STRADA SOPRA E PRIVATA: si parcheggia un bel pezzo prima del decollo. "
+          "Alternativa migliore: navette dall'atterraggio a sud del lago, organizzate benissimo.",
+     fonte="Lorenzo + KML"),
 ]
 
 GIORNI = [
