@@ -9,7 +9,7 @@ ZONE=[("1 Alpstein",47.28,9.35,32),("2 Zurigo",47.10,8.60,55),("3 Oberland",46.6
       ("4 Annecy",45.87,6.20,32),("5 Saint-Hilaire",45.31,5.86,35),("6 Ecrins",44.92,6.45,50),
       ("7 Val Susa/Chisone",44.98,7.00,45)]
 TIPO={'Takeoffs':'decollo','Landings':'atterraggio','Parkings':'parcheggio',
-      'Cablecars':'impianto','Hike & Fly':'decollo'}
+      'Cablecars':'impianto','Hike & Fly':'hike&fly'}
 
 def dist(a,b,c,d): return math.hypot((a-c)*111,(b-d)*111*math.cos(math.radians((a+c)/2)))
 
@@ -43,7 +43,7 @@ for f in doc.findall('k:Folder',ns):
         d=re.sub('<[^>]+>',' ',de.text).strip() if de is not None and de.text else ''
         rows.append(dict(zona=z, tipo=TIPO[fn], nome=nm, lat=lat, lon=lon, quota=None,
                          vento='', difficolta='', aff='K',
-                         categoria='Hike & Fly' if fn=='Hike & Fly' else '',
+                         categoria='Hike & Fly' if fn=='Hike & Fly' else 'Decollo ufficiale',
                          note=html.unescape(d), fonte='KML Delbene', disl=None, partenza='',
                          origine='kml'))
         n_kml+=1

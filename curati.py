@@ -266,7 +266,7 @@ dict(zona="4 Annecy", tipo="decollo", nome="La Forclaz", lat=45.8142, lon=6.2468
           "MA non ci arrivi in auto: la strada e' privata, devi parcheggiare un bel pezzo prima. "
           "In compenso dall'atterraggio a sud del lago partono navette organizzate benissimo.",
      fonte="KML Delbene + Lorenzo"),
-dict(zona="4 Annecy", tipo="decollo", nome="Col des Fretes", lat=45.8564, lon=6.2466, quota=1584,
+dict(zona="4 Annecy", tipo="hike&fly", nome="Col des Fretes", lat=45.8564, lon=6.2466, quota=1584,
      vento="S-SW / W-SW", diff="4/5", aff="V", cat="Hike & Fly",
      note="Pendio erboso grande e bello. Dall'atterraggio ufficiale di Perroix (550 m) sono D+ 1030. "
           "La prima parte della salita e quella che porta al decollo di Planfait. "
@@ -489,12 +489,12 @@ dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Colle Azzara", lat=45.0300
      note="Campo molto grande, ottimo per il groundhandling. SE NON RIESCI A GUADAGNARE QUOTA DEVI "
           "TOPLANDARE: l'atterraggio e troppo lontano e non ci sono atterraggi di fortuna in mezzo. "
           "Quasi sempre vento forte.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Monte Vandalino", lat=44.8600, lon=7.1700, quota=2121,
+dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Monte Vandalino", lat=44.8600, lon=7.1700, quota=2121,
      vento="SW-S-SE", diff="5/5", aff="V", cat="Hike & Fly",
      note="Bel decollo alpino, buono anche per groundhandling.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Punta Curbasiri", lat=44.9500, lon=7.0500, quota=1800,
+dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Punta Curbasiri", lat=44.9500, lon=7.0500, quota=1800,
      vento="SE-S-SW-W", diff="4/5", aff="V", cat="Hike & Fly", note="", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Pian dell'Alpe", lat=45.0100, lon=6.9900, quota=1980,
+dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Pian dell'Alpe", lat=45.0100, lon=6.9900, quota=1980,
      vento="SW-S-SE", diff="4/5", aff="V", cat="Hike & Fly",
      note="Usato dalle scuole per i voli intermedi.", fonte="KML Delbene"),
 dict(zona="7 Val Susa/Chisone", tipo="atterraggio", nome="Riposa", lat=45.0400, lon=6.9300, quota=1100,
@@ -550,6 +550,144 @@ dict(zona="4 Annecy", tipo="parcheggio", nome="Parcheggio La Forclaz", lat=45.80
      note="LA STRADA SOPRA E PRIVATA: si parcheggia un bel pezzo prima del decollo. "
           "Alternativa migliore: navette dall'atterraggio a sud del lago, organizzate benissimo.",
      fonte="Lorenzo + KML"),
+# ---- cime mancanti ----
+dict(zona="6 Ecrins", tipo="cima", nome="Barre des Ecrins", lat=44.9219, lon=6.3606, quota=4102,
+     disl=2230, partenza="Pre de Madame Carle 1874 m", diff="Ghiacciaio + cresta, PD+/AD-", aff="V",
+     cat="Alpinismo",
+     note="90 m piu in alto del Dome de Neige, ma il decollo si fa dal Dome. "
+          "A fine settembre il ghiacciaio e scoperto e crepacciato: LA CREPACCIA SOTTO LA BARRE E LA CRUX. "
+          "Sentire il gardien del Refuge des Ecrins il giorno prima.", fonte="FFCAM + relazioni"),
+dict(zona="3 Oberland", tipo="cima", nome="Morgenberghorn (salita)", lat=46.6560, lon=7.7500, quota=2190,
+     disl=1498, partenza="Muelenen", diff="", aff="V", cat="Alpinismo",
+     note="Decollo S/SW/W, atterraggio a Interlaken, 1622 m di volo. "
+          "Via alternativa da Aeschiried lungo la cresta, con lo Startplatz Spitz a meta per chiudere prima.",
+     fonte="hikeandfly.com / baern-gliders.ch"),
+dict(zona="4 Annecy", tipo="cima", nome="Pointe de la Sambuy", lat=45.7500, lon=6.2800, quota=2198,
+     disl=1420, partenza="Atterraggio Val de Tamie 780 m", diff="", aff="V", cat="Cross",
+     note="1420 m per la cima, ma solo 1300 PER IL DECOLLO AL COLLE verso la Petite Sambuy. "
+          "Orientamento NE a E.", fonte="lespiedssurterre.blog"),
+
+# ---- decolli hike & fly dell'Oberland (nomi dal listino di una guida locale) ----
+dict(zona="3 Oberland", tipo="hike&fly", nome="Baellenhoechst", lat=46.6300, lon=7.8300, quota=1750,
+     vento="", diff="", aff="?", cat="Hike & Fly",
+     note="Regione Interlaken. Coordinate approssimative: verifica su camptocamp o SHV.", fonte="highabove.me"),
+dict(zona="3 Oberland", tipo="hike&fly", nome="Tanzboedeli", lat=46.5600, lon=7.9000, quota=1670,
+     vento="", diff="", aff="?", cat="Hike & Fly",
+     note="Lauterbrunnental. Coordinate approssimative.", fonte="highabove.me"),
+dict(zona="3 Oberland", tipo="hike&fly", nome="Gemmenalphorn", lat=46.7100, lon=7.7600, quota=2061,
+     vento="", diff="", aff="?", cat="Hike & Fly",
+     note="Zona Niederhorn. Coordinate approssimative.", fonte="highabove.me"),
+dict(zona="3 Oberland", tipo="hike&fly", nome="Rotschalp", lat=46.7300, lon=8.0000, quota=1600,
+     vento="", diff="", aff="?", cat="Hike & Fly",
+     note="Brienzersee. Coordinate approssimative.", fonte="highabove.me"),
+dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)", lat=46.6700, lon=7.7400, quota=1600,
+     vento="S-SW-W", diff="", aff="V", cat="Hike & Fly",
+     note="Alla stazione a monte dello skilift superiore salendo da Aeschiried lungo la cresta. "
+          "PRIMA POSSIBILITA DI DECOLLO: se hai gia abbastanza quota o se sopra le condizioni non "
+          "vanno, chiudi qui. Coordinate approssimative.", fonte="baern-gliders.ch"),
+]
+
+# nome, zona, giorni consigliati, categoria, dislivello, ore, elementi (nome punto), descrizione
+GITE = [
+ dict(nome="Ebenalp da Wasserauen", zona="1 Alpstein", giorni="sab 12", cat="Cross", disl=770, ore="2h30",
+      punti=["Ebenalp a piedi","Ebenalp NW (1.1)","A1 Wasserauen (parapendio)"],
+      testo="Sali a piedi da Wasserauen via Seealpsee, decolli dal NW nella finestra 15-18 e "
+            "atterri dove hai lasciato l'auto. Con vento da ovest forte lascia perdere: rotore. "
+            "Il decollo e tardo, quindi ti si incastra bene dopo l'impegno delle 13 a San Gallo."),
+ dict(nome="Kronberg, l'assicurazione", zona="1 Alpstein", giorni="dom 13", cat="Cross", disl=770, ore="2h30",
+      punti=["Kronberg a piedi","Kronberg Sud","Kronberg Ovest","Kronberg Nord"],
+      testo="Da Jakobsbad. Quattro decolli in cima coprono tutte le direzioni, quindi e il piano "
+            "che non salta mai. Atterraggio alla stazione a valle: torni all'auto a piedi. "
+            "Il Sud e l'unico decollo dell'Alpstein per vento meridionale."),
+ dict(nome="Saentis per il Lisengrat", zona="1 Alpstein", giorni="dom 13", cat="Alpinismo", disl=1634, ore="5h",
+      punti=["Saentis via Rotsteinpass e Lisengrat","Saentis"],
+      testo="La traversata classica dell'Alpstein: Seealpsee, Meglisalp, Rotsteinpass, poi la cresta "
+            "attrezzata del Lisengrat. SOLO CON W-SW DEBOLI, e non si decolla dalla funivia. "
+            "Atterri a Unterwasser in Toggenburg: il recupero e dall'altro versante, va organizzato prima. "
+            "Se il vento non e quello, ripieghi sul Kronberg."),
+ dict(nome="Rigi di pomeriggio", zona="2 Zurigo", giorni="lun 14", cat="Cross", disl=1115, ore="3h",
+      punti=["Rigi Staffelhoehe","Rigi Scheidegg"],
+      testo="Da Weggis a piedi, oppure con la cremagliera se l'impegno delle 09 a Zurigo si allunga. "
+            "Staffelhoehe funziona dalle 14 fino a sera. Se c'e bise forte, il decollo giusto e "
+            "Rigi Scheidegg, che e esposto NE."),
+ dict(nome="Schynige Platte a piedi", zona="3 Oberland", giorni="mar 15", cat="Cross", disl=1383, ore="4h30",
+      punti=["Schynige Platte a piedi","Schynige Platte","Lehn (Interlaken)"],
+      testo="Il piu bel hike & fly del viaggio come rapporto fatica/rientro. Parti da Zurigo alle 6:30, "
+            "parcheggi a Wilderswil alle 9, sei in cima alle 13:30 dentro la finestra buona, "
+            "atterri a Lehn che e a 3 km dall'auto con treno e bus ogni pochi minuti. "
+            "NO-GO: vento di valle a Lehn, NW, o bise forte. In quel caso vai a Grindelwald-First."),
+ dict(nome="Faulhorn dal First", zona="3 Oberland", giorni="mer 16", cat="Cross", disl=516, ore="2h",
+      punti=["Faulhorn","Grindelwald-First"],
+      testo="Cabinovia fino a First e due ore di sentiero. Poca fatica, ambiente enorme davanti a "
+            "Eiger, Moench e Jungfrau. Se vuoi la giornata piena, la traversata integrale "
+            "Wilderswil-Schynige Platte-Faulhorn e 2330 m su 25 km, circa 10 ore."),
+ dict(nome="Morgenberghorn", zona="3 Oberland", giorni="mer 16", cat="Alpinismo", disl=1498, ore="5h",
+      punti=["Morgenberghorn (salita)","Morgenberghorn","Startplatz Spitz (Morgenberghorn)"],
+      testo="Da Muelenen, decollo S/SW/W, 1622 m di volo fino a Interlaken. "
+            "Dalla via di Aeschiried c'e lo Startplatz Spitz a meta: se in alto non va, chiudi li."),
+ dict(nome="Forclaz, il giorno di cross", zona="4 Annecy", giorni="gio 17", cat="Cross", disl=0, ore="",
+      punti=["La Forclaz","Doussard","Parcheggio La Forclaz"],
+      testo="LORENZO: per partire in XC si va alla Forclaz, che e piu alta di Planfait. "
+            "Ma la strada sopra e privata: lasci l'auto all'atterraggio a sud del lago e prendi "
+            "le navette, organizzate benissimo. A settembre c'e molta meno gente che d'estate. "
+            "I cross sono facili perche basta seguire gli altri."),
+ dict(nome="Col des Fretes", zona="4 Annecy", giorni="gio 17", cat="Hike & Fly", disl=400, ore="1h30",
+      punti=["Col des Fretes","Parcheggio alto Planfait / Col de Fretes"],
+      testo="LORENZO: il punto di partenza e il parcheggio alto del decollo Planfait, dove arrivi "
+            "in navetta o col bus gratuito. Quindi non sono i 1030 m dal fondovalle: solo l'ultimo "
+            "pezzo a piedi. Pendio erboso grande e bello, S-SW. "
+            "Da li a piedi raggiungi comunque tutti i decolli della zona."),
+ dict(nome="Coupe Icare senza coda", zona="5 Saint-Hilaire", giorni="ven 18 - dom 20", cat="Cross", disl=0, ore="",
+      punti=["Saint-Hilaire EST (il segreto)","Lumbin","Top landing ufficio turismo"],
+      testo="Il decollo Nord il 19-20 e occupato dall'Icarnaval. L'Est e un piccolo decollo nascosto "
+            "e pulito per quando il tappeto e troppo affollato: attenzione alle vele che arrivano di lato. "
+            "NON SI SALE SOPRA I 3000 m, aeroporto di Lione. "
+            "Lascia l'auto all'atterraggio e sali con la funicolare o le navette gratuite."),
+ dict(nome="Dent de Crolles dal Col du Coq", zona="5 Saint-Hilaire", giorni="sab 19 - dom 20", cat="Cross",
+      disl=650, ore="2h",
+      punti=["Dent de Crolles"],
+      testo="La via corta: 650 m dal Col du Coq invece dei 1100 da Saint-Hilaire o 1800 da Lumbin. "
+            "Decollo nel pendio sommitale, sud o nord. Attenzione a un effetto di compressione sulla cima. "
+            "E l'unico modo di volare davvero nel weekend della manifestazione."),
+ dict(nome="Dome de Neige e volo", zona="6 Ecrins", giorni="mar 22", cat="Alpinismo", disl=2141, ore="6-7h",
+      punti=["Dome de Neige des Ecrins","Refuge des Ecrins","Refuge du Glacier Blanc"],
+      testo="Partenza notturna dal Pre de Madame Carle verso l'1:00-2:00 per essere in cima tra le 7 e le 8. "
+            "Il decollo si fa SOTTO LA CREPACCIA e il rischio e la neve troppo scaldata in cui sprofondi "
+            "correndo: alle 10 hai perso la finestra. Tre opzioni di volo, la piu sicura e lo scavalco "
+            "del col de Barre Noire sul Glacier Noir, per non farsi schiacciare dal catabatico. "
+            "ACCLIMATAMENTO: vieni da 300 m di Saint-Hilaire. Valuta la notte al locale invernale del "
+            "Glacier Blanc (2542 m): dimezza la giornata e ti da una notte in quota."),
+ dict(nome="Roche Faurio, la versione ragionevole", zona="6 Ecrins", giorni="mar 22 - mer 23", cat="Alpinismo",
+      disl=1850, ore="5-6h",
+      punti=["Roche Faurio"],
+      testo="300 m in meno del Dome e nessuna difficolta seria, stesso ambiente. "
+            "Decollo est/sud-est, due piazzali: uno a ovest poco pendente con spazio per correre, "
+            "uno a sud grande e piatto sopra la fine del ghiacciaio. "
+            "PORTA I PICCHETTI da piantare nella neve. Volo sopra il Glacier Blanc fino al parcheggio."),
+ dict(nome="Pic du Glacier d'Arsine", zona="6 Ecrins", giorni="mer 23", cat="Alpinismo", disl=1500, ore="5h",
+      punti=["Pic du Glacier d'Arsine"],
+      testo="Decollo OVEST e SUD, quindi e il complemento della Roche Faurio: con qualsiasi vento "
+            "uno dei due funziona. 1500 m dal Pre de Madame Carle."),
+ dict(nome="Dibona, giornata di roccia", zona="6 Ecrins", giorni="alternativa 21-23", cat="Arrampicata",
+      disl=1150, ore="3h avvicinamento",
+      punti=["Aiguille Dibona","Refuge du Soreiller"],
+      testo="ATTENZIONE: e sul versante OPPOSTO del massiccio (Veneon, lato Isere). "
+            "Dal Pre de Madame Carle sono 110 km e due ore. Con tre giorni non ci stanno sia questa "
+            "che la Barre: devi sceglierne una. "
+            "LA VELA RESTA IN MACCHINA: la cima e una guglia, non si decolla. "
+            "Telefona al rifugio (04 76 79 08 32), le date di chiusura sono discordanti."),
+ dict(nome="Pointe des Cerces", zona="6 Ecrins", giorni="21 o 23", cat="Cross", disl=1150, ore="4h",
+      punti=["Pointe des Cerces"],
+      testo="Da Plan Lachat, sulla sinistra salendo al Galibier. Rientra nel budget cross. "
+            "Decollo nord/nord-ovest su un ripiano sotto la cima, atterraggio a Plan Lachat, grandi spazi. "
+            "Col Mont Thabor (sud-est/sud-ovest) copri i regimi opposti."),
+ dict(nome="Ceillac, giornata van life", zona="6 Ecrins", giorni="opzionale", cat="Cross", disl=0, ore="",
+      punti=["Ceillac","Ceillac (atterraggio)"],
+      testo="LORENZO: paradiso van life. Valle alpina con mega pianoro e paesino caratteristico. "
+            "Decollo a 200 m dall'atterraggio, con dinamica costante che ti tiene su. "
+            "Ci sono anche hike & fly alti con viste spettacolari. "
+            "CONTRO: partire in XC da li non e per niente facile, sei molto in alto e giri in valli alpine. "
+            "NOTA LOGISTICA: e 50 km a sud di Vallouise, nel Queyras. Non e sulla strada del Dome."),
 ]
 
 GIORNI = [
