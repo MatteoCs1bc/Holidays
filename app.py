@@ -318,11 +318,11 @@ with t5:
     cons = k1.number_input("Consumo l/100 km", 4.0, 20.0, float(COSTI["consumo"]), 0.5)
     prezzo = k2.number_input("€/litro", 1.0, 3.0, float(COSTI["prezzo_gasolio"]), 0.05)
     carb = tot_km / 100 * cons * prezzo
-    vign = COSTI["vignetta_chf"] * 1.05
+    vign = COSTI["vignetta_chf"] * 1.05 + COSTI.get("vignetta_at", 0)
     ped = COSTI["pedaggi_stimati"]
     d1, d2, d3, d4 = st.columns(4)
     d1.metric("Carburante", f"{carb:.0f} €")
-    d2.metric("Vignetta CH", f"{vign:.0f} €")
+    d2.metric("Vignette", f"{vign:.0f} €")
     d3.metric("Pedaggi", f"{ped:.0f} €")
     d4.metric("Totale", f"{carb + vign + ped:.0f} €")
     st.caption(COSTI["nota"])
@@ -369,6 +369,7 @@ with t5:
 
 # ---------------------------------------------------------------- meteo
 PUNTI_METEO = {
+    "Gemona del Friuli": (46.28, 13.14),
     "Appenzell / Alpstein": (47.28, 9.35),
     "Rigi / Svizzera centrale": (47.05, 8.48),
     "Interlaken / Oberland": (46.69, 7.86),
@@ -397,8 +398,54 @@ def cardinale(v):
 with t6:
     st.caption("Il vento a 700 hPa (~3000 m) è il gradiente che decide se voli. "
                "Lo zero termico serve per i ghiacciai. Medie della fascia 12-16.")
-    modo = st.radio("Vista", ["Una località, 16 giorni", "Confronto fra tutte, un giorno"],
+    modo = st.radio("Vista", ["Windy", "Una località, 16 giorni", "Confronto fra tutte, un giorno"],
                     horizontal=True, label_visibility="collapsed")
+
+    if modo == "Windy":
+        import streamlit.components.v1 as components
+        LIVELLI = {
+            "Superficie (10 m)": "surface",
+            "850 hPa (~1500 m)": "850h",
+            "700 hPa (~3000 m)": "700h",
+            "600 hPa (~4200 m)": "600h",
+            "500 hPa (~5500 m)": "500h",
+        }
+        STRATI = {
+            "Vento": "wind", "Raffiche": "gust", "Nuvole": "clouds", "Pioggia": "rain",
+            "Temperatura": "temp", "CAPE (instabilità)": "cape",
+            "Neve fresca": "snowAccu", "Isoterma zero": "deg0",
+        }
+        c1, c2 = st.columns(2)
+        luogo = c1.selectbox("Centro mappa", list(PUNTI_METEO), key="windy_loc")
+        strato = c2.selectbox("Strato", list(STRATI), key="windy_ov")
+        liv = st.select_slider("Quota", list(LIVELLI), value="700 hPa (~3000 m)")
+        wla, wlo = PUNTI_METEO[luogo]
+        url = (f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}"
+               f"&detailLat={wla}&detailLon={wlo}&zoom=8"
+               f"&level={LIVELLI[liv]}&overlay={STRATI[strato]}"
+               "&product=ecmwf&menu=&message=true&marker=true&calendar=now"
+               "&pressure=&type=map&location=coordinates&detail=true"
+               "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1")
+        components.iframe(url, height=520, scrolling=False)
+        st.caption("Modello ECMWF. Il livello **700 hPa** è il gradiente che decide la giornata; "
+                   "**isoterma zero** e **neve fresca** servono per i ghiacciai degli Écrins.")
+        st.markdown(
+            f"[Apri a schermo intero su windy.com](https://www.windy.com/{wla}/{wlo}"
+            f"?{STRATI[strato]},{wla},{wlo},8) · "
+            f"[meteo-parapente](https://meteo-parapente.com/#/{wla},{wlo},11)")
+        with st.expander("I vincoli di vento sito per sito"):
+            st.markdown("- **Ebenalp** — con W forte: pericolo di rotore")
+            st.markdown("- **Kronberg** — nessuno: 4 decolli coprono tutte le direzioni")
+            st.markdown("- **Säntis** — solo W-SW **deboli**, e non si parte dalla funivia")
+            st.markdown("- **Rigi Staffelhöhe** — dalle 14 a sera; con bise vai a Rigi Scheidegg (NE)")
+            st.markdown("- **Rotenflue** — non ideale con W; quota massima 2750 m (aerovia A9)")
+            st.markdown("- **Schynige Platte** — no con vento di valle a Lehn, no con NW, "
+                        "no con bise forte")
+            st.markdown("- **Saint-Hilaire** — attenzione al vento da sud; **tetto 3000 m** "
+                        "(aeroporto di Lione)")
+            st.markdown("- **Dôme / Roche Faurio** — si decolla presto: la neve troppo scaldata "
+                        "fa sprofondare mentre corri")
+        st.stop()
 
     if modo.startswith("Confronto"):
         try:

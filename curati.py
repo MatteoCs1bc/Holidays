@@ -589,6 +589,7 @@ dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)
 
 # coordinate dei capolinea delle tratte, per la mappa del viaggio
 COORD_TAPPE = {
+ "Gemona del Friuli":   (46.2750, 13.1372),
  "Milano":              (45.4642,  9.1900),
  "San Gallo":           (47.4245,  9.3767),
  "Wasserauen":          (47.2835,  9.4277),
@@ -614,54 +615,73 @@ COORD_TAPPE = {
 # --- TRATTE: giorno, da, a, km, ore, tipo, nota ---
 # tipo: "base" = il giro principale | "locale" = spostamenti in zona | "opzionale" = deviazioni
 TAPPE = [
- dict(g="sab 12", da="Milano",            a="San Gallo",           km=330, ore=4.0,  tipo="base",
-      nota="Autostrada. VIGNETTA SVIZZERA obbligatoria, 40 CHF, si compra alla frontiera o online."),
+ dict(g="sab 12", da="Gemona del Friuli", a="San Gallo",           km=670, ore=7.0,  tipo="base",
+      nota="LA TAPPA PIU LUNGA DEL VIAGGIO, e cade sul giorno con l'impegno alle 13. "
+           "Per arrivare in orario devi partire verso le 5, oppure spezzarla partendo il giorno prima. "
+           "Percorso piu diretto via Austria: Tarvisio, Villach, Salisburgo, Monaco, Lindau. "
+           "Serve la VIGNETTA AUSTRIACA (10 giorni, ~13 euro) oltre a quella SVIZZERA (40 CHF). "
+           "In Germania le autostrade sono gratuite. "
+           "Alternativa via Italia: Udine, A4, Milano, Como, Zurigo. Chilometri simili ma piu "
+           "pedaggi e piu traffico."),
  dict(g="sab 12", da="San Gallo",         a="Wasserauen",          km=30,  ore=0.6,  tipo="locale",
       nota="Base per Ebenalp. Passi vicino all'heliport di Trogen: divieto di volo sotto 1200 m."),
  dict(g="dom 13", da="Wasserauen",        a="Jakobsbad",           km=35,  ore=0.7,  tipo="locale",
-      nota="Se scegli il Kronberg."),
+      nota="Se scegli il Kronberg invece del Saentis."),
  dict(g="dom 13", da="Unterwasser",       a="Wasserauen",          km=40,  ore=0.9,  tipo="opzionale",
-      nota="RECUPERO SAENTIS: atterri in Toggenburg, dall'altro versante. Va organizzato prima."),
- dict(g="lun 14", da="San Gallo",         a="Zurigo",              km=85,  ore=1.0,  tipo="base",  nota=""),
+      nota="RECUPERO SAENTIS: atterri in Toggenburg, dall'altro versante del massiccio. "
+           "Va organizzato prima, o con una seconda auto o in treno via Nesslau e Wattwil."),
+ dict(g="lun 14", da="San Gallo",         a="Zurigo",              km=85,  ore=1.0,  tipo="base",
+      nota="Impegno alle 09."),
  dict(g="lun 14", da="Zurigo",            a="Weggis (Rigi)",       km=60,  ore=0.9,  tipo="locale",
-      nota="Staffelhoehe funziona dalle 14 a sera: ci arrivi comodo dopo l'impegno delle 09."),
+      nota="Staffelhoehe funziona dalle 14 a sera: ci arrivi comodo dopo l'impegno del mattino."),
  dict(g="mar 15", da="Zurigo",            a="Wilderswil",          km=135, ore=2.0,  tipo="base",
-      nota="Parti alle 6:30 se vuoi salire a piedi alla Schynige Platte ed essere in cima alle 13:30."),
+      nota="Parti alle 6:30 se vuoi salire a piedi alla Schynige Platte ed essere in cima "
+           "alle 13:30, dentro la finestra buona."),
  dict(g="mer 16", da="Wilderswil",        a="Grindelwald",         km=22,  ore=0.5,  tipo="locale",
-      nota="Andata e ritorno 45 km. Per First e Faulhorn."),
+      nota="Per First e Faulhorn. Andata e ritorno 45 km."),
  dict(g="mer 16", da="Wilderswil",        a="Muelenen",            km=25,  ore=0.5,  tipo="opzionale",
-      nota="Per il Morgenberghorn. Si atterra a Interlaken, quindi l'auto la lasci li."),
+      nota="Per il Morgenberghorn. Si atterra a Interlaken, quindi valuta dove lasci l'auto."),
  dict(g="gio 17", da="Wilderswil",        a="Annecy",              km=250, ore=3.5,  tipo="base",
-      nota="Tolto il passaggio da Losanna. La termica ad Annecy si accende tardi a settembre: non serve partire all'alba."),
+      nota="Tolto il passaggio da Losanna. A settembre la termica ad Annecy si accende tardi: "
+           "non serve partire all'alba."),
  dict(g="gio 17", da="Annecy",            a="Doussard",            km=20,  ore=0.4,  tipo="locale",
-      nota="LORENZO: lascia l'auto all'atterraggio a sud del lago e prendi la navetta per la Forclaz. "
-           "La strada sopra e privata. Per Planfait invece ci arrivi in auto."),
+      nota="LORENZO: lascia l'auto all'atterraggio a sud del lago e prendi la navetta per la "
+           "Forclaz, la strada sopra e privata. A Planfait invece ci arrivi in auto."),
  dict(g="ven 18", da="Annecy",            a="Lumbin",              km=100, ore=1.4,  tipo="base",
-      nota="Parcheggi a Lumbin, navette gratuite per Saint-Hilaire per tutta la manifestazione. Arrivare presto."),
+      nota="Parcheggi a Lumbin, navette gratuite per Saint-Hilaire per tutta la manifestazione. "
+           "Arrivare presto, soprattutto nel weekend."),
  dict(g="lun 21", da="Saint-Hilaire",     a="Briancon",            km=190, ore=3.0,  tipo="base",
       nota="Via Grenoble e Col du Lautaret."),
  dict(g="lun 21", da="Briancon",          a="Pre de Madame Carle", km=25,  ore=0.7,  tipo="locale",
-      nota="Andata e ritorno 50 km. Base per Dome, Barre, Roche Faurio, Arsine. "
-           "Ultimo tratto stretto, meglio non di notte la prima volta: fai la ricognizione il 21."),
+      nota="Base per Dome, Barre, Roche Faurio e Arsine. Andata e ritorno 50 km. "
+           "Ultimo tratto stretto: fai la ricognizione il 21, non di notte la prima volta."),
  dict(g="21-23",  da="Briancon",          a="Plan Lachat",         km=30,  ore=0.6,  tipo="opzionale",
-      nota="Per la Pointe des Cerces, salendo al Galibier. Rientra nel budget cross."),
+      nota="Per la Pointe des Cerces, sulla salita al Galibier. Rientra nel budget cross."),
  dict(g="21-23",  da="Briancon",          a="Ceillac",             km=50,  ore=1.0,  tipo="opzionale",
-      nota="LORENZO: paradiso van life, decollo a 200 m dall'atterraggio. "
-           "MA e nel Queyras, fuori dal giro degli Ecrins. Andata e ritorno 100 km."),
+      nota="LORENZO: paradiso van life, decollo a 200 m dall'atterraggio con dinamica costante. "
+           "MA e nel Queyras, a sud, fuori dal giro degli Ecrins. Andata e ritorno 100 km."),
  dict(g="21-23",  da="Briancon",          a="Les Etages (Dibona)", km=110, ore=2.0,  tipo="opzionale",
       nota="VERSANTE OPPOSTO del massiccio, lato Veneon/Isere. Andata e ritorno 220 km e 4 ore: "
-           "con tre giorni non ci stanno sia la Dibona che la Barre."),
+           "con tre giorni non ci stanno sia la Dibona che la Barre. Devi sceglierne una."),
  dict(g="gio 24", da="Briancon",          a="Valle Orco",          km=230, ore=3.5,  tipo="opzionale",
-      nota="Via Monginevro, Torino, Cuorgne."),
- dict(g="lun 28", da="Briancon",          a="Milano",              km=300, ore=4.0,  tipo="base",
-      nota="Via Monginevro e Torino."),
+      nota="Via Monginevro, Torino, Cuorgne. PARTENDO DA GEMONA LA VALLE ORCO NON E PIU UNA "
+           "DEVIAZIONE: e sulla strada di casa, e spezza in due il rientro."),
+ dict(g="lun 28", da="Valle Orco",        a="Gemona del Friuli",   km=530, ore=6.0,  tipo="opzionale",
+      nota="Rientro alternativo se il 24-27 sei in Valle Orco: 230 + 530 invece di 700 in un giorno. "
+           "Via Torino, Milano, A4. SE USI QUESTO, TOGLI la tratta Briancon-Gemona."),
+ dict(g="lun 28", da="Briancon",          a="Gemona del Friuli",   km=700, ore=8.0,  tipo="base",
+      nota="Via Monginevro, Torino, Milano, A4. OTTO ORE, una giornata intera di guida. "
+           "E' la seconda tappa piu lunga: valuta di spezzarla."),
 ]
 
 # consumo e pedaggi: valori modificabili nell'app
-COSTI = dict(consumo=8.5, prezzo_gasolio=1.75, vignetta_chf=40,
-             pedaggi_stimati=90,
-             nota="Vignetta svizzera 40 CHF (annuale, non esistono formule brevi). "
-                  "Pedaggi stimati per autostrade italiane e francesi andata/ritorno. "
+COSTI = dict(consumo=8.5, prezzo_gasolio=1.75, vignetta_chf=40, vignetta_at=13,
+             pedaggi_stimati=140,
+             nota="Vignetta svizzera 40 CHF, annuale, non esistono formule brevi. "
+                  "Vignetta austriaca ~13 euro per 10 giorni, serve solo se fai la prima tappa "
+                  "via Tarvisio-Villach-Salisburgo. In Germania le autostrade sono gratuite. "
+                  "Pedaggi stimati per le autostrade italiane e francesi, andata e ritorno: "
+                  "con partenza da Gemona la A4 pesa parecchio. "
                   "Monginevro e Lautaret sono valichi liberi, nessun tunnel a pagamento sul giro.")
 
 # nome, zona, giorni consigliati, categoria, dislivello, ore, elementi (nome punto), descrizione
