@@ -3,7 +3,7 @@ import json, math, os
 import pandas as pd
 import streamlit as st
 import pydeck as pdk
-from curati import GIORNI, TRATTE, MATERIALE, FONTI, GITE
+from curati import GIORNI, TAPPE, COSTI, MATERIALE, FONTI, GITE
 
 st.set_page_config(page_title="Viaggio set 2026", page_icon="🪂", layout="centered")
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -102,8 +102,8 @@ if pos.strip():
         st.sidebar.error("Formato: 46.65, 8.27")
 sel = sel.reset_index(drop=True)
 
-t1, t2, t3, t4, t5, t6 = st.tabs(
-    ["🗺️ Mappa", "📋 Elenco", "🥾 Gite", "📅 Giorni", "🌤️ Meteo", "🔧 Info"])
+t1, t2, t3, t4, t5, t6, t7 = st.tabs(
+    ["🗺️ Mappa", "📋 Elenco", "🥾 Gite", "📅 Giorni", "🚗 Viaggio", "🌤️ Meteo", "🔧 Info"])
 
 # ---------------------------------------------------------------- mappa
 with t1:
@@ -217,8 +217,83 @@ with t4:
         if gg:
             st.markdown(" ".join(f"🥾 {x}  " for x in gg))
     st.markdown("---")
-    st.markdown("#### Tratte")
-    st.dataframe(pd.DataFrame(TRATTE, columns=["Da", "A", "km", "ore"]), hide_index=True)
+    st.caption("Gli spostamenti sono nel tab Viaggio.")
+
+# ---------------------------------------------------------------- viaggio
+with t5:
+    tipi_t = ["base", "locale", "opzionale"]
+    nomi_t = {"base": "Giro principale", "locale": "Spostamenti in zona",
+              "opzionale": "Deviazioni possibili"}
+    scelti = st.multiselect("Cosa conteggiare", tipi_t, default=["base", "locale"],
+                            format_func=lambda x: nomi_t[x])
+    ar = st.checkbox("Conta gli spostamenti in zona andata e ritorno", value=True)
+
+    def km_eff(t):
+        return t["km"] * 2 if (ar and t["tipo"] == "locale") else t["km"]
+
+    att = [t for t in TAPPE if t["tipo"] in scelti]
+    tot_km = sum(km_eff(t) for t in att)
+    tot_ore = sum(t["ore"] * (2 if (ar and t["tipo"] == "locale") else 1) for t in att)
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Chilometri", f"{tot_km:,.0f}".replace(",", "."))
+    c2.metric("Ore di guida", f"{tot_ore:.1f}")
+    c3.metric("Tappe", len(att))
+
+    st.markdown("---")
+    st.markdown("#### Costo indicativo")
+    k1, k2 = st.columns(2)
+    cons = k1.number_input("Consumo l/100 km", 4.0, 20.0, float(COSTI["consumo"]), 0.5)
+    prezzo = k2.number_input("€/litro", 1.0, 3.0, float(COSTI["prezzo_gasolio"]), 0.05)
+    carb = tot_km / 100 * cons * prezzo
+    vign = COSTI["vignetta_chf"] * 1.05
+    ped = COSTI["pedaggi_stimati"]
+    d1, d2, d3, d4 = st.columns(4)
+    d1.metric("Carburante", f"{carb:.0f} €")
+    d2.metric("Vignetta CH", f"{vign:.0f} €")
+    d3.metric("Pedaggi", f"{ped:.0f} €")
+    d4.metric("Totale", f"{carb + vign + ped:.0f} €")
+    st.caption(COSTI["nota"])
+
+    st.markdown("---")
+    st.markdown("#### Tappe")
+    tab = pd.DataFrame([{
+        "Giorno": t["g"], "Da": t["da"], "A": t["a"],
+        "km": km_eff(t),
+        "ore": round(t["ore"] * (2 if (ar and t["tipo"] == "locale") else 1), 1),
+        "Tipo": nomi_t[t["tipo"]],
+    } for t in att])
+    st.dataframe(tab, hide_index=True)
+
+    st.markdown("#### Note per tappa")
+    for t in att:
+        if t["nota"]:
+            with st.expander(f"{t['g']} · {t['da']} → {t['a']}  ·  {km_eff(t)} km"):
+                st.write(t["nota"])
+                st.markdown(
+                    "[Percorso su Google Maps](https://www.google.com/maps/dir/?api=1"
+                    f"&origin={t['da'].replace(' ', '+')}"
+                    f"&destination={t['a'].replace(' ', '+')})")
+
+    st.markdown("---")
+    st.markdown("#### Chilometri accumulati")
+    base_ord = [t for t in TAPPE if t["tipo"] == "base"]
+    cum, acc = [], 0
+    for t in base_ord:
+        acc += t["km"]
+        cum.append({"tappa": t["a"], "km": acc})
+    st.line_chart(pd.DataFrame(cum).set_index("tappa"))
+    st.caption(f"Solo il giro principale: {sum(t['km'] for t in base_ord)} km. "
+               "Gli spostamenti in zona e le deviazioni si aggiungono a questi.")
+
+    st.markdown("---")
+    st.markdown("#### Se aggiungi una deviazione")
+    for t in TAPPE:
+        if t["tipo"] == "opzionale":
+            st.markdown(f"**{t['da']} → {t['a']}** — {t['km']} km sola andata, "
+                        f"{t['km']*2} km a/r, ~{t['ore']*2:.1f} h totali")
+    st.caption("La Dibona da sola costa 220 km e 4 ore di guida: con tre giorni negli Écrins "
+               "esclude la Barre.")
 
 # ---------------------------------------------------------------- meteo
 PUNTI_METEO = {
@@ -247,9 +322,48 @@ def cardinale(v):
            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
     return pts[int((v % 360) / 22.5 + 0.5) % 16] if pd.notna(v) else "—"
 
-with t5:
+with t6:
     st.caption("Il vento a 700 hPa (~3000 m) è il gradiente che decide se voli. "
                "Lo zero termico serve per i ghiacciai. Medie della fascia 12-16.")
+    modo = st.radio("Vista", ["Una località, 16 giorni", "Confronto fra tutte, un giorno"],
+                    horizontal=True, label_visibility="collapsed")
+
+    if modo.startswith("Confronto"):
+        try:
+            righe = []
+            for nome, (a, b) in PUNTI_METEO.items():
+                d = meteo(a, b)
+                dd = pd.DataFrame(d["daily"]); dd["time"] = pd.to_datetime(dd["time"])
+                hh = pd.DataFrame(d["hourly"]); hh["time"] = pd.to_datetime(hh["time"])
+                h = hh[hh["time"].dt.hour.between(12, 16)].copy(); h["g"] = h["time"].dt.date
+                ag = h.groupby("g").agg(v700=("windspeed_700hPa", "mean"),
+                                        d700=("winddirection_700hPa", "mean"),
+                                        zt=("freezing_level_height", "mean")).reset_index()
+                dd["g"] = dd["time"].dt.date
+                for _, x in dd.merge(ag, on="g", how="left").iterrows():
+                    righe.append(dict(Localita=nome, g=x["g"],
+                                      tmax=x["temperature_2m_max"],
+                                      pioggia=x["precipitation_probability_max"],
+                                      v700=x["v700"], d700=x["d700"], zt=x["zt"]))
+            R = pd.DataFrame(righe)
+            giorni_d = sorted(R["g"].unique())
+            gsel = st.select_slider("Giorno", giorni_d, value=giorni_d[0],
+                                    format_func=lambda d: d.strftime("%a %d/%m"))
+            q = R[R["g"] == gsel].copy()
+            st.dataframe(pd.DataFrame({
+                "Località": q["Localita"],
+                "Max": [f"{v:.0f}°" for v in q["tmax"]],
+                "Pioggia": [f"{v:.0f}%" for v in q["pioggia"].fillna(0)],
+                "Vento 700hPa": [f"{v:.0f} km/h {cardinale(x)}" if pd.notna(v) else "—"
+                                 for v, x in zip(q["v700"], q["d700"])],
+                "Zero term.": [f"{z:.0f} m" if pd.notna(z) else "—" for z in q["zt"]],
+            }), hide_index=True)
+            st.caption("Il gradiente piu debole e quasi sempre la localita dove si vola meglio.")
+        except Exception as e:
+            st.warning("Non riesco a raggiungere Open-Meteo adesso.")
+            st.caption(f"({type(e).__name__}) Serve connessione internet.")
+        st.stop()
+
     scelta = st.selectbox("Località", list(PUNTI_METEO))
     la, lo = PUNTI_METEO[scelta]
     try:
@@ -282,9 +396,19 @@ with t5:
         if len(g):
             g.columns = ["vento 700 hPa km/h"]
             st.line_chart(g)
-            st.caption("Sopra i 25-30 km/h a 700 hPa i decolli esposti diventano difficili. "
-                       "Ebenalp teme la W forte, Schynige Platte la NW e la bise, "
-                       "il Säntis vuole W-SW deboli.")
+            st.caption("Sopra i 25-30 km/h a 700 hPa i decolli esposti diventano difficili.")
+        with st.expander("I vincoli di vento sito per sito"):
+            st.markdown("- **Ebenalp** — con W forte: pericolo di rotore")
+            st.markdown("- **Kronberg** — nessuno: 4 decolli coprono tutte le direzioni")
+            st.markdown("- **Säntis** — solo W-SW **deboli**, e non si parte dalla funivia")
+            st.markdown("- **Rigi Staffelhöhe** — dalle 14 a sera; con bise vai a Rigi Scheidegg (NE)")
+            st.markdown("- **Rotenflue** — non ideale con W; quota massima 2750 m (aerovia A9)")
+            st.markdown("- **Schynige Platte** — no con vento di valle a Lehn, no con NW, "
+                        "no con bise forte")
+            st.markdown("- **Saint-Hilaire** — attenzione al vento da sud; **tetto 3000 m** "
+                        "(aeroporto di Lione)")
+            st.markdown("- **Dôme / Roche Faurio** — si decolla presto: la neve troppo scaldata "
+                        "fa sprofondare mentre corri")
     except Exception as e:
         st.warning("Non riesco a raggiungere Open-Meteo adesso.")
         st.caption(f"({type(e).__name__}) Serve connessione internet. Su Streamlit Cloud funziona.")
@@ -295,7 +419,7 @@ with t5:
         "[gipfelbuch.ch](https://www.gipfelbuch.ch)")
 
 # ---------------------------------------------------------------- info
-with t6:
+with t7:
     st.markdown("#### Materiale")
     for k, v in MATERIALE:
         st.markdown(f"**{k}** — {v}")

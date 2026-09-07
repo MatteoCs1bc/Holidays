@@ -587,6 +587,59 @@ dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)
           "vanno, chiudi qui. Coordinate approssimative.", fonte="baern-gliders.ch"),
 ]
 
+# --- TRATTE: giorno, da, a, km, ore, tipo, nota ---
+# tipo: "base" = il giro principale | "locale" = spostamenti in zona | "opzionale" = deviazioni
+TAPPE = [
+ dict(g="sab 12", da="Milano",            a="San Gallo",           km=330, ore=4.0,  tipo="base",
+      nota="Autostrada. VIGNETTA SVIZZERA obbligatoria, 40 CHF, si compra alla frontiera o online."),
+ dict(g="sab 12", da="San Gallo",         a="Wasserauen",          km=30,  ore=0.6,  tipo="locale",
+      nota="Base per Ebenalp. Passi vicino all'heliport di Trogen: divieto di volo sotto 1200 m."),
+ dict(g="dom 13", da="Wasserauen",        a="Jakobsbad",           km=35,  ore=0.7,  tipo="locale",
+      nota="Se scegli il Kronberg."),
+ dict(g="dom 13", da="Unterwasser",       a="Wasserauen",          km=40,  ore=0.9,  tipo="opzionale",
+      nota="RECUPERO SAENTIS: atterri in Toggenburg, dall'altro versante. Va organizzato prima."),
+ dict(g="lun 14", da="San Gallo",         a="Zurigo",              km=85,  ore=1.0,  tipo="base",  nota=""),
+ dict(g="lun 14", da="Zurigo",            a="Weggis (Rigi)",       km=60,  ore=0.9,  tipo="locale",
+      nota="Staffelhoehe funziona dalle 14 a sera: ci arrivi comodo dopo l'impegno delle 09."),
+ dict(g="mar 15", da="Zurigo",            a="Wilderswil",          km=135, ore=2.0,  tipo="base",
+      nota="Parti alle 6:30 se vuoi salire a piedi alla Schynige Platte ed essere in cima alle 13:30."),
+ dict(g="mer 16", da="Wilderswil",        a="Grindelwald",         km=22,  ore=0.5,  tipo="locale",
+      nota="Andata e ritorno 45 km. Per First e Faulhorn."),
+ dict(g="mer 16", da="Wilderswil",        a="Muelenen",            km=25,  ore=0.5,  tipo="opzionale",
+      nota="Per il Morgenberghorn. Si atterra a Interlaken, quindi l'auto la lasci li."),
+ dict(g="gio 17", da="Wilderswil",        a="Annecy",              km=250, ore=3.5,  tipo="base",
+      nota="Tolto il passaggio da Losanna. La termica ad Annecy si accende tardi a settembre: non serve partire all'alba."),
+ dict(g="gio 17", da="Annecy",            a="Doussard",            km=20,  ore=0.4,  tipo="locale",
+      nota="LORENZO: lascia l'auto all'atterraggio a sud del lago e prendi la navetta per la Forclaz. "
+           "La strada sopra e privata. Per Planfait invece ci arrivi in auto."),
+ dict(g="ven 18", da="Annecy",            a="Lumbin",              km=100, ore=1.4,  tipo="base",
+      nota="Parcheggi a Lumbin, navette gratuite per Saint-Hilaire per tutta la manifestazione. Arrivare presto."),
+ dict(g="lun 21", da="Saint-Hilaire",     a="Briancon",            km=190, ore=3.0,  tipo="base",
+      nota="Via Grenoble e Col du Lautaret."),
+ dict(g="lun 21", da="Briancon",          a="Pre de Madame Carle", km=25,  ore=0.7,  tipo="locale",
+      nota="Andata e ritorno 50 km. Base per Dome, Barre, Roche Faurio, Arsine. "
+           "Ultimo tratto stretto, meglio non di notte la prima volta: fai la ricognizione il 21."),
+ dict(g="21-23",  da="Briancon",          a="Plan Lachat",         km=30,  ore=0.6,  tipo="opzionale",
+      nota="Per la Pointe des Cerces, salendo al Galibier. Rientra nel budget cross."),
+ dict(g="21-23",  da="Briancon",          a="Ceillac",             km=50,  ore=1.0,  tipo="opzionale",
+      nota="LORENZO: paradiso van life, decollo a 200 m dall'atterraggio. "
+           "MA e nel Queyras, fuori dal giro degli Ecrins. Andata e ritorno 100 km."),
+ dict(g="21-23",  da="Briancon",          a="Les Etages (Dibona)", km=110, ore=2.0,  tipo="opzionale",
+      nota="VERSANTE OPPOSTO del massiccio, lato Veneon/Isere. Andata e ritorno 220 km e 4 ore: "
+           "con tre giorni non ci stanno sia la Dibona che la Barre."),
+ dict(g="gio 24", da="Briancon",          a="Valle Orco",          km=230, ore=3.5,  tipo="opzionale",
+      nota="Via Monginevro, Torino, Cuorgne."),
+ dict(g="lun 28", da="Briancon",          a="Milano",              km=300, ore=4.0,  tipo="base",
+      nota="Via Monginevro e Torino."),
+]
+
+# consumo e pedaggi: valori modificabili nell'app
+COSTI = dict(consumo=8.5, prezzo_gasolio=1.75, vignetta_chf=40,
+             pedaggi_stimati=90,
+             nota="Vignetta svizzera 40 CHF (annuale, non esistono formule brevi). "
+                  "Pedaggi stimati per autostrade italiane e francesi andata/ritorno. "
+                  "Monginevro e Lautaret sono valichi liberi, nessun tunnel a pagamento sul giro.")
+
 # nome, zona, giorni consigliati, categoria, dislivello, ore, elementi (nome punto), descrizione
 GITE = [
  dict(nome="Ebenalp da Wasserauen", zona="1 Alpstein", giorni="sab 12", cat="Cross", disl=770, ore="2h30",
