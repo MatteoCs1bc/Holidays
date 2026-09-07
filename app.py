@@ -3,7 +3,7 @@ import json, math, os
 import pandas as pd
 import streamlit as st
 import pydeck as pdk
-from curati import GIORNI, TAPPE, COSTI, MATERIALE, FONTI, GITE
+from curati import GIORNI, TAPPE, COSTI, COORD_TAPPE, MATERIALE, FONTI, GITE
 
 st.set_page_config(page_title="Viaggio set 2026", page_icon="🪂", layout="centered")
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -239,6 +239,78 @@ with t5:
     c1.metric("Chilometri", f"{tot_km:,.0f}".replace(",", "."))
     c2.metric("Ore di guida", f"{tot_ore:.1f}")
     c3.metric("Tappe", len(att))
+
+    st.markdown("---")
+    st.markdown("#### Mappa degli spostamenti")
+
+    COL_T = {"base": [200, 30, 45], "locale": [42, 157, 143], "opzionale": [245, 158, 11]}
+    seg = []
+    for t in att:
+        a, b = COORD_TAPPE.get(t["da"]), COORD_TAPPE.get(t["a"])
+        if not a or not b:
+            continue
+        seg.append(dict(da=t["da"], a_=t["a"], tipo=t["tipo"], g=t["g"], km=km_eff(t),
+                        lat1=a[0], lon1=a[1], lat2=b[0], lon2=b[1],
+                        col=COL_T[t["tipo"]],
+                        larg={"base": 5, "locale": 3, "opzionale": 2}[t["tipo"]],
+                        eti=f"{t['da']} → {t['a']}"))
+    if seg:
+        S = pd.DataFrame(seg)
+        nodi = {}
+        for t in att:
+            for k in (t["da"], t["a"]):
+                c = COORD_TAPPE.get(k)
+                if c:
+                    nodi.setdefault(k, dict(nome=k, lat=c[0], lon=c[1], base=False))
+                    if t["tipo"] == "base":
+                        nodi[k]["base"] = True
+        N = pd.DataFrame(nodi.values())
+        N["col"] = [[200, 30, 45] if b else [90, 90, 90] for b in N["base"]]
+        N["rad"] = [7000 if b else 3500 for b in N["base"]]
+
+        livelli_v = []
+        dritte = S[S["tipo"] != "opzionale"]
+        if len(dritte):
+            livelli_v.append(pdk.Layer(
+                "LineLayer", data=dritte,
+                get_source_position=["lon1", "lat1"], get_target_position=["lon2", "lat2"],
+                get_color="col", get_width="larg", width_min_pixels=2,
+                pickable=True, auto_highlight=True))
+        archi = S[S["tipo"] == "opzionale"]
+        if len(archi):
+            livelli_v.append(pdk.Layer(
+                "ArcLayer", data=archi,
+                get_source_position=["lon1", "lat1"], get_target_position=["lon2", "lat2"],
+                get_source_color=[245, 158, 11], get_target_color=[245, 158, 11],
+                get_width=2, get_height=0.35, pickable=True, auto_highlight=True))
+        livelli_v.append(pdk.Layer(
+            "ScatterplotLayer", data=N,
+            get_position=["lon", "lat"], get_fill_color="col", get_radius="rad",
+            radius_min_pixels=5, radius_max_pixels=14, pickable=True,
+            stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1))
+        livelli_v.append(pdk.Layer(
+            "TextLayer", data=N, get_position=["lon", "lat"], get_text="nome",
+            get_size=12, get_color=[40, 40, 40], get_alignment_baseline="'top'",
+            get_pixel_offset=[0, 10], size_units="'pixels'"))
+
+        st.pydeck_chart(pdk.Deck(
+            layers=livelli_v, map_style=None,
+            initial_view_state=pdk.ViewState(
+                latitude=float(N["lat"].mean()), longitude=float(N["lon"].mean()), zoom=5.6),
+            tooltip={"html": "<b>{eti}</b><br/>{g} · {km} km"}))
+
+        lg = st.columns(3)
+        for i, (k, v) in enumerate(COL_T.items()):
+            if k in scelti:
+                lg[i % 3].markdown(
+                    f"<span style='display:inline-block;width:22px;height:4px;"
+                    f"background:rgb({v[0]},{v[1]},{v[2]});vertical-align:middle;"
+                    f"margin-right:6px'></span><small>{nomi_t[k]}</small>",
+                    unsafe_allow_html=True)
+        st.caption("Le deviazioni sono disegnate ad arco. Le linee sono in linea d'aria, "
+                   "i chilometri in tabella sono quelli reali su strada.")
+    else:
+        st.info("Seleziona almeno una categoria di spostamenti.")
 
     st.markdown("---")
     st.markdown("#### Costo indicativo")

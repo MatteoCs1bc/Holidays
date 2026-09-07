@@ -587,6 +587,30 @@ dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)
           "vanno, chiudi qui. Coordinate approssimative.", fonte="baern-gliders.ch"),
 ]
 
+# coordinate dei capolinea delle tratte, per la mappa del viaggio
+COORD_TAPPE = {
+ "Milano":              (45.4642,  9.1900),
+ "San Gallo":           (47.4245,  9.3767),
+ "Wasserauen":          (47.2835,  9.4277),
+ "Jakobsbad":           (47.3167,  9.2500),
+ "Unterwasser":         (47.1900,  9.3100),
+ "Zurigo":              (47.3769,  8.5417),
+ "Weggis (Rigi)":       (47.0333,  8.4333),
+ "Wilderswil":          (46.6650,  7.8600),
+ "Grindelwald":         (46.6244,  8.0413),
+ "Muelenen":            (46.6400,  7.6800),
+ "Annecy":              (45.8992,  6.1294),
+ "Doussard":            (45.7880,  6.2200),
+ "Lumbin":              (45.3020,  5.9061),
+ "Saint-Hilaire":       (45.3069,  5.8881),
+ "Briancon":            (44.8990,  6.6450),
+ "Pre de Madame Carle": (44.9250,  6.4100),
+ "Plan Lachat":         (45.0700,  6.4200),
+ "Ceillac":             (44.6667,  6.7756),
+ "Les Etages (Dibona)": (44.9250,  6.2500),
+ "Valle Orco":          (45.4200,  7.4000),
+}
+
 # --- TRATTE: giorno, da, a, km, ore, tipo, nota ---
 # tipo: "base" = il giro principale | "locale" = spostamenti in zona | "opzionale" = deviazioni
 TAPPE = [
