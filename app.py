@@ -15,30 +15,30 @@ def carica():
 
 df = carica()
 
-COLORI = {
-    "decollo":    "#e63946",
-    "atterraggio":"#2a9d8f",
-    "cima":       "#264653",
-    "rifugio":    "#e76f51",
-    "parcheggio": "#f4a261",
-    "impianto":   "#9d4edd",
-    "zona":       "#000000",
-}
-ICONE = {
-    "decollo": "🪂", "atterraggio": "🎯", "cima": "⛰️", "rifugio": "🏠",
-    "parcheggio": "🅿️", "impianto": "🚡", "zona": "⚠️",
-}
+COLORI = {"decollo": "#e63946", "atterraggio": "#2a9d8f", "cima": "#264653",
+          "rifugio": "#e76f51", "parcheggio": "#f4a261", "impianto": "#9d4edd",
+          "zona": "#000000"}
+ICONE = {"decollo": "🪂", "atterraggio": "🎯", "cima": "⛰️", "rifugio": "🏠",
+         "parcheggio": "🅿️", "impianto": "🚡", "zona": "⚠️"}
+CAMPI_TESTO = ["nome", "note", "vento", "difficolta", "partenza", "categoria"]
 
 def dist_km(la1, lo1, la2, lo2):
-    return math.hypot((la1-la2)*111, (lo1-lo2)*111*math.cos(math.radians((la1+la2)/2)))
+    return math.hypot((la1 - la2) * 111,
+                      (lo1 - lo2) * 111 * math.cos(math.radians((la1 + la2) / 2)))
+
+def val(riga, campo):
+    """Lettura sicura: mai attributi, pandas ha .cat .diff .size .name ecc."""
+    v = riga[campo] if campo in riga.index else None
+    return "" if v is None or (isinstance(v, float) and pd.isna(v)) else v
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.markdown("### Filtri")
-    zone = sorted(df.zona.unique())
+    zone = sorted(df["zona"].unique())
     z_sel = st.multiselect("Zona", zone, default=zone)
-    t_sel = st.multiselect("Tipo", sorted(df.tipo.unique()),
-                           default=["decollo", "cima", "atterraggio", "zona", "rifugio"])
+    tipi = sorted(df["tipo"].unique())
+    default_tipi = [t for t in ["decollo", "cima", "atterraggio", "zona", "rifugio"] if t in tipi]
+    t_sel = st.multiselect("Tipo", tipi, default=default_tipi)
     solo_note = st.checkbox("Solo punti con note vere", value=True,
                             help="Esclude i punti del KML senza descrizione")
     st.markdown("---")
@@ -50,17 +50,18 @@ with st.sidebar:
     pos = st.text_input("lat, lon (opzionale)", placeholder="46.65, 8.27",
                         help="Incolla le coordinate dal telefono per ordinare per distanza")
 
-sel = df[df.zona.isin(z_sel) & df.tipo.isin(t_sel)].copy()
+sel = df[df["zona"].isin(z_sel) & df["tipo"].isin(t_sel)].copy()
 if solo_note:
-    sel = sel[(sel.origine == "curato") | (sel.note.astype(str).str.len() > 20)]
+    sel = sel[(sel["origine"] == "curato") | (sel["note"].astype(str).str.len() > 20)]
 
 qui = None
 if pos.strip():
     try:
         a, b = [float(x) for x in pos.replace(";", ",").split(",")[:2]]
         qui = (a, b)
-        sel["dist"] = sel.apply(lambda r: dist_km(a, b, r.lat, r.lon), axis=1)
-        sel = sel.sort_values("dist")
+        if len(sel):
+            sel["dist"] = [dist_km(a, b, la, lo) for la, lo in zip(sel["lat"], sel["lon"])]
+            sel = sel.sort_values("dist")
     except Exception:
         st.sidebar.error("Formato: 46.65, 8.27")
 
@@ -70,47 +71,63 @@ t1, t2, t3, t4 = st.tabs(["🗺️ Mappa", "📋 Elenco", "📅 Giorni", "🔧 I
 with t1:
     st.caption(f"{len(sel)} punti")
     m = sel.dropna(subset=["lat", "lon"]).copy()
-    m["color"] = m.tipo.map(COLORI).fillna("#888888")
-    m["size"] = m.tipo.map({"cima": 260, "decollo": 200, "zona": 300}).fillna(130)
-    if qui:
-        m = pd.concat([m, pd.DataFrame([{"lat": qui[0], "lon": qui[1],
-                                         "color": "#0077ff", "size": 400}])], ignore_index=True)
-    st.map(m, latitude="lat", longitude="lon", color="color", size="size")
+    if len(m) or qui:
+        m["color"] = m["tipo"].map(COLORI).fillna("#888888")
+        m["size"] = m["tipo"].map({"cima": 260, "decollo": 200, "zona": 300}).fillna(130)
+        if qui:
+            m = pd.concat([m[["lat", "lon", "color", "size"]],
+                           pd.DataFrame([{"lat": qui[0], "lon": qui[1],
+                                          "color": "#0077ff", "size": 400}])],
+                          ignore_index=True)
+        st.map(m, latitude="lat", longitude="lon", color="color", size="size")
+    else:
+        st.info("Nessun punto con questi filtri.")
     c = st.columns(4)
     for i, (k, v) in enumerate(ICONE.items()):
         c[i % 4].markdown(f"<small>{v} {k}</small>", unsafe_allow_html=True)
 
 with t2:
-    q = st.text_input("Cerca", placeholder="crepaccia, rotore, navetta, corda...")
+    q = st.text_input("Cerca", placeholder="crepaccia, rotore, navetta, cavi, doppia...")
     vis = sel
-    if q:
-        m_ = vis.apply(lambda r: q.lower() in " ".join(
-            str(r[c]) for c in ["nome", "note", "vento", "diff", "partenza"]).lower(), axis=1)
-        vis = vis[m_]
-    vis = vis[(vis.disl.isna()) | (vis.disl <= disl_max)]
+    if q and len(vis):
+        ql = q.lower()
+        tieni = [any(ql in str(r[c]).lower() for c in CAMPI_TESTO if c in vis.columns)
+                 for _, r in vis.iterrows()]
+        vis = vis[tieni]
+    if len(vis):
+        vis = vis[vis["disl"].isna() | (vis["disl"] <= disl_max)]
     st.caption(f"{len(vis)} risultati")
 
-    for zona in sorted(vis.zona.unique()):
-        blocco = vis[vis.zona == zona]
+    for zona in sorted(vis["zona"].unique()):
         st.markdown(f"#### {zona}")
-        for _, r in blocco.iterrows():
-            testa = f"{ICONE.get(r.tipo,'📍')} **{r.nome}**"
+        for _, r in vis[vis["zona"] == zona].iterrows():
             coda = []
-            if pd.notna(r.quota) and r.quota: coda.append(f"{int(r.quota)} m")
-            if pd.notna(r.disl) and r.disl:   coda.append(f"D+{int(r.disl)}")
-            if r.vento:                        coda.append(f"vento {r.vento}")
-            if qui is not None and "dist" in r: coda.append(f"{r.dist:.0f} km")
+            if val(r, "quota"):
+                coda.append(f"{int(r['quota'])} m")
+            if val(r, "disl"):
+                coda.append(f"D+{int(r['disl'])}")
+            if val(r, "vento"):
+                coda.append(f"vento {r['vento']}")
+            if "dist" in r.index and pd.notna(r["dist"]):
+                coda.append(f"{r['dist']:.0f} km")
+            testa = f"{ICONE.get(r['tipo'], '📍')} **{r['nome']}**"
             with st.expander(testa + ("  ·  " + " · ".join(coda) if coda else "")):
-                if r.partenza: st.markdown(f"**Partenza:** {r.partenza}")
-                if r.diff:     st.markdown(f"**Difficolta:** {r.diff}")
-                if r.cat:      st.markdown(f"**Categoria:** {r.cat}")
-                if r.note:     st.write(r.note)
-                aff = {"V": "✅ verificato", "K": "🟡 solo KML", "?": "❓ da verificare"}.get(r.aff, "")
-                st.caption(f"{aff} — fonte: {r.fonte}")
+                if val(r, "partenza"):
+                    st.markdown(f"**Partenza:** {r['partenza']}")
+                if val(r, "difficolta"):
+                    st.markdown(f"**Difficoltà:** {r['difficolta']}")
+                if val(r, "categoria"):
+                    st.markdown(f"**Categoria:** {r['categoria']}")
+                if val(r, "note"):
+                    st.write(r["note"])
+                aff = {"V": "✅ verificato", "K": "🟡 solo KML",
+                       "?": "❓ da verificare"}.get(val(r, "aff"), "")
+                st.caption(f"{aff} — fonte: {val(r, 'fonte')}")
                 st.markdown(
-                    f"[Google Maps](https://www.google.com/maps/search/?api=1&query={r.lat},{r.lon}) · "
-                    f"[Organic Maps](om://map?v=1&ll={r.lat},{r.lon}&n={r.nome}) · "
-                    f"`{r.lat:.5f}, {r.lon:.5f}`")
+                    f"[Google Maps](https://www.google.com/maps/search/?api=1"
+                    f"&query={r['lat']},{r['lon']}) · "
+                    f"[Organic Maps](om://map?v=1&ll={r['lat']},{r['lon']}&n={r['nome']}) · "
+                    f"`{r['lat']:.5f}, {r['lon']:.5f}`")
 
 with t3:
     for giorno, zona, nota in GIORNI:
@@ -119,8 +136,7 @@ with t3:
             st.caption(nota)
     st.markdown("---")
     st.markdown("#### Tratte")
-    st.dataframe(pd.DataFrame(TRATTE, columns=["Da", "A", "km", "ore"]),
-                 hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(TRATTE, columns=["Da", "A", "km", "ore"]), hide_index=True)
 
 with t4:
     st.markdown("#### Materiale")
@@ -128,11 +144,8 @@ with t4:
         st.markdown(f"**{k}** — {v}")
     st.markdown("---")
     st.markdown("#### Fonti")
-    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte", "Cosa da", "Area"]),
-                 hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte", "Cosa dà", "Area"]), hide_index=True)
     st.markdown("---")
-    st.caption(
-        "✅ verificato con fonte · 🟡 presente solo nel KML di Lorenzo Delbene, senza note "
-        "· ❓ da verificare prima di andarci. Le condizioni di ghiacciaio e i "
-        "decolli non ufficiali vanno sempre confermati sul posto."
-    )
+    st.caption("✅ verificato con fonte · 🟡 presente solo nel KML di Lorenzo Delbene, senza note "
+               "· ❓ da verificare prima di andarci. Condizioni di ghiacciaio e decolli non "
+               "ufficiali vanno sempre confermati sul posto.")

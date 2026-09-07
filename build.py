@@ -13,11 +13,16 @@ TIPO={'Takeoffs':'decollo','Landings':'atterraggio','Parkings':'parcheggio',
 
 def dist(a,b,c,d): return math.hypot((a-c)*111,(b-d)*111*math.cos(math.radians((a+c)/2)))
 
-rows=[]
-for r in CURATI:
-    r=dict(r); r.setdefault('disl',None); r.setdefault('partenza',''); r.setdefault('vento','')
-    r.setdefault('diff',''); r.setdefault('cat',''); r['origine']='curato'
-    rows.append(r)
+# 'cat' e 'diff' collidono con pandas (accessor .cat, metodo .diff): rinominati
+def norm(r):
+    r=dict(r)
+    r.setdefault('disl',None); r.setdefault('partenza',''); r.setdefault('vento','')
+    r['difficolta']=r.pop('diff','') or ''
+    r['categoria']=r.pop('cat','') or ''
+    r['origine']='curato'
+    return r
+
+rows=[norm(r) for r in CURATI]
 
 # nomi gia curati, per non duplicare
 seen={(r['zona'], r['nome'].lower()[:12]) for r in rows}
@@ -37,7 +42,8 @@ for f in doc.findall('k:Folder',ns):
         de=p.find('k:description',ns)
         d=re.sub('<[^>]+>',' ',de.text).strip() if de is not None and de.text else ''
         rows.append(dict(zona=z, tipo=TIPO[fn], nome=nm, lat=lat, lon=lon, quota=None,
-                         vento='', diff='', aff='K', cat='Hike & Fly' if fn=='Hike & Fly' else '',
+                         vento='', difficolta='', aff='K',
+                         categoria='Hike & Fly' if fn=='Hike & Fly' else '',
                          note=html.unescape(d), fonte='KML Delbene', disl=None, partenza='',
                          origine='kml'))
         n_kml+=1
