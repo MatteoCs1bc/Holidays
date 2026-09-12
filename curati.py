@@ -587,6 +587,77 @@ dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)
           "vanno, chiudi qui. Coordinate approssimative.", fonte="baern-gliders.ch"),
 ]
 
+# --- VINCOLI DI VOLO PER SITO ---
+# settori: liste di (da_gradi, a_gradi) in cui il sito FUNZIONA (settori orari, possono passare da 360)
+# vietati: settori in cui NON si vola comunque
+# max_v / max_giallo: vento a 700 hPa in km/h
+VINCOLI = {
+ "1 Alpstein": [
+   dict(sito="Ebenalp NW", settori=[(292,360),(0,22)], vietati=[(247,292)], max_v=22, max_giallo=30,
+        nota="Con W forte: pericolo di rotore"),
+   dict(sito="Kronberg (4 decolli)", settori=[(0,360)], vietati=[], max_v=25, max_giallo=35,
+        nota="Copre tutte le direzioni: e il piano che non salta mai"),
+   dict(sito="Hoher Kasten", settori=[(247,337)], vietati=[], max_v=25, max_giallo=33,
+        nota="Decollo W al Kastensattel; c'e anche lo Starkwind e l'Est"),
+   dict(sito="Saentis (alpinistico)", settori=[(225,292)], vietati=[], max_v=13, max_giallo=18,
+        nota="SOLO W-SW DEBOLI. Atterraggio a Unterwasser, recupero dall'altro versante"),
+ ],
+ "2 Zurigo": [
+   dict(sito="Rigi Staffelhoehe", settori=[(270,337)], vietati=[], max_v=25, max_giallo=33,
+        nota="Funziona dalle 14 a sera"),
+   dict(sito="Rigi Scheidegg", settori=[(22,67)], vietati=[], max_v=25, max_giallo=33,
+        nota="Il decollo da bise"),
+   dict(sito="Rigi Kulm", settori=[(135,247)], vietati=[], max_v=25, max_giallo=33, nota=""),
+   dict(sito="Rotenflue", settori=[(315,360),(0,45),(135,225)], vietati=[(247,292)], max_v=25,
+        max_giallo=33, nota="Non ideale con W. Quota massima 2750 m, aerovia A9"),
+   dict(sito="Niederbauen", settori=[(0,360)], vietati=[], max_v=22, max_giallo=30,
+        nota="Il piu facile del gruppo"),
+ ],
+ "3 Oberland": [
+   dict(sito="Schynige Platte", settori=[(180,292)], vietati=[(292,360),(0,67)], max_v=22, max_giallo=30,
+        nota="No con NW, no con bise forte, no con vento di valle a Lehn"),
+   dict(sito="Grindelwald-First", settori=[(112,247)], vietati=[], max_v=25, max_giallo=33,
+        nota="Esposto a sud: il ripiego quando la Schynige Platte non va"),
+   dict(sito="Morgenberghorn", settori=[(157,292)], vietati=[], max_v=22, max_giallo=30,
+        nota="S-SW-W. Startplatz Spitz a meta salita per chiudere prima"),
+   dict(sito="Beatenberg-Amisbuehl", settori=[(0,360)], vietati=[], max_v=22, max_giallo=30,
+        nota="Il piu semplice della zona"),
+ ],
+ "4 Annecy": [
+   dict(sito="La Forclaz", settori=[(225,337)], vietati=[], max_v=25, max_giallo=33,
+        nota="Il decollo da XC. Strada privata: navetta dall'atterraggio"),
+   dict(sito="Planfait", settori=[(270,337)], vietati=[], max_v=25, max_giallo=33,
+        nota="Ci arrivi in auto"),
+   dict(sito="Col des Fretes (H&F)", settori=[(157,247)], vietati=[], max_v=22, max_giallo=30,
+        nota="Parti dal parcheggio alto di Planfait"),
+   dict(sito="Sambuy", settori=[(337,360),(0,90)], vietati=[], max_v=22, max_giallo=30, nota="N-NE-E"),
+ ],
+ "5 Saint-Hilaire": [
+   dict(sito="Saint-Hilaire Nord", settori=[(0,360)], vietati=[(157,202)], max_v=25, max_giallo=33,
+        nota="Attenzione al vento da sud. TETTO 3000 m, aeroporto di Lione"),
+   dict(sito="Saint-Hilaire Est", settori=[(45,157)], vietati=[], max_v=22, max_giallo=30,
+        nota="Il decollo nascosto per quando il tappeto e affollato"),
+   dict(sito="Dent de Crolles (H&F)", settori=[(157,202),(337,360),(0,22)], vietati=[], max_v=22,
+        max_giallo=30, nota="Decollo sud o nord. Effetto di compressione sulla cima"),
+ ],
+ "6 Ecrins": [
+   dict(sito="Dome de Neige", settori=[(0,360)], vietati=[], max_v=13, max_giallo=18,
+        nota="Serve aria calma di primo mattino. Decollo sotto la crepaccia"),
+   dict(sito="Roche Faurio", settori=[(45,157)], vietati=[], max_v=15, max_giallo=20,
+        nota="Decollo E/SE. Porta i picchetti da neve"),
+   dict(sito="Pic du Glacier d'Arsine", settori=[(157,292)], vietati=[], max_v=15, max_giallo=20,
+        nota="Decollo W e S: complementare alla Roche Faurio"),
+   dict(sito="Col d'Izoard High", settori=[(112,247)], vietati=[], max_v=25, max_giallo=35,
+        nota="Rampa dei 300 km: a settembre piu gestibile"),
+   dict(sito="Puy Aillaud (Vallouise)", settori=[(90,157)], vietati=[], max_v=25, max_giallo=33,
+        nota="Decollo ufficiale di Vallouise"),
+   dict(sito="Ceillac", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
+        nota="Dinamica costante. XC difficile"),
+   dict(sito="Pointe des Cerces", settori=[(315,360),(0,22)], vietati=[], max_v=22, max_giallo=30,
+        nota="Decollo N/NW da Plan Lachat"),
+ ],
+}
+
 # coordinate dei capolinea delle tratte, per la mappa del viaggio
 COORD_TAPPE = {
  "Gemona del Friuli":   (46.2750, 13.1372),

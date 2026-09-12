@@ -3,7 +3,8 @@ import json, math, os
 import pandas as pd
 import streamlit as st
 import pydeck as pdk
-from curati import GIORNI, TAPPE, COSTI, COORD_TAPPE, MATERIALE, FONTI, GITE
+from curati import (GIORNI, TAPPE, COSTI, COORD_TAPPE, VINCOLI,
+                    MATERIALE, FONTI, GITE)
 
 st.set_page_config(page_title="Viaggio set 2026", page_icon="🪂", layout="centered")
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -220,6 +221,36 @@ with t4:
     st.caption("Gli spostamenti sono nel tab Viaggio.")
 
 # ---------------------------------------------------------------- viaggio
+def cardinale(v):
+    pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+           "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    return pts[int((v % 360) / 22.5 + 0.5) % 16] if pd.notna(v) else "—"
+
+def in_settore(deg, settori):
+    if pd.isna(deg):
+        return False
+    d = deg % 360
+    for a, b in settori:
+        if a <= b and a <= d <= b:
+            return True
+        if a > b and (d >= a or d <= b):
+            return True
+    return False
+
+def giudizio(v, deg, s):
+    """🟢 si vola · 🟡 al limite · 🔴 no. Ritorna (icona, motivo)."""
+    if pd.isna(v):
+        return "·", "dati mancanti"
+    if in_settore(deg, s["vietati"]):
+        return "🔴", "direzione vietata"
+    if not in_settore(deg, s["settori"]):
+        return "🔴", "fuori settore"
+    if v <= s["max_v"]:
+        return "🟢", f"{v:.0f} km/h, in settore"
+    if v <= s["max_giallo"]:
+        return "🟡", f"{v:.0f} km/h, al limite"
+    return "🔴", f"{v:.0f} km/h, troppo vento"
+
 with t5:
     tipi_t = ["base", "locale", "opzionale"]
     nomi_t = {"base": "Giro principale", "locale": "Spostamenti in zona",
@@ -378,7 +409,7 @@ PUNTI_METEO = {
     "Briançon / Écrins": (44.90, 6.45),
 }
 
-@st.cache_data(ttl=1800, show_spinner=False)
+@st.cache_data(ttl=900, show_spinner=False)
 def meteo(la, lo):
     import urllib.request, urllib.parse
     p = urllib.parse.urlencode({
@@ -387,19 +418,71 @@ def meteo(la, lo):
                  "precipitation_probability_max,windspeed_10m_max",
         "hourly": "windspeed_700hPa,winddirection_700hPa,freezing_level_height,cloudcover",
     })
+    from datetime import datetime
     with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=20) as f:
-        return json.load(f)
-
-def cardinale(v):
-    pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-           "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
-    return pts[int((v % 360) / 22.5 + 0.5) % 16] if pd.notna(v) else "—"
+        d = json.load(f)
+    d["_scaricato"] = datetime.now().strftime("%d/%m %H:%M")
+    return d
 
 with t6:
     st.caption("Il vento a 700 hPa (~3000 m) è il gradiente che decide se voli. "
                "Lo zero termico serve per i ghiacciai. Medie della fascia 12-16.")
-    modo = st.radio("Vista", ["Windy", "Una località, 16 giorni", "Confronto fra tutte, un giorno"],
+    ca, cb = st.columns([3, 1])
+    ca.caption("I dati si riscaricano da soli ogni 15 minuti e a ogni apertura dell'app.")
+    if cb.button("🔄 Aggiorna ora", use_container_width=True):
+        meteo.clear()
+        st.rerun()
+
+    modo = st.radio("Vista", ["Semaforo", "Windy", "Una località, 16 giorni",
+                              "Confronto fra tutte, un giorno"],
                     horizontal=True, label_visibility="collapsed")
+
+    if modo == "Semaforo":
+        st.caption("Ogni decollo confrontato con le sue regole di vento, sul vento a 700 hPa "
+                   "della fascia 12-16. Si aggiorna da solo.")
+        zone_v = st.multiselect("Zone", list(VINCOLI), default=[z for z in VINCOLI if z in z_sel]
+                                or list(VINCOLI), key="sem_z")
+        MAPPA_Z = {
+            "1 Alpstein": "Appenzell / Alpstein", "2 Zurigo": "Rigi / Svizzera centrale",
+            "3 Oberland": "Interlaken / Oberland", "4 Annecy": "Annecy",
+            "5 Saint-Hilaire": "Saint-Hilaire", "6 Ecrins": "Briançon / Écrins",
+        }
+        try:
+            quando = None
+            for z in zone_v:
+                pm = MAPPA_Z.get(z)
+                if not pm or pm not in PUNTI_METEO:
+                    continue
+                a, b = PUNTI_METEO[pm]
+                d = meteo(a, b)
+                quando = d.get("_scaricato", quando)
+                hh = pd.DataFrame(d["hourly"]); hh["time"] = pd.to_datetime(hh["time"])
+                h = hh[hh["time"].dt.hour.between(12, 16)].copy(); h["g"] = h["time"].dt.date
+                ag = h.groupby("g").agg(v=("windspeed_700hPa", "mean"),
+                                        dr=("winddirection_700hPa", "mean")).reset_index()
+                ag = ag.head(10)
+                st.markdown(f"##### {z}")
+                colonne = {"Decollo": [s2["sito"] for s2 in VINCOLI[z]]}
+                for _, riga in ag.iterrows():
+                    et = pd.Timestamp(riga["g"]).strftime("%a %d")
+                    colonne[et] = [giudizio(riga["v"], riga["dr"], s2)[0] for s2 in VINCOLI[z]]
+                st.dataframe(pd.DataFrame(colonne), hide_index=True)
+                og = ag.iloc[0]
+                with st.expander(f"Perché — {pd.Timestamp(og['g']).strftime('%a %d/%m')}, "
+                                 f"{og['v']:.0f} km/h da {cardinale(og['dr'])}"):
+                    for s2 in VINCOLI[z]:
+                        ic, why = giudizio(og["v"], og["dr"], s2)
+                        st.markdown(f"{ic} **{s2['sito']}** — {why}"
+                                    + (f". {s2['nota']}" if s2["nota"] else ""))
+            if quando:
+                st.caption(f"Ultimo scaricamento: {quando}")
+            st.caption("🟢 si vola · 🟡 al limite · 🔴 no. "
+                       "Il semaforo guarda solo il gradiente in quota: la brezza locale, "
+                       "l'inversione e lo stato del terreno li devi vedere tu sul posto.")
+        except Exception as e:
+            st.warning("Non riesco a raggiungere Open-Meteo adesso.")
+            st.caption(f"({type(e).__name__}) Serve connessione internet.")
+        st.stop()
 
     if modo == "Windy":
         import streamlit.components.v1 as components
@@ -515,7 +598,8 @@ with t6:
         if len(g):
             g.columns = ["vento 700 hPa km/h"]
             st.line_chart(g)
-            st.caption("Sopra i 25-30 km/h a 700 hPa i decolli esposti diventano difficili.")
+            st.caption("Sopra i 25-30 km/h a 700 hPa i decolli esposti diventano difficili. "
+                   f"Ultimo scaricamento: {d.get('_scaricato','—')}")
         with st.expander("I vincoli di vento sito per sito"):
             st.markdown("- **Ebenalp** — con W forte: pericolo di rotore")
             st.markdown("- **Kronberg** — nessuno: 4 decolli coprono tutte le direzioni")
