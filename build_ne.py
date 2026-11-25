@@ -4,21 +4,20 @@ import xml.etree.ElementTree as ET, math, re, json, html, unicodedata, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 MARCATORE = "# ======================================================================\n# APP"
 
-def _curati_da(path):
+def _dati_da(path):
     """Esegue solo la parte DATI del file (prima del marcatore APP): niente streamlit."""
     testo = open(path, encoding="utf-8").read()
-    dati = testo.split(MARCATORE)[0]
     ns_ = {}
-    exec(compile(dati, path, "exec"), ns_)
-    if "CURATI" not in ns_:
-        raise SystemExit(f"CURATI non trovato in {path}")
-    return ns_["CURATI"]
+    exec(compile(testo.split(MARCATORE)[0], path, "exec"), ns_)
+    if "CURATI" not in ns_ or "attivita_di" not in ns_:
+        raise SystemExit(f"CURATI o attivita_di non trovati in {path}")
+    return ns_["CURATI"], ns_["attivita_di"]
 
 _qui = os.path.dirname(os.path.abspath(__file__))
 _src = os.path.join(_qui, "app.py")
 if not os.path.exists(_src):
     _src = os.path.join(_qui, "dati_ne.py")
-CURATI = _curati_da(_src)
+CURATI, attivita_di = _dati_da(_src)
 
 ns = {'k': 'http://www.opengis.net/kml/2.2'}
 KML = '/mnt/user-data/uploads/Paragliding_Sites.kml'
@@ -28,13 +27,16 @@ TIPO = {'Takeoffs':'decollo','Landings':'atterraggio','Parkings':'parcheggio',
         'Cablecars':'impianto','Hike & Fly':'hike&fly'}
 
 def zona(la, lo):
-    if lo >= 13.80:                      return "8 Austria / Carinzia"
-    if lo >= 13.55 and la <= 46.45:      return "3 Slovenia"
+    if lo >= 14.40:                      return "9 Slovenia centrale / Austria est"
+    if lo >= 13.80 and la >= 46.45:      return "8 Austria / Carinzia"
+    if lo >= 13.55:                      return "3 Slovenia"
     if lo >= 13.30 and la >= 46.35:      return "2 Alpi Giulie"
     if lo >= 12.95:                      return "1 Friuli"
     if lo >= 12.55:                      return "6 Pordenonese / Carnia ovest"
+    if lo >= 12.10 and la >= 46.30:      return "10 Cadore / Dolomiti"
     if lo >= 12.10:                      return "4 Alpago"
     if lo >= 11.95:                      return "5 Feltrino"
+    if la >= 46.20:                      return "11 Dolomiti / Agordino"
     return "7 Veneto (Bassano/Marostica)"
 
 def chiave(n):
@@ -54,6 +56,7 @@ for r in CURATI:
     r['difficolta'] = r.pop('diff','') or ''
     r['categoria']  = r.pop('cat','') or ''
     r['origine'] = 'curato'
+    r['att'] = attivita_di(r['nome'], r['tipo'], quota=r.get('quota'))
     rows.append(r)
 
 chiavi_cur = {(r['zona'], chiave(r['nome'])) for r in rows}
@@ -66,9 +69,13 @@ for f in doc.findall('k:Folder', ns):
         co = p.find('.//k:coordinates', ns)
         if co is None: continue
         lon, lat, *_ = co.text.strip().split(','); lat = float(lat); lon = float(lon)
-        if not (45.55 <= lat <= 46.80 and 11.55 <= lon <= 14.40): continue
+        if not (45.30 <= lat <= 47.05 and 10.95 <= lon <= 15.60): continue
         nm = (p.find('k:name', ns).text or '').strip()
-        if not nm or nm[0].isdigit(): continue
+        if not nm or nm[0].isdigit():
+            nm = f"{TIPO[fn].capitalize()} {lat:.4f}, {lon:.4f}"
+            senza_nome = True
+        else:
+            senza_nome = False
         z = zona(lat, lon)
         if (z, chiave(nm)) in chiavi_cur: continue
         if any(t == TIPO[fn] and abs(a-lat) < 0.004 and abs(b-lon) < 0.005 for a,b,t in coord_cur):
@@ -81,7 +88,9 @@ for f in doc.findall('k:Folder', ns):
         rows.append(dict(zona=z, tipo=TIPO[fn], nome=nm, lat=lat, lon=lon, quota=None,
                          vento='', difficolta='', aff='K',
                          categoria='Hike & Fly' if fn=='Hike & Fly' else 'Dal KML',
-                         note=d, fonte='KML Delbene', disl=None, partenza='', origine='kml'))
+                         note=d, fonte='KML Delbene', disl=None, partenza='', origine='kml',
+                         senza_nome=senza_nome,
+                         att=attivita_di(nm, TIPO[fn], cartella_kml=fn)))
         n_kml += 1
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'siti_ne.json')
