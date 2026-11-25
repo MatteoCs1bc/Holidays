@@ -470,10 +470,105 @@ FENOMENI_FVG = [
   "ad avvicinare'. Le statistiche storiche valgono meno di una volta."),
 ]
 
+DESCR_ATT = {
+ "cross": "Decolli e atterraggi ufficiali: ci si arriva in auto o con un impianto, c'e' un club "
+          "dietro e di solito un regolamento da rispettare.",
+ "hef": "Si sale a piedi su terreno escursionistico. Molti punti vengono dal KML senza note: "
+        "il punto c'e', l'esposizione va ricavata dalla carta, da camptocamp o dai tracciati XContest.",
+ "pa_est": "Cime alpine: terreno da alpinismo, roccia o neve residua, si vola in discesa. "
+           "La classificazione e' una proposta basata sul carattere della cima.",
+ "pa_inv": "Cime da scialpinismo: si sale con le pelli e si vola giu'. Valgono valanghe, vento "
+           "di quota e giornate corte: il semaforo guarda solo il vento.",
+}
 
-# ---------------------------------------------------------------------
+# Dagli "Appunti di meteorologia per il Friuli Venezia Giulia", ARPA FVG, III edizione 2010.
+METEO_FVG = [
+ ("Stau e foehn — perche' piove tanto sulle Prealpi",
+  "Sul versante sopravvento l'aria e' costretta a salire: si espande, si raffredda e da una certa "
+  "quota in su il vapore condensa, con nuvole e precipitazioni TANTO PIU' INTENSE QUANTO PIU' SI "
+  "E' VICINI ALLE MONTAGNE. Ma condensando il vapore emette calore, quindi da li' in su l'aria si "
+  "raffredda meno del normale e arriva sullo spartiacque meno fredda di quanto sarebbe. "
+  "Sul versante sottovento torna a scendere, ha perso quasi tutto il vapore, si comprime e si "
+  "riscalda: la nuvolosita' scompare subito e l'aria arriva in pianura ben piu' calda che "
+  "sull'altro versante alla stessa quota. Tempo bello, ventoso e secco: e' il foehn."),
+ ("Dove piove in Friuli",
+  "Dai trent'anni di dati del Servizio Idrografico: a causa dello stau LE PREALPI, che sono le "
+  "prime montagne a sbarrare il passo alle masse d'aria umide meridionali, ricevono le quantita' "
+  "piu' elevate di pioggia e neve. A seconda dei casi risultano favorite le Prealpi Carniche o le "
+  "Giulie. Allontanandosi dalle Prealpi le precipitazioni diminuiscono: nelle Alpi perche' sono "
+  "riparate dalle Prealpi, sulla pianura perche' lo stau si fa via via meno intenso. "
+  "Il Friuli e' fortunato: riceve piogge e nevicate con venti sia da sud-ovest (Libeccio), "
+  "sia da sud, sia da sud-est (Scirocco)."),
+ ("Bora chiara",
+  "Generata da un forte anticiclone sull'Europa nord-orientale, che spinge aria secca e "
+  "d'inverno molto fredda verso il Mediterraneo centrale. Il vento sulle Venezie e' IMPETUOSO, "
+  "MOLTO FORTE MA DISCONTINUO, A RAFFICHE. Tempo bello e secco, d'inverno freddo. "
+  "Puo' essere brutto sui versanti sopravvento di Slovenia e Croazia per effetto stau."),
+ ("Bora scura",
+  "Generata da una profonda depressione sul Tirreno, a volte sull'Adriatico, che richiama aria "
+  "dall'Europa orientale. Il vento da nord-est e' FORTE E ABBASTANZA CONTINUO, con raffiche meno "
+  "marcate della chiara. Poiche' la depressione richiama in quota aria calda e umida da sud, su "
+  "buona parte d'Italia il tempo e' brutto, ma SUL FRIULI LE PIOGGE NON SONO MOLTO INTENSE. "
+  "D'inverno e' una delle poche situazioni che portano la neve in regione."),
+ ("Dove nasce la Bora e perche' e' cosi' forte",
+  "E' particolarmente forte sulle Venezie perche' prima di arrivarci una gran massa d'aria deve "
+  "passare per una ZONA RISTRETTA FRA LE ALPI GIULIE E I DINARI, sul Carso, nel retroterra "
+  "triestino. Chiara o scura, quando c'e' Bora la pressione e' piu' alta su Austria, entroterra "
+  "sloveno e croato che sull'area padano-veneta. Il gradiente e' massimo proprio sulle Alpi "
+  "Giulie, sul Carso fra Lubiana e Trieste e sulle Dinariche. "
+  "E' comunque un VENTO DI CADUTA, DEL TIPO FOEHN: arriva sull'Adriatico piu' calda di quando e' "
+  "partita, anche di diversi gradi. Ma fra wind-chill e aria preesistente piu' calda, la "
+  "sensazione e' di freddo."),
+ ("Le brezze: il respiro della montagna",
+  "Le valli friulane sono rivolte all'incirca VERSO SUD, verso la pianura e l'Adriatico. Questo "
+  "determina sia l'incanalamento dei venti sia lo sviluppo delle brezze. "
+  "La brezza di MONTE e' notturna: i versanti in quota si raffreddano, l'aria a contatto diventa "
+  "piu' pesante e scende lungo i pendii fino al fondovalle. La brezza di VALLE e' diurna ed e' "
+  "l'inverso: i versanti si scaldano, l'aria sale lungo i pendii e richiama aria dal fondovalle. "
+  "Quando la situazione le favorisce le brezze possono diventare anche forti."),
+ ("La giornata tipo in una valle friulana",
+  "DI BUON MATTINO soffia la brezza di monte: alle alte quote cielo sereno e buona visibilita', "
+  "sul fondovalle ristagna un cuscinetto di aria fredda che genera INVERSIONE TERMICA, con "
+  "foschie o nebbie. Se l'inversione e' forte ed e' a meta' altezza nella vallata, la nebbia puo' "
+  "sollevarsi fin sotto l'inversione formando STRATOCUMULI anche compatti, che da sotto danno "
+  "l'impressione di cielo coperto.\\n\\n"
+  "A META' MATTINATA il sole scalda i versanti e poi il fondovalle: l'aria sale, prima ROMPE "
+  "L'INVERSIONE e poi comincia a risalire il fondovalle. Nuvole, foschia e nebbia si dissolvono. "
+  "La visibilita' migliora in basso e PEGGIORA IN QUOTA, perche' l'umidita' viene portata in alto.\\n\\n"
+  "VERSO META' GIORNATA e' piena brezza di valle: l'aria porta su l'umidita', si espande, si "
+  "raffredda e condensa nei CUMULI DI BEL TEMPO sopra i versanti. Lo sviluppo e' piu' facile con "
+  "atmosfera instabile, ostacolato con atmosfera stabile.\\n\\n"
+  "D'INVERNO tutto questo avviene con molta minore intensita'. A volte l'inversione, con nebbia o "
+  "nuvole, PUO' PERMANERE TUTTO IL GIORNO."),
+ ("Il temporale di calore pomeridiano",
+  "Favorito da instabilita', umidita' elevata e ASSENZA DI VENTO FORTE IN QUOTA. Uno dei cumuli "
+  "diventa sempre piu' grande, torreggiante, con molte protuberanze; la sommita' si allarga e si "
+  "appiattisce nell'INCUDINE. Se la base e' grigia e frastagliata e' facile che ci siano pioggia "
+  "o grandine. IL TEMPORALE ROMPE IL SISTEMA DEI VENTI DI BREZZA: correnti di aria fredda "
+  "arrivano fino al suolo con raffiche disordinate. Si sposta nella direzione del vento dominante "
+  "in quota. "
+  "Sulle Alpi non e' raro che PIU' TEMPORALI FORMATISI IN VALLATE VICINE SI UNISCANO nel tardo "
+  "pomeriggio, per esempio in Carnia o nelle Dolomiti, e che il gruppo poi si sposti sulla "
+  "pianura friulana."),
+ ("Di sera: come si legge il giorno dopo",
+  "Quando il temporale si allontana o si esaurisce, nella vallata non ci sono venti ben "
+  "individuabili e le nuvole vanno diminuendo; quelle che restano tendono a diventare "
+  "STRATIFORMI. SE SCOMPAIONO DEL TUTTO il tempo probabilmente non sta cambiando e restera' "
+  "bello, e l'indomani il ciclo ricomincia. SE INVECE SI ESTENDONO E SI ALLARGANO, e' possibile "
+  "che si prospetti un peggioramento."),
+ ("Il vento trasversale alla valle",
+  "Quando il vento sinottico soffia a circa 90 gradi rispetto alla valle, e' difficile che venga "
+  "incanalato. TANTO PIU' LA VALLE E' STRETTA E PROFONDA, TANTO PIU' IL VENTO ARRIVA SUL "
+  "FONDOVALLE INALTERATO. Puo' succedere che l'aria, dopo aver sorvolato la valle, venga riflessa "
+  "dal versante opposto e torni indietro sul fondovalle in verso opposto al vento dominante. "
+  "In generale si forma TURBOLENZA, che pero' dissipa foschie e nebbie e rimescola l'atmosfera. "
+  "Sul fondovalle i venti trasversali sono comunque rari."),
+]
+
+
+# --------------------------------------------------------------------
 # ATTIVITA
-# ---------------------------------------------------------------------
+# --------------------------------------------------------------------
 """Classificazione per TIPOLOGIA DI ATTIVITA'.
 
 cross  = voli di cross: decolli e atterraggi ufficiali, si arriva in auto o con impianto
@@ -567,7 +662,12 @@ def attivita_di(nome, tipo, cartella_kml=None, quota=None):
         return list(OVERRIDE[nome])
     k = _norm(nome)
     a = []
-    if tipo in ("decollo","atterraggio","parcheggio","impianto"): a.append("cross")
+    # si atterra e si parcheggia qualunque sia l'attivita': valgono per tutte
+    if tipo in ("atterraggio", "parcheggio"):
+        return ["cross", "hef", "pa_est", "pa_inv"]
+    if tipo == "impianto":
+        return ["cross", "pa_inv"]
+    if tipo == "decollo": a.append("cross")
     if tipo == "hike&fly": a.append("hef")
     if k in PARALP_ESTIVO:    a.append("pa_est")
     if k in PARALP_INVERNALE: a.append("pa_inv")
@@ -577,9 +677,9 @@ def attivita_di(nome, tipo, cartella_kml=None, quota=None):
     return a or ["cross"]
 
 
-# ---------------------------------------------------------------------
+# --------------------------------------------------------------------
 # MOTORE METEO
-# ---------------------------------------------------------------------
+# --------------------------------------------------------------------
 """Analisi meteo orientata al volo: instabilita', quota massima, inversioni,
 turbolenza, gradiente termico. Dati Open-Meteo (modello ICON/ECMWF)."""
 import json, urllib.request, urllib.parse, math
@@ -596,6 +696,8 @@ ORARIE = (
     + [f"wind_speed_{l}hPa" for l in LIVELLI]
     + [f"wind_direction_{l}hPa" for l in LIVELLI]
     + [f"geopotential_height_{l}hPa" for l in LIVELLI]
+    + [f"relative_humidity_{l}hPa" for l in LIVELLI]
+    + [f"cloud_cover_{l}hPa" for l in LIVELLI]
 )
 GIORNALIERE = ["temperature_2m_max","temperature_2m_min","precipitation_sum",
                "precipitation_probability_max","wind_speed_10m_max"]
@@ -614,14 +716,16 @@ def scarica(la, lo):
     except Exception:
         vecchi = [v.replace("dew_point_2m","dewpoint_2m").replace("wind_speed","windspeed")
                    .replace("wind_direction","winddirection").replace("wind_gusts","windgusts")
-                   .replace("cloud_cover","cloudcover") for v in ORARIE]
+                   .replace("cloud_cover","cloudcover")
+                   .replace("relative_humidity","relativehumidity") for v in ORARIE]
         return _get(la, lo, vecchi)
 
 def _c(h, nome):
     """Colonna, qualunque sia la convenzione di nomi."""
     for n in (nome, nome.replace("dew_point_2m","dewpoint_2m").replace("wind_speed","windspeed")
                         .replace("wind_direction","winddirection").replace("wind_gusts","windgusts")
-                        .replace("cloud_cover","cloudcover")):
+                        .replace("cloud_cover","cloudcover")
+                        .replace("relative_humidity","relativehumidity")):
         if n in h.columns: return h[n]
     return pd.Series([float("nan")] * len(h), index=h.index)
 
@@ -663,7 +767,8 @@ def analizza(la, lo):
         r["zero_term"] = _c(b,"freezing_level_height").mean()
         t2, td2 = _c(b,"temperature_2m").mean(), _c(b,"dew_point_2m").mean()
         r["spread"] = t2 - td2 if pd.notna(t2) and pd.notna(td2) else float("nan")
-        r["base_nubi"] = quota_staz + 125*(t2-td2) if pd.notna(t2) and pd.notna(td2) else float("nan")
+        r["base_nubi"] = (max(quota_staz + 50, quota_staz + 125*(t2-td2))
+                          if pd.notna(t2) and pd.notna(td2) else float("nan"))
         r["nuv_bassa"] = _c(b,"cloud_cover_low").mean()
         r["nuv_tot"]   = _c(b,"cloud_cover").mean()
         r["pioggia"]   = _c(b,"precipitation_probability").max()
@@ -679,7 +784,9 @@ def analizza(la, lo):
             z = _c(b,f"geopotential_height_{l}hPa").mean()
             v = _c(b,f"wind_speed_{l}hPa").mean()
             dr_ = _vento_medio(_c(b,f"wind_speed_{l}hPa"), _c(b,f"wind_direction_{l}hPa"))[1]
-            prof.append(dict(hPa=l, t=t, z=z, v=v, d=dr_))
+            rh = _c(b,f"relative_humidity_{l}hPa").mean()
+            nb = _c(b,f"cloud_cover_{l}hPa").mean()
+            prof.append(dict(hPa=l, t=t, z=z, v=v, d=dr_, rh=rh, nub=nb))
         r["profilo"] = prof
         P = {p["hPa"]: p for p in prof}
         r["v700"], r["d700"] = P[700]["v"], P[700]["d"]
@@ -709,6 +816,20 @@ def analizza(la, lo):
             inv.insert(0, (quota_staz, P[925]["z"], P[925]["t"]-t2))
         r["inversioni"] = inv
         r["tappo"] = inv[0][0] if inv else float("nan")
+
+        # strati di nubi: quota e copertura
+        strati = []
+        for p in sorted([x for x in prof if pd.notna(x["z"])], key=lambda x: x["z"]):
+            cop = p["nub"] if pd.notna(p["nub"]) else (
+                  max(0.0, (p["rh"]-70)*3.3) if pd.notna(p["rh"]) else float("nan"))
+            if pd.notna(cop) and cop >= 25:
+                strati.append(dict(z=p["z"], cop=cop, rh=p["rh"], hPa=p["hPa"]))
+        r["strati_nubi"] = strati
+        r["nuv_media"] = _c(b,"cloud_cover_mid").mean()
+        r["nuv_alta"]  = _c(b,"cloud_cover_high").mean()
+        # la base dei cumuli e' sopra o sotto il tetto delle termiche?
+        bn, qt = r["base_nubi"], r["quota_termica"]
+        r["cumuli"] = (pd.notna(bn) and pd.notna(qt) and bn <= qt + 150)
 
         # shear = turbolenza potenziale
         r["shear_925_700"] = _shear(P[925]["v"],P[925]["d"],P[700]["v"],P[700]["d"])
@@ -765,6 +886,34 @@ def descrivi_inversioni(inv, quota_staz):
                               f"(+{dt:.1f}°C fino a {cima:.0f} m)")
     return "\U0001F7E1", f"inversione in quota a {base:.0f} m (+{dt:.1f}°C)"
 
+
+def giudica_nuvole(nuv_bassa, nuv_media, nuv_alta, base, quota_term, cumuli):
+    """Lettura operativa della copertura: cosa vuol dire per chi vola."""
+    nb = 0 if pd.isna(nuv_bassa) else nuv_bassa
+    nm = 0 if pd.isna(nuv_media) else nuv_media
+    na = 0 if pd.isna(nuv_alta) else nuv_alta
+    frasi, ic = [], "\U0001F7E2"
+    if nb >= 70:
+        ic = "\U0001F534"
+        frasi.append(f"nubi basse al {nb:.0f}%: sole schermato, termiche spente")
+    elif nb >= 35:
+        ic = "\U0001F7E1"
+        frasi.append(f"nubi basse al {nb:.0f}%: termiche a intermittenza")
+    elif nb > 10:
+        frasi.append(f"poche nubi basse ({nb:.0f}%)")
+    if nm >= 50:
+        if ic == "\U0001F7E2": ic = "\U0001F7E1"
+        frasi.append(f"strato medio al {nm:.0f}%: scalda meno, attenzione al peggioramento")
+    if na >= 50:
+        frasi.append(f"velature al {na:.0f}%: riducono l'irraggiamento ma lasciano volare")
+    if cumuli:
+        frasi.append(f"cumuli attesi, base intorno a {base:.0f} m")
+    elif pd.notna(base) and pd.notna(quota_term) and base > quota_term + 150:
+        frasi.append("aria troppo secca per i cumuli: termiche blu, niente riferimenti visivi")
+    if not frasi:
+        frasi.append("cielo sereno o quasi")
+    return ic, " \u00b7 ".join(frasi)
+
 # ======================================================================
 # APP
 # ======================================================================
@@ -773,10 +922,34 @@ import pandas as pd
 import streamlit as st
 import pydeck as pdk
 import sys as _sys
-M = _sys.modules[__name__]   # le funzioni meteo sono qui sopra
+M = _sys.modules[__name__]   # il motore meteo e' definito qui sopra
 
-st.set_page_config(page_title="Nordest — volo e montagna", page_icon="\U0001FA82", layout="centered")
+st.set_page_config(page_title="Nordest — volo", page_icon="\U0001FA82", layout="centered")
 BASE = os.path.dirname(os.path.abspath(__file__))
+
+st.markdown("""<style>
+.block-container{padding-top:1.4rem;padding-bottom:3rem;max-width:860px}
+h1,h2,h3{letter-spacing:-.02em}
+div[data-testid="stMetricValue"]{font-size:1.35rem;font-weight:650}
+div[data-testid="stMetricLabel"] p{font-size:.72rem;opacity:.72;text-transform:uppercase;
+  letter-spacing:.06em}
+.card{border:1px solid rgba(128,128,128,.25);border-radius:14px;padding:.9rem 1.05rem;
+  margin:.45rem 0;background:rgba(128,128,128,.045)}
+.card.g{border-left:4px solid #22a046}.card.y{border-left:4px solid #e0a500}
+.card.o{border-left:4px solid #e2741c}.card.r{border-left:4px solid #cc2b2b}
+.card.b{border-left:4px solid #3c91e6}.card.n{border-left:4px solid #8a8a8a}
+.card h4{margin:0 0 .3rem 0;font-size:1rem;font-weight:650}
+.card .sub{font-size:.82rem;opacity:.75;line-height:1.45}
+.chip{display:inline-block;padding:.12rem .55rem;border-radius:999px;font-size:.72rem;
+  border:1px solid rgba(128,128,128,.35);margin:.1rem .25rem .1rem 0;white-space:nowrap}
+.kv{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;
+  border-bottom:1px dashed rgba(128,128,128,.22);font-size:.87rem}
+.kv:last-child{border-bottom:none}
+.kv .k{opacity:.7}.kv .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.bar{height:7px;border-radius:4px;background:rgba(128,128,128,.2);overflow:hidden}
+.bar>i{display:block;height:100%}
+.stTabs [data-baseweb="tab"]{font-size:.95rem;font-weight:600}
+</style>""", unsafe_allow_html=True)
 
 @st.cache_data
 def carica():
@@ -784,24 +957,24 @@ def carica():
 
 df = carica()
 PRIORITA = ["pa_inv", "pa_est", "hef", "cross"]
-TIPI_ETI = {"decollo":"Decollo","hike&fly":"Hike & Fly","atterraggio":"Atterraggio",
-            "impianto":"Impianto","parcheggio":"Parcheggio","zona":"Regole"}
 ORDINE = ["1 Friuli","2 Alpi Giulie","6 Pordenonese / Carnia ovest","3 Slovenia",
           "4 Alpago","5 Feltrino","10 Cadore / Dolomiti","11 Dolomiti / Agordino",
           "8 Austria / Carinzia","9 Slovenia centrale / Austria est",
           "7 Veneto (Bassano/Marostica)"]
 CAMPI = ["nome","note","vento","difficolta","partenza","categoria","fonte","zona"]
 VIN_FLAT = {v["sito"]: v for vs in VINCOLI.values() for v in vs}
-
-def att_prim(lista, ammesse=None):
-    for a in PRIORITA:
-        if a in lista and (ammesse is None or a in ammesse): return a
-    return lista[0] if lista else "cross"
+CL = {"\U0001F7E2":"g","\U0001F7E1":"y","\U0001F7E0":"o","\U0001F534":"r",
+      "\U0001F535":"b","⚪":"n","—":"n","·":"n"}
 
 def rgb(a):  return ATTIVITA.get(a, {}).get("rgb", [136,136,136])
 def hexa(a): return "#%02x%02x%02x" % tuple(rgb(a))
 def eti(a):  return ATTIVITA.get(a, {}).get("eti", a)
 def ico(a):  return ATTIVITA.get(a, {}).get("ico", "\U0001F4CD")
+
+def att_prim(l, am=None):
+    for a in PRIORITA:
+        if a in l and (am is None or a in am): return a
+    return l[0] if l else "cross"
 
 def dist_km(a,b,c,d):
     return math.hypot((a-c)*111, (b-d)*111*math.cos(math.radians((a+c)/2)))
@@ -810,45 +983,29 @@ def val(r,c):
     v = r[c] if c in r.index else None
     return "" if v is None or (isinstance(v,float) and pd.isna(v)) else v
 
-def riassunto(r):
-    p = []
-    if val(r,"quota"): p.append(f"{int(r['quota'])} m")
-    if val(r,"vento"): p.append(f"\U0001F9ED {r['vento']}")
-    if val(r,"disl"):  p.append(f"↗ {int(r['disl'])} m")
-    if val(r,"difficolta"): p.append(str(r["difficolta"])[:30])
-    return " · ".join(p)
-
-def pallino(a):
-    return (f"<span style='display:inline-block;width:11px;height:11px;border-radius:50%;"
-            f"background:{hexa(a)};border:1px solid #bbb;margin-right:6px'></span>")
-
-def scheda(r):
-    atts = r["att"] if isinstance(r["att"], list) else []
-    st.markdown(pallino(att_prim(atts)) + f"<b>{r['nome']}</b> "
-                f"<small>· {TIPI_ETI.get(r['tipo'], r['tipo'])}</small>", unsafe_allow_html=True)
-    if atts:
-        st.markdown(" ".join(f"{ico(a)} {eti(a)}" for a in atts))
-    riga = riassunto(r)
-    if riga: st.markdown(f"**{riga}**")
-    if val(r,"partenza"):  st.markdown(f"**Partenza:** {r['partenza']}")
-    if val(r,"categoria"): st.caption(r["categoria"])
-    if val(r,"note"):      st.write(r["note"])
-    aff = {"V":"✅ verificato con fonte","K":"\U0001F7E1 solo KML",
-           "?":"❓ da verificare"}.get(val(r,"aff"), "")
-    st.caption(f"{aff} — fonte: {val(r,'fonte')}  ·  `{r['lat']:.5f}, {r['lon']:.5f}`")
-    st.markdown(
-        f"[Maps](https://www.google.com/maps/search/?api=1&query={r['lat']},{r['lon']}) · "
-        f"[Organic Maps](om://map?v=1&ll={r['lat']},{r['lon']}&n={r['nome']}) · "
-        f"[meteo-parapente](https://meteo-parapente.com/#/{r['lat']},{r['lon']},11)")
-
 def cardinale(v):
-    pts = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
-    return pts[int((v % 360)/22.5 + 0.5) % 16] if pd.notna(v) else "—"
+    p = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
+    return p[int((v % 360)/22.5 + 0.5) % 16] if pd.notna(v) else "—"
 
-def in_settore(deg, settori):
+def card(titolo, sotto="", stato="n"):
+    st.markdown(f"<div class='card {stato}'><h4>{titolo}</h4>"
+                + (f"<div class='sub'>{sotto}</div>" if sotto else "") + "</div>",
+                unsafe_allow_html=True)
+
+def kv(righe):
+    h = "<div class='card'>" + "".join(
+        f"<div class='kv'><span class='k'>{k}</span><span class='v'>{v}</span></div>"
+        for k, v in righe) + "</div>"
+    st.markdown(h, unsafe_allow_html=True)
+
+def barra(perc, colore="#3c91e6"):
+    p = 0 if pd.isna(perc) else max(0, min(100, perc))
+    return f"<div class='bar'><i style='width:{p:.0f}%;background:{colore}'></i></div>"
+
+def in_settore(deg, s):
     if pd.isna(deg): return False
     d = deg % 360
-    for a,b in settori:
+    for a,b in s:
         if a <= b and a <= d <= b: return True
         if a > b and (d >= a or d <= b): return True
     return False
@@ -865,33 +1022,57 @@ def giudizio(v, deg, s):
 def analisi(la, lo):
     return M.analizza(la, lo)
 
-def mappa(blocco, zoom=8, colora_per="att", ammesse=None, verdetti=None):
-    m = blocco.dropna(subset=["lat","lon"]).copy()
+def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420):
+    m = b.dropna(subset=["lat","lon"]).copy()
     if not len(m):
         st.info("Nessun punto con questi filtri."); return
-    if colora_per == "verdetto" and verdetti is not None:
-        COL = {"\U0001F7E2":[34,160,70], "\U0001F7E1":[235,180,20],
-               "\U0001F534":[200,40,40], "⚪":[150,150,150], "":[150,150,150]}
-        m["_v"] = [verdetti.get(n, "⚪") for n in m["nome"]]
-        m["col"] = [COL.get(v, [150,150,150]) for v in m["_v"]]
-        m["etichetta"] = m["_v"]
+    if verdetti is not None:
+        COL = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,170,20],
+               "\U0001F534":[200,45,45],"⚪":[150,150,150]}
+        m["_e"] = [verdetti.get(n,"⚪") for n in m["nome"]]
+        m["col"] = [COL.get(v,[150,150,150]) for v in m["_e"]]
+        m["etichetta"] = m["_e"]
     else:
-        m["_a"] = [att_prim(a if isinstance(a, list) else [], ammesse) for a in m["att"]]
+        m["_a"] = [att_prim(a if isinstance(a,list) else [], ammesse) for a in m["att"]]
         m["col"] = [rgb(a) for a in m["_a"]]
         m["etichetta"] = [eti(a) for a in m["_a"]]
-    m["rad"] = [{"decollo":420,"hike&fly":400,"zona":460}.get(t, 230) for t in m["tipo"]]
-    m["sotto"] = [riassunto(r) or TIPI_ETI.get(r["tipo"], "") for _, r in m.iterrows()]
+    m["rad"] = [460 if t=="decollo" else (380 if t=="hike&fly" else 240) for t in m["tipo"]]
+    m["sotto"] = [(f"{int(r['quota'])} m · " if val(r,'quota') else "")
+                  + (str(r["vento"]) if val(r,"vento") else r["tipo"]) for _, r in m.iterrows()]
     st.pydeck_chart(pdk.Deck(
         layers=[pdk.Layer("ScatterplotLayer",
-                          data=m[["lat","lon","col","rad","nome","etichetta","sotto"]],
-                          get_position=["lon","lat"], get_fill_color="col", get_radius="rad",
-                          radius_min_pixels=5, radius_max_pixels=18, pickable=True,
-                          auto_highlight=True, stroked=True, get_line_color=[255,255,255],
-                          line_width_min_pixels=1)],
+                data=m[["lat","lon","col","rad","nome","etichetta","sotto"]],
+                get_position=["lon","lat"], get_fill_color="col", get_radius="rad",
+                radius_min_pixels=5, radius_max_pixels=18, pickable=True, auto_highlight=True,
+                stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1)],
         map_style=None,
         initial_view_state=pdk.ViewState(latitude=float(m["lat"].mean()),
-                                         longitude=float(m["lon"].mean()), zoom=zoom),
-        tooltip={"html": "<b>{nome}</b><br/>{etichetta}<br/>{sotto}"}))
+                                         longitude=float(m["lon"].mean()), zoom=zoom)),
+        height=h)
+
+def scheda_sito(r, verdetto=None, motivo=None):
+    a = r["att"] if isinstance(r["att"], list) else []
+    chips = "".join(f"<span class='chip'>{ico(x)} {eti(x)}</span>" for x in a)
+    aff = {"V":"✅ verificato","K":"\U0001F7E1 solo KML","?":"❓ da verificare"}.get(
+        val(r,"aff"), "")
+    if verdetto: st.markdown(f"**{verdetto} {motivo or ''}**")
+    st.markdown(chips, unsafe_allow_html=True)
+    righe = []
+    if val(r,"quota"):      righe.append(("Quota", f"{int(r['quota'])} m"))
+    if val(r,"vento"):      righe.append(("Esposizione", str(r["vento"])))
+    if val(r,"difficolta"): righe.append(("Difficoltà", str(r["difficolta"])))
+    if val(r,"disl"):       righe.append(("Dislivello", f"{int(r['disl'])} m"))
+    if val(r,"partenza"):   righe.append(("Via di salita", str(r["partenza"])))
+    righe.append(("Zona", r["zona"]))
+    righe.append(("Affidabilità", aff))
+    if "dist" in r.index and pd.notna(r["dist"]): righe.append(("Distanza", f"{r['dist']:.0f} km"))
+    kv(righe)
+    if val(r,"note"): st.write(r["note"])
+    st.caption(f"Fonte: {val(r,'fonte')}  ·  `{r['lat']:.5f}, {r['lon']:.5f}`")
+    st.markdown(
+        f"[Maps](https://www.google.com/maps/search/?api=1&query={r['lat']},{r['lon']}) · "
+        f"[Organic Maps](om://map?v=1&ll={r['lat']},{r['lon']}&n={r['nome']}) · "
+        f"[meteo-parapente](https://meteo-parapente.com/#/{r['lat']},{r['lon']},11)")
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
@@ -902,299 +1083,293 @@ with st.sidebar:
     aff_sel = st.multiselect("Affidabilità", ["V","K","?"], default=["V","K","?"],
                              format_func=lambda a: {"V":"✅ verificato","K":"\U0001F7E1 solo KML",
                                                     "?":"❓ da verificare"}[a])
-    mostra_servizi = st.checkbox("Mostra parcheggi e impianti", value=False)
-    st.markdown("---")
+    serv = st.checkbox("Mostra parcheggi e impianti", value=False)
     pos = st.text_input("La tua posizione — lat, lon", placeholder="46.27, 13.14")
 
 base = df[df["zona"].isin(z_sel) & df["aff"].isin(aff_sel)].copy()
-if not mostra_servizi:
-    base = base[~base["tipo"].isin(["parcheggio","impianto"])]
-qui = None
+if not serv: base = base[~base["tipo"].isin(["parcheggio","impianto"])]
 if pos.strip():
     try:
-        a, b = [float(x) for x in pos.replace(";", ",").split(",")[:2]]
-        qui = (a, b)
-        base["dist"] = [dist_km(a,b,la,lo) for la,lo in zip(base["lat"], base["lon"])]
+        a_, b_ = [float(x) for x in pos.replace(";",",").split(",")[:2]]
+        base["dist"] = [dist_km(a_,b_,la,lo) for la,lo in zip(base["lat"], base["lon"])]
         base = base.sort_values("dist")
     except Exception:
         st.sidebar.error("Formato: 46.27, 13.14")
 base = base.reset_index(drop=True)
 
-def solo(att):
-    return base[[att in (a if isinstance(a,list) else []) for a in base["att"]]]
+def solo(a):
+    return base[[a in (x if isinstance(x,list) else []) for x in base["att"]]]
 
-SEZ = ["\U0001F5FA️ Mappa unica", "\U0001FA82 Voli di cross", "\U0001F97E Hike & Fly",
-       "⛰️ Paralpinismo estivo", "❄️ Paralpinismo invernale",
-       "\U0001F324️ Meteo", "✅ Siti volabili", "\U0001F527 Info"]
-sezione = st.selectbox("Sezione", SEZ, index=0, key="nav")
+st.markdown("## \U0001FA82 Nordest")
 st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
-st.divider()
 
-def elenco(blocco, vuoto="Nessun punto con questi filtri."):
-    if not len(blocco): st.info(vuoto); return
-    for z in [z for z in ORDINE if z in set(blocco["zona"])]:
-        st.markdown(f"**{z}**")
-        for _, r in blocco[blocco["zona"]==z].sort_values("nome").iterrows():
-            coda = riassunto(r)
-            if "dist" in r.index and pd.notna(r["dist"]):
-                coda = (coda + " · " if coda else "") + f"{r['dist']:.0f} km"
-            with st.expander(f"{r['nome']}" + (f"  ·  {coda}" if coda else "")):
-                scheda(r)
+T_METEO, T_SITI, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Siti di volo",
+                                   "\U0001F527  Info"])
 
-def sezione_attivita(chiave, titolo, intro, tipi=None):
-    st.markdown(f"### {ico(chiave)} {titolo}")
-    st.caption(intro)
-    B = solo(chiave)
-    if tipi: B = B[B["tipo"].isin(tipi)]
-    c = st.columns(4)
-    for i, t in enumerate(["decollo","hike&fly","atterraggio","zona"]):
-        n = len(B[B["tipo"]==t])
-        if n: c[i].metric(TIPI_ETI[t], n)
-    mappa(B, zoom=8.3, ammesse={chiave})
-    st.divider()
-    q = st.text_input("Cerca", key=f"q_{chiave}",
-                      placeholder="bora, cavi, vietato, navetta, biglietto…")
-    V = B
-    if q and len(V):
-        ql = q.lower()
-        V = V[[any(ql in str(r[c_]).lower() for c_ in CAMPI if c_ in V.columns)
-               for _, r in V.iterrows()]]
-    st.caption(f"{len(V)} punti")
-    elenco(V)
-
-# ---------------------------------------------------------------- sezioni
-if sezione == SEZ[0]:
-    att_sel = st.multiselect("Attività", list(ATTIVITA), default=list(ATTIVITA),
-                             format_func=lambda a: f"{ico(a)} {eti(a)}")
-    B = base[[any(x in (a if isinstance(a,list) else []) for x in att_sel) for a in base["att"]]]
-    st.caption(f"{len(B)} punti su {len(df)} totali")
-    mappa(B, zoom=7.6, ammesse=set(att_sel))
-    cols = st.columns(2)
-    for i, a in enumerate(att_sel):
-        n = len(solo(a))
-        cols[i % 2].markdown(pallino(a) + f"<small>{eti(a)} — {n} punti</small>",
-                             unsafe_allow_html=True)
-    st.caption("Un punto può valere per più attività: sulla mappa prende il colore "
-               "di quella più impegnativa fra quelle selezionate.")
-
-elif sezione == SEZ[1]:
-    sezione_attivita("cross", "Voli di cross",
-                     "Decolli e atterraggi ufficiali: ci si arriva in auto o con impianto, "
-                     "c'è un club dietro e di solito un regolamento.")
-
-elif sezione == SEZ[2]:
-    sezione_attivita("hef", "Hike & Fly",
-                     "Si sale a piedi su terreno escursionistico. Molti vengono dal KML senza "
-                     "note: il punto c'è, l'esposizione va ricavata da carta, camptocamp o "
-                     "dai tracciati XContest.")
-
-elif sezione == SEZ[3]:
-    sezione_attivita("pa_est", "Paralpinismo estivo",
-                     "Cime alpine: terreno da alpinismo, roccia o neve residua, si vola in discesa. "
-                     "La classificazione è una PROPOSTA basata sul carattere della cima, "
-                     "non su relazioni di volo verificate.")
-
-elif sezione == SEZ[4]:
-    sezione_attivita("pa_inv", "Paralpinismo invernale",
-                     "Cime da scialpinismo: si sale con le pelli e si vola giù. "
-                     "Anche qui la classificazione è una proposta da confermare. "
-                     "D'inverno valgono valanghe, vento di quota e giornate corte: "
-                     "il semaforo guarda solo il vento.")
-
-elif sezione == SEZ[5]:
-    st.markdown("### Analisi meteo per il volo")
-    ca, cb = st.columns([3,1])
-    luogo = ca.selectbox("Località", list(PUNTI_METEO))
-    if cb.button("\U0001F504 Aggiorna", use_container_width=True):
+# ======================================================= METEO
+with T_METEO:
+    st.markdown("#### Dove")
+    modo = st.radio("Riferimento", ["Zona", "Da un sito", "Coordinate"],
+                    horizontal=True, label_visibility="collapsed")
+    if modo == "Zona":
+        luogo = st.selectbox("Zona di riferimento", list(PUNTI_METEO))
+        la, lo = PUNTI_METEO[luogo]
+    elif modo == "Da un sito":
+        dec = base[base["tipo"].isin(["decollo","hike&fly"])].sort_values("nome")
+        nomi = list(dec["nome"])
+        if nomi:
+            scelto = st.selectbox("Decollo", nomi)
+            rr = dec[dec["nome"]==scelto].iloc[0]
+            la, lo, luogo = rr["lat"], rr["lon"], scelto
+        else:
+            luogo = list(PUNTI_METEO)[0]; la, lo = PUNTI_METEO[luogo]
+    else:
+        c1, c2 = st.columns(2)
+        la = c1.number_input("Latitudine", 44.5, 47.5, 46.27, 0.01, format="%.4f")
+        lo = c2.number_input("Longitudine", 10.5, 16.0, 13.16, 0.01, format="%.4f")
+        luogo = f"{la:.3f}, {lo:.3f}"
+    cga, cgb = st.columns([3,1])
+    if cgb.button("\U0001F504 Aggiorna", use_container_width=True):
         analisi.clear(); st.rerun()
-    la, lo = PUNTI_METEO[luogo]
+
     try:
-        t, quota_staz, quando = analisi(la, lo)
+        t, qstaz, quando = analisi(float(la), float(lo))
         gg = list(t["g"])
-        g = st.select_slider("Giorno", gg, value=gg[0],
-                             format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="mg")
+        g = cga.select_slider("Giorno", gg, value=gg[0],
+                              format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="mg")
         r = t[t["g"]==g].iloc[0]
 
-        st.markdown("#### Sintesi")
-        i_ic, i_tx = M.giudica_instabilita(r["cape"], r["li"])
-        g_ic, g_tx = M.giudica_gradiente(r["lapse_850_700"])
-        tb_ic, tb_tx = M.giudica_turbolenza(r["shear_925_700"], r["raff_ratio"], r["v700"])
-        inv_ic, inv_tx = M.descrivi_inversioni(r["inversioni"], quota_staz)
-        for icn, txt in [(i_ic,i_tx),(g_ic,g_tx),(tb_ic,tb_tx),(inv_ic,inv_tx)]:
-            st.markdown(f"{icn} **{txt}**")
-
-        st.markdown("#### Quote")
-        q1,q2,q3 = st.columns(3)
-        q1.metric("Quota massima termica",
-                  f"{r['quota_termica']:.0f} m" if pd.notna(r["quota_termica"]) else "—",
-                  help="Cima dello strato rimescolato: in pratica il tetto delle termiche.")
-        q2.metric("Base dei cumuli",
-                  f"{r['base_nubi']:.0f} m" if pd.notna(r["base_nubi"]) else "—",
-                  help="Stimata dallo spread temperatura/rugiada al suolo.")
-        q3.metric("Zero termico",
-                  f"{r['zero_term']:.0f} m" if pd.notna(r["zero_term"]) else "—")
-
-        st.markdown("#### Instabilità e vento")
-        w1,w2,w3,w4 = st.columns(4)
-        w1.metric("CAPE", f"{r['cape']:.0f}" if pd.notna(r["cape"]) else "—",
-                  help="Energia convettiva disponibile, J/kg. Sopra 1200 sono temporali.")
-        w2.metric("Lifted index", f"{r['li']:.1f}" if pd.notna(r["li"]) else "—",
-                  help="Negativo = instabile. Sotto -5 molto instabile.")
-        w3.metric("Vento 700 hPa",
-                  f"{r['v700']:.0f} {cardinale(r['d700'])}" if pd.notna(r["v700"]) else "—")
-        w4.metric("Raffiche", f"{r['raffiche']:.0f} km/h" if pd.notna(r["raffiche"]) else "—")
-
-        st.markdown("#### Gradiente termico")
-        grad = pd.DataFrame({
-            "Strato": ["925→850 hPa (basso)","850→700 hPa (medio)","700→500 hPa (alto)"],
-            "°C / 100 m": [f"{r[k]:.2f}" if pd.notna(r[k]) else "—"
-                                for k in ["lapse_925_850","lapse_850_700","lapse_700_500"]],
-            "Lettura": [M.giudica_gradiente(r[k])[1]
-                        for k in ["lapse_925_850","lapse_850_700","lapse_700_500"]]})
-        st.dataframe(grad, hide_index=True)
-        st.caption("0,98 °C/100 m è l'adiabatica secca: più ci si avvicina, "
-                   "più le termiche sono forti. Sotto 0,45 l'aria è stabile.")
-
-        st.markdown("#### Profilo verticale")
-        prof = pd.DataFrame(r["profilo"])
-        prof = prof[prof["z"].notna()]
-        if len(prof):
-            st.dataframe(pd.DataFrame({
-                "Livello": [f"{int(p)} hPa" for p in prof["hPa"]],
-                "Quota": [f"{z:.0f} m" for z in prof["z"]],
-                "Temp": [f"{x:.1f}°" if pd.notna(x) else "—" for x in prof["t"]],
-                "Vento": [f"{v:.0f} km/h {cardinale(d)}" if pd.notna(v) else "—"
-                          for v,d in zip(prof["v"], prof["d"])]}), hide_index=True)
-            ch = prof[["z","t"]].dropna().set_index("z").sort_index()
-            if len(ch):
-                ch.columns = ["temperatura °C"]
-                st.line_chart(ch)
-                st.caption("Se la linea torna a salire andando verso quote maggiori, "
-                           "lì c'è un'inversione.")
-        if r["inversioni"]:
-            st.markdown("**Inversioni trovate**")
-            for b_, c_, dt in r["inversioni"]:
-                st.markdown(f"• da {b_:.0f} m a {c_:.0f} m, +{dt:.1f} °C")
-
-        st.markdown("#### Andamento sui giorni")
-        serie = t[["time","cape","quota_termica","v700"]].dropna(subset=["time"]).set_index("time")
-        st.line_chart(serie[["quota_termica"]].rename(columns={"quota_termica":"quota termica m"}))
-        st.line_chart(serie[["cape","v700"]].rename(
-            columns={"cape":"CAPE J/kg","v700":"vento 700 hPa km/h"}))
-        st.caption(f"Medie della fascia 11-16. Quota stazione {quota_staz:.0f} m. "
-                   f"Ultimo scaricamento: {quando}.")
-    except Exception as e:
-        st.warning("Non riesco a raggiungere Open-Meteo adesso.")
-        st.caption(f"({type(e).__name__}) Serve connessione internet.")
-
-    st.divider()
-    st.markdown("#### Carte sinottiche e mappe")
-    import streamlit.components.v1 as components
-    LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
-           "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
-    STR = {"Vento":"wind","Raffiche":"gust","CAPE":"cape","Base nubi":"cbase",
-           "Nuvole":"clouds","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
-           "Isoterma zero":"deg0","Inversione":"deg0"}
-    c1,c2 = st.columns(2)
-    strato = c1.selectbox("Strato", list(STR), key="w_ov")
-    liv = c2.selectbox("Quota", list(LIV), index=2, key="w_lv")
-    wla, wlo = PUNTI_METEO[luogo]
-    components.iframe(
-        f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}&detailLat={wla}"
-        f"&detailLon={wlo}&zoom=7&level={LIV[liv]}&overlay={STR[strato]}&product=ecmwf"
-        "&menu=&message=true&marker=true&calendar=now&pressure=true&type=map"
-        "&location=coordinates&detail=true&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1",
-        height=500)
-    st.markdown(
-        "**Carte vere:** "
-        "[Wetterzentrale GFS/ECMWF](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) · "
-        "[Meteociel ECMWF](https://www.meteociel.fr/modeles/ecmwf_cartes.php) · "
-        "[ARPA FVG OSMER](https://www.meteo.fvg.it/) · "
-        "[Radar Protezione Civile](https://radar.protezionecivile.it/) · "
-        f"[meteo-parapente](https://meteo-parapente.com/#/{wla},{wlo},11)")
-    st.divider()
-    st.markdown("#### Fonti locali del Friuli")
-    for n_, d_ in FONTI_METEO_FVG:
-        st.markdown(f"**{n_}** — {d_}")
-
-elif sezione == SEZ[6]:
-    st.markdown("### Siti volabili")
-    st.caption("Incrocia il vento a 700 hPa previsto con le regole di ogni decollo. "
-               "Verde si vola, giallo al limite, rosso no, grigio esposizione sconosciuta.")
-    ca, cb = st.columns([3,1])
-    luogo = ca.selectbox("Meteo di riferimento", list(PUNTI_METEO), key="sv_l")
-    att_f = cb.selectbox("Attività", list(ATTIVITA), key="sv_a",
-                         format_func=lambda a: eti(a))
-    la, lo = PUNTI_METEO[luogo]
-    try:
-        t, quota_staz, quando = analisi(la, lo)
-        gg = list(t["g"])
-        g = st.select_slider("Giorno", gg, value=gg[0],
-                             format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="svg")
-        r = t[t["g"]==g].iloc[0]
-        v, d = r["v700"], r["d700"]
-        k1,k2,k3,k4 = st.columns(4)
-        k1.metric("Vento 700 hPa", f"{v:.0f} km/h" if pd.notna(v) else "—")
-        k2.metric("Direzione", cardinale(d))
-        k3.metric("Quota termica",
-                  f"{r['quota_termica']:.0f} m" if pd.notna(r["quota_termica"]) else "—")
-        k4.metric("CAPE", f"{r['cape']:.0f}" if pd.notna(r["cape"]) else "—")
+        st.markdown(f"### {luogo} — {pd.Timestamp(g).strftime('%A %d/%m')}")
         i_ic,i_tx = M.giudica_instabilita(r["cape"], r["li"])
+        g_ic,g_tx = M.giudica_gradiente(r["lapse_850_700"])
         tb_ic,tb_tx = M.giudica_turbolenza(r["shear_925_700"], r["raff_ratio"], r["v700"])
-        inv_ic,inv_tx = M.descrivi_inversioni(r["inversioni"], quota_staz)
-        st.markdown(f"{i_ic} {i_tx} · {tb_ic} {tb_tx} · {inv_ic} {inv_tx}")
+        in_ic,in_tx = M.descrivi_inversioni(r["inversioni"], qstaz)
+        nu_ic,nu_tx = M.giudica_nuvole(r["nuv_bassa"], r["nuv_media"], r["nuv_alta"],
+                                       r["base_nubi"], r["quota_termica"], r["cumuli"])
+        for ic_, tx_, tit in [(i_ic,i_tx,"Instabilità"), (g_ic,g_tx,"Gradiente termico"),
+                              (in_ic,in_tx,"Inversioni"), (tb_ic,tb_tx,"Turbolenza"),
+                              (nu_ic,nu_tx,"Copertura nuvolosa")]:
+            card(f"{ic_} {tit}", tx_, CL.get(ic_,"n"))
 
-        B = solo(att_f)
-        B = B[B["tipo"].isin(["decollo","hike&fly"])]
+        st.markdown("#### Quote di lavoro")
+        q1,q2,q3,q4 = st.columns(4)
+        q1.metric("Tetto termiche",
+                  f"{r['quota_termica']:.0f}" if pd.notna(r["quota_termica"]) else "—")
+        q2.metric("Base cumuli",
+                  f"{r['base_nubi']:.0f}" if pd.notna(r["base_nubi"]) else "—")
+        q3.metric("Zero termico",
+                  f"{r['zero_term']:.0f}" if pd.notna(r["zero_term"]) else "—")
+        q4.metric("Stazione", f"{qstaz:.0f}")
+        st.caption("Metri sul livello del mare. Il tetto delle termiche è la cima dello "
+                   "strato rimescolato; la base dei cumuli viene dallo spread temperatura/rugiada.")
+
+        st.markdown("#### Copertura nuvolosa")
+        n1,n2,n3 = st.columns(3)
+        for col, et, vv, cc in [(n1,"Basse < 2 km",r["nuv_bassa"],"#cc2b2b"),
+                                (n2,"Medie 2-7 km",r["nuv_media"],"#e0a500"),
+                                (n3,"Alte > 7 km",r["nuv_alta"],"#3c91e6")]:
+            col.markdown(f"<div class='card'><h4>{vv:.0f}%</h4>"
+                         f"<div class='sub'>{et}</div>{barra(vv, cc)}</div>"
+                         if pd.notna(vv) else f"<div class='card'><h4>—</h4>"
+                         f"<div class='sub'>{et}</div></div>", unsafe_allow_html=True)
+        strati = r["strati_nubi"]
+        if strati:
+            st.markdown("**Strati individuati nel profilo**")
+            kv([(f"{s['z']:.0f} m ({int(s['hPa'])} hPa)",
+                 f"{s['cop']:.0f}% · UR {s['rh']:.0f}%" if pd.notna(s["rh"])
+                 else f"{s['cop']:.0f}%") for s in strati])
+        else:
+            st.caption("Nessuno strato significativo nel profilo verticale.")
+        if r["cumuli"]:
+            st.success(f"Cumuli attesi con base intorno a {r['base_nubi']:.0f} m: "
+                       "hai riferimenti visivi per trovare le termiche.")
+        elif pd.notna(r["base_nubi"]) and pd.notna(r["quota_termica"]) \
+             and r["base_nubi"] > r["quota_termica"] + 150:
+            st.info("Aria secca: termiche blu, nessun cumulo a segnalarle.")
+
+        with st.expander("Gradiente termico, strato per strato"):
+            for k, et in [("lapse_925_850","925→850 hPa, il basso"),
+                          ("lapse_850_700","850→700 hPa, il medio"),
+                          ("lapse_700_500","700→500 hPa, l'alto")]:
+                ic_, tx_ = M.giudica_gradiente(r[k])
+                v_ = f"{r[k]:.2f} °C/100 m" if pd.notna(r[k]) else "—"
+                card(f"{ic_} {et} — {v_}", tx_, CL.get(ic_,"n"))
+            st.caption("0,98 °C/100 m è l'adiabatica secca: più ci si avvicina, "
+                       "più le termiche sono forti. Sotto 0,45 l'aria è stabile.")
+
+        with st.expander("Profilo verticale e inversioni"):
+            prof = pd.DataFrame(r["profilo"]); prof = prof[prof["z"].notna()]
+            if len(prof):
+                kv([(f"{int(p.hPa)} hPa — {p.z:.0f} m",
+                     (f"{p.t:.1f}°" if pd.notna(p.t) else "—") + "  ·  "
+                     + (f"{p.v:.0f} km/h {cardinale(p.d)}" if pd.notna(p.v) else "—")
+                     + (f"  ·  UR {p.rh:.0f}%" if pd.notna(p.rh) else ""))
+                    for p in prof.itertuples()])
+                ch = prof[["z","t"]].dropna().set_index("z").sort_index()
+                if len(ch):
+                    ch.columns = ["temperatura °C"]; st.line_chart(ch, height=200)
+                    st.caption("Dove la linea torna a salire andando verso quote maggiori, "
+                               "c'è un'inversione.")
+            if r["inversioni"]:
+                for b2, c2_, dt in r["inversioni"]:
+                    st.markdown(f"• inversione da **{b2:.0f} m** a **{c2_:.0f} m**, "
+                                f"+{dt:.1f} °C")
+
+        with st.expander("Instabilità, vento e numeri"):
+            kv([("CAPE medio", f"{r['cape']:.0f} J/kg" if pd.notna(r["cape"]) else "—"),
+                ("CAPE massimo", f"{r['cape_max']:.0f} J/kg" if pd.notna(r["cape_max"]) else "—"),
+                ("Lifted index", f"{r['li']:.1f}" if pd.notna(r["li"]) else "—"),
+                ("CIN", f"{r['cin']:.0f} J/kg" if pd.notna(r["cin"]) else "—"),
+                ("Vento 700 hPa", f"{r['v700']:.0f} km/h {cardinale(r['d700'])}"
+                 if pd.notna(r["v700"]) else "—"),
+                ("Vento 850 hPa", f"{r['v850']:.0f} km/h {cardinale(r['d850'])}"
+                 if pd.notna(r["v850"]) else "—"),
+                ("Shear 925→700", f"{r['shear_925_700']:.0f} km/h"
+                 if pd.notna(r["shear_925_700"]) else "—"),
+                ("Raffiche al suolo", f"{r['raffiche']:.0f} km/h"
+                 if pd.notna(r["raffiche"]) else "—"),
+                ("Pioggia", f"{r['pioggia']:.0f}%" if pd.notna(r["pioggia"]) else "—")])
+
+        with st.expander("Andamento sui prossimi giorni"):
+            s_ = t[["time","quota_termica","base_nubi"]].dropna(subset=["time"]).set_index("time")
+            st.line_chart(s_.rename(columns={"quota_termica":"tetto termiche m",
+                                             "base_nubi":"base cumuli m"}), height=210)
+            s2 = t[["time","cape","v700"]].dropna(subset=["time"]).set_index("time")
+            st.line_chart(s2.rename(columns={"cape":"CAPE J/kg","v700":"vento 700 hPa km/h"}),
+                          height=210)
+        st.caption(f"Medie della fascia 11-16. Ultimo scaricamento: {quando}.")
+
+        # ---- mappa dei siti volabili
+        st.divider()
+        st.markdown("#### Siti volabili con questo meteo")
+        v, d = r["v700"], r["d700"]
+        att_f = st.segmented_control("Attività", list(ATTIVITA), default="cross",
+                                     format_func=lambda a: f"{ico(a)} {eti(a)}", key="sv_a") or "cross"
+        B = solo(att_f); B = B[B["tipo"].isin(["decollo","hike&fly"])]
         verdetti, motivi = {}, {}
         for _, x in B.iterrows():
             vk = VIN_FLAT.get(x["nome"])
             if vk:
-                ic, why = giudizio(v, d, vk)
-                verdetti[x["nome"]] = ic; motivi[x["nome"]] = (why, vk["nota"])
+                ic2, why = giudizio(v, d, vk)
+                verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"])
             else:
                 verdetti[x["nome"]] = "⚪"
-        n_ok = sum(1 for x in verdetti.values() if x == "\U0001F7E2")
-        n_gi = sum(1 for x in verdetti.values() if x == "\U0001F7E1")
-        n_no = sum(1 for x in verdetti.values() if x == "\U0001F534")
-        n_bo = sum(1 for x in verdetti.values() if x == "⚪")
-        s1,s2,s3,s4 = st.columns(4)
-        s1.metric("\U0001F7E2 Si vola", n_ok); s2.metric("\U0001F7E1 Al limite", n_gi)
-        s3.metric("\U0001F534 No", n_no); s4.metric("⚪ Da verificare", n_bo)
-        mappa(B, zoom=8, colora_per="verdetto", verdetti=verdetti)
-        st.divider()
-        for stato, titolo in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
-                              ("\U0001F534","Da escludere"),("⚪","Esposizione sconosciuta")]:
-            blocco = B[[verdetti.get(n)==stato for n in B["nome"]]]
-            if not len(blocco): continue
-            st.markdown(f"#### {stato} {titolo} — {len(blocco)}")
-            for _, x in blocco.sort_values("nome").iterrows():
-                why = motivi.get(x["nome"])
-                sub = f" — {why[0]}" if why else ""
-                with st.expander(f"{x['nome']}{sub}"):
-                    if why and why[1]: st.caption(why[1])
-                    scheda(x)
-        st.caption(f"Ultimo scaricamento: {quando}. Il semaforo guarda solo il gradiente in "
-                   "quota: brezza di valle, inversione locale e stato del terreno li vedi tu.")
+        cnt = {k: sum(1 for z in verdetti.values() if z==k)
+               for k in ["\U0001F7E2","\U0001F7E1","\U0001F534","⚪"]}
+        s1,s2_,s3,s4 = st.columns(4)
+        s1.metric("\U0001F7E2 Si vola", cnt["\U0001F7E2"])
+        s2_.metric("\U0001F7E1 Al limite", cnt["\U0001F7E1"])
+        s3.metric("\U0001F534 No", cnt["\U0001F534"])
+        s4.metric("⚪ Ignoto", cnt["⚪"])
+        mappa(B, zoom=7.8, verdetti=verdetti, h=430)
+        for stato, tit in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
+                           ("\U0001F534","Da escludere")]:
+            bl = B[[verdetti.get(n)==stato for n in B["nome"]]]
+            if not len(bl): continue
+            with st.expander(f"{stato} {tit} — {len(bl)}"):
+                for _, x in bl.sort_values("nome").iterrows():
+                    w = motivi.get(x["nome"])
+                    st.markdown(f"**{x['nome']}** — {w[0] if w else ''}")
+                    if w and w[1]: st.caption(w[1])
+        st.caption("Il semaforo guarda solo il gradiente a 700 hPa contro l'esposizione del "
+                   "decollo. Brezza di valle, inversione locale e stato del terreno li vedi tu.")
     except Exception as e:
         st.warning("Non riesco a raggiungere Open-Meteo adesso.")
         st.caption(f"({type(e).__name__}) Serve connessione internet.")
 
-else:
+    st.divider()
+    st.markdown("#### Carte e mappe")
+    import streamlit.components.v1 as components
+    LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
+           "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
+    STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
+           "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
+           "Isoterma zero":"deg0"}
+    cw1, cw2 = st.columns(2)
+    strato = cw1.selectbox("Strato", list(STR), key="w_ov")
+    livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
+    components.iframe(
+        f"https://embed.windy.com/embed2.html?lat={float(la)}&lon={float(lo)}"
+        f"&detailLat={float(la)}&detailLon={float(lo)}&zoom=7&level={LIV[livw]}"
+        f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
+        "&pressure=true&type=map&location=coordinates&detail=true"
+        "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
+    st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
+                "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
+                "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
+                "· [Radar Protezione Civile](https://radar.protezionecivile.it/) "
+                f"· [meteo-parapente](https://meteo-parapente.com/#/{float(la)},{float(lo)},11)")
+
+    st.divider()
+    st.markdown("#### Come funziona il tempo in Friuli")
+    st.caption("Dagli *Appunti di meteorologia per il Friuli Venezia Giulia*, ARPA FVG.")
+    for n_, d_ in METEO_FVG:
+        with st.expander(n_):
+            st.write(d_)
+    st.markdown("#### Fonti locali")
+    for n_, d_ in FONTI_METEO_FVG:
+        st.markdown(f"**{n_}** — {d_}")
+
+# ======================================================= SITI
+with T_SITI:
+    att = st.segmented_control("Attività", list(ATTIVITA), default="cross",
+                               format_func=lambda a: f"{ico(a)} {eti(a)}", key="att") or "cross"
+    B = solo(att)
+    st.markdown(f"### {ico(att)} {eti(att)}")
+    st.caption(DESCR_ATT[att])
+    dec = B[B["tipo"].isin(["decollo","hike&fly"])]
+    att_l = B[B["tipo"]=="atterraggio"]
+    altro = B[B["tipo"].isin(["zona","parcheggio","impianto"])]
+    c1,c2,c3 = st.columns(3)
+    c1.metric("Decolli", len(dec)); c2.metric("Atterraggi", len(att_l))
+    c3.metric("Con esposizione", int((dec["vento"].astype(str).str.len()>0).sum()))
+    mappa(B, zoom=8.1, ammesse={att}, h=430)
+    q = st.text_input("Cerca", key=f"q_{att}",
+                      placeholder="bora, cavi, vietato, navetta, biglietto…")
+    def filtra(b):
+        if not q or not len(b): return b
+        ql = q.lower()
+        return b[[any(ql in str(x[c]).lower() for c in CAMPI if c in b.columns)
+                  for _, x in b.iterrows()]]
+    dec, att_l, altro = filtra(dec), filtra(att_l), filtra(altro)
+
+    st.markdown(f"#### \U0001FA82 Decolli — {len(dec)}")
+    if not len(dec): st.info("Nessun decollo con questi filtri.")
+    for z in [z for z in ORDINE if z in set(dec["zona"])]:
+        st.markdown(f"*{z}*")
+        for _, r in dec[dec["zona"]==z].sort_values("nome").iterrows():
+            e_ = val(r,"vento") or "esposizione da verificare"
+            qt = f" · {int(r['quota'])} m" if val(r,"quota") else ""
+            with st.expander(f"{r['nome']} — \U0001F9ED {e_}{qt}"):
+                scheda_sito(r)
+    if len(att_l):
+        st.markdown(f"#### \U0001F3AF Atterraggi — {len(att_l)}")
+        for z in [z for z in ORDINE if z in set(att_l["zona"])]:
+            st.markdown(f"*{z}*")
+            for _, r in att_l[att_l["zona"]==z].sort_values("nome").iterrows():
+                with st.expander(r["nome"]):
+                    scheda_sito(r)
+    if len(altro):
+        st.markdown(f"#### ⚠️ Regole e servizi — {len(altro)}")
+        for _, r in altro.sort_values("nome").iterrows():
+            with st.expander(r["nome"]):
+                scheda_sito(r)
+
+# ======================================================= INFO
+with T_INFO:
     st.markdown("#### Le quattro attività")
     for a, cfg in ATTIVITA.items():
-        st.markdown(pallino(a) + f"**{cfg['ico']} {cfg['eti']}** — {len(solo(a))} punti",
-                    unsafe_allow_html=True)
+        b = solo(a)
+        card(f"{cfg['ico']} {cfg['eti']} — {len(b)} punti",
+             f"{len(b[b['tipo'].isin(['decollo','hike&fly'])])} decolli · "
+             f"{len(b[b['tipo']=='atterraggio'])} atterraggi<br>{DESCR_ATT[a]}")
     st.caption("Un punto può valere per più attività. Cross e hike & fly vengono "
-               "dalle cartelle del KML e dalle fonti dei club. I due paralpinismi sono una "
+               "dalle cartelle del KML e dalle fonti dei club. I due alpinismi sono una "
                "PROPOSTA basata sul carattere della cima: vanno confermati.")
     st.divider()
     st.markdown("#### Com'è messa ogni zona")
     for k, v in NOTE_AREA:
-        st.markdown(f"**{k}**"); st.write(v)
-    st.divider()
-    st.markdown("#### Fonti")
-    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte","Cosa dà","Area"]), hide_index=True)
+        with st.expander(k): st.write(v)
     st.divider()
     st.markdown("#### Gite curate")
     for g in GITE:
@@ -1203,12 +1378,13 @@ else:
                                        + ([g["ore"]] if g["ore"] else [])))
             st.write(g["testo"])
     st.markdown("#### Flytherapy — 25 gite bellunesi")
-    for nome_g, zona_g, slug in GITE_FLYTHERAPY:
-        st.markdown(f"• **{nome_g}** <small>{zona_g}</small> — "
-                    f"[scheda](https://www.flytherapy.it/portfolio_page/{slug}/)",
-                    unsafe_allow_html=True)
+    st.markdown("  ·  ".join(
+        f"[{n}](https://www.flytherapy.it/portfolio_page/{s}/)" for n, _, s in GITE_FLYTHERAPY))
+    st.divider()
+    st.markdown("#### Fonti")
+    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte","Cosa dà","Area"]), hide_index=True)
     st.divider()
     st.markdown("#### Affidabilità")
-    st.markdown("✅ **verificato** con fonte scritta: club, federazioni, guide locali")
-    st.markdown("\U0001F7E1 **solo KML** — nella mappa di Lorenzo Delbene ma senza note")
-    st.markdown("❓ **da verificare** prima di andarci")
+    card("✅ Verificato", "fonte scritta: club, federazioni, guide locali, ARPA FVG", "g")
+    card("\U0001F7E1 Solo KML", "nella mappa di Lorenzo Delbene ma senza note dell'autore", "y")
+    card("❓ Da verificare", "prima di andarci", "n")

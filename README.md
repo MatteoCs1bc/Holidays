@@ -26,13 +26,23 @@ impegnativa fra quelle selezionate.
 **I due paralpinismi sono una proposta**: classificati sul carattere della cima,
 non su relazioni di volo verificate. Vanno confermati.
 
-## Sezioni
+## Schede
 
-- **Mappa unica** — tutti i punti, filtrabili per attività
-- **Una sezione per attività** — mappa, conteggi, ricerca libera, schede
-- **Meteo** — instabilità, quota massima, inversioni, turbolenza, gradiente, profilo verticale, Windy, carte sinottiche, fonti e fenomeni del Friuli
-- **Siti volabili** — seconda mappa: ogni decollo colorato in base al meteo del giorno scelto
-- **Info** — stato della documentazione, fonti, gite
+Tre schede in alto.
+
+**🌤️ Meteo** — riferimento scelto fra zona, singolo decollo o coordinate libere.
+Sintesi del giorno a card colorate (instabilità, gradiente, inversioni, turbolenza,
+copertura nuvolosa), quote di lavoro, analisi delle nubi per fascia e per strato,
+gradiente strato per strato, profilo verticale, andamento sui giorni.
+In fondo: mappa dei siti volabili con quel meteo, Windy, carte sinottiche e il
+capitolo sul tempo in Friuli.
+
+**🪂 Siti di volo** — selettore di attività, mappa della sola attività scelta,
+poi **decolli e atterraggi separati**, con esposizione, difficoltà, dislivello e
+via di salita dove ci sono.
+
+**🔧 Info** — le quattro attività, stato della documentazione zona per zona,
+gite, fonti, legenda.
 
 ## Cosa calcola il motore meteo
 
@@ -40,13 +50,23 @@ Da Open-Meteo, medie della fascia 11-16:
 
 - **Instabilità** da CAPE e lifted index
 - **Quota massima di volo** = quota stazione + altezza dello strato limite
-- **Base dei cumuli** stimata dallo spread temperatura/rugiada
+- **Base dei cumuli** dallo spread temperatura/rugiada, con il confronto
+  base-contro-tetto per sapere se avrai cumuli o termiche blu
+- **Copertura nuvolosa** per fascia (basse, medie, alte) e **strati veri** individuati
+  nel profilo con quota, copertura e umidità relativa a sei livelli
 - **Inversioni** cercate nel profilo: dove la temperatura torna a salire con la quota
 - **Gradiente termico** su tre strati (925→850, 850→700, 700→500) in °C/100 m,
   confrontato con l'adiabatica secca di 0,98
 - **Turbolenza potenziale** da shear vettoriale 925→700, rapporto raffiche/vento medio
   e intensità a 700 hPa
-- **Profilo verticale** su sei livelli con quota, temperatura e vento
+- **Profilo verticale** su sei livelli con quota, temperatura, vento e umidità
+
+## Il tempo in Friuli
+
+Dieci capitoli tratti dagli *Appunti di meteorologia per il Friuli Venezia Giulia*
+(ARPA FVG, III edizione): stau e föhn, dove piove e perché, bora chiara e scura,
+le brezze di monte e di valle, la giornata tipo in una valle friulana, il temporale
+di calore pomeridiano, come si legge la sera per il giorno dopo, il vento trasversale.
 
 ## Avvio
 
