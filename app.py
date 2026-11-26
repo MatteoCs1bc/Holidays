@@ -1,2241 +1,1746 @@
 # -*- coding: utf-8 -*-
-import json, math, os
-import pandas as pd
-import streamlit as st
-import pydeck as pdk
+"""Dati curati nordest: Friuli (specialita'), Alpi Giulie, Slovenia, Alpago, Bellunese.
+Fonti: vololiberofriuli.it, paragliding-bovec.com, paradeltafeltre.it, flytherapy.it,
+KML Paragliding Sites di Lorenzo Delbene."""
 
-# ======================================================================
-# DATI
-# ======================================================================
-"""Dati curati: tutto quello che ha note vere (orientamento, pericoli, dislivelli).
-Fonti: pannelli SHV/FGA, paraglidingearth, lespiedssurterre.blog, paragliding.ch,
-FFCAM, camptocamp, refuges-ecrins, KML di Lorenzo Delbene."""
-
-# tipo: decollo | atterraggio | cima | rifugio | zona | parcheggio
-# aff:  V = verificato con fonte  |  K = solo nel KML  |  ? = da verificare
-
+# aff: V = verificato con fonte | K = solo nel KML | ? = da verificare
 CURATI = [
 
-# ============ 1. ALPSTEIN ============
-dict(zona="1 Alpstein", tipo="decollo", nome="Ebenalp NW (1.1)", lat=47.2844, lon=9.4110, quota=1600,
-     vento="NW-NNE", diff="Facile", aff="V", cat="Parapendio",
-     note="Decollo standard. Accesso con Ebenalpbahn da Wasserauen, sta sopra la stazione a monte. "
-          "Prato prima piatto poi piu inclinato. CON VENTO DA OVEST: pericolo di rotore. "
-          "Finestra pomeridiana 15-18, tira fino alle 19:30. Prima di mezzogiorno solo giornate rare.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Ebenalp NO (1.2)", lat=47.2849, lon=9.4117, quota=1600,
-     vento="N-NE", diff="Facile", aff="V", cat="Parapendio/Delta",
-     note="Direttamente sotto la stazione a monte. Delta e scuole hanno la precedenza.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Ebenalp SO (1.3)", lat=47.2838, lon=9.4136, quota=1600,
-     vento="NE-SE", diff="DIFFICILE", aff="V", cat="Delta (Parapendio)",
-     note="Salita al ristorante poi discesa a est. Decollo da scogliera per i delta sopra il muro. "
-          "PER PARAPENDIO: prato piccolo, MOLTO TURBOLENTO.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Hoher Kasten W (2.1)", lat=47.2859, lon=9.4864, quota=1730,
-     vento="W-NW", diff="Medio", aff="V", cat="Parapendio",
-     note="Dalla stazione a monte si scende al Kastensattel (~10 min, discesa ripida). "
-          "Nella parte nord le scuole hanno la precedenza.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Hoher Kasten Starkwind (2.2)", lat=47.2877, lon=9.4847, quota=1830,
-     vento="W-NW", diff="Medio", aff="V", cat="Parapendio",
-     note="Decollo di ripiego quando il vento nella sella e troppo forte. "
-          "Segui il sentiero fino alla 2a curva a sinistra.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Hoher Kasten Ost (2.3)", lat=47.2885, lon=9.4883, quota=1750,
-     vento="E", diff="Facile", aff="V", cat="Parapendio",
-     note="Dalla stazione a monte al lato opposto della sella. Per voli di planata nel Rheintal.",
-     fonte="SHV/FGA Fluggebiet Alpstein"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Kronberg Sud", lat=47.2758, lon=9.2811, quota=1640,
-     vento="S-SW", diff="Medio", aff="V", cat="Parapendio",
-     note="UNICO DECOLLO DELL'ALPSTEIN PER VENTO DA SUD/SUDOVEST. Stendere sotto il cavo dello skilift. "
-          "Appena staccato virata 90 gradi a destra per passare tra gli alberi. "
-          "Se non sei abbastanza alto, atterri dritto sulla selletta.",
-     fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Kronberg Ovest", lat=47.2760, lon=9.2805, quota=1640,
-     vento="W-WNW", diff="Facile", aff="V", cat="Parapendio",
-     note="Prato lungo e progressivamente piu ripido, ottimo. A destra strapiombo, a sinistra abeti. "
-          "Scuole prioritarie. NON BRUCIARE QUOTA davanti al decollo: l'atterraggio e lontano.",
-     fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Kronberg Nord", lat=47.2765, lon=9.2812, quota=1640,
-     vento="NW-NE", diff="Difficile", aff="V", cat="Parapendio",
-     note="Solo per chi parte sicuro e solo con vento sufficiente. Spazio giusto per stendere sul sentiero: "
-          "quando le funi sono in tensione sei gia sul pendio ripido.",
-     fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Kronberg Nord 2", lat=47.2768, lon=9.2840, quota=1620,
-     vento="NW-NE", diff="Medio", aff="V", cat="Parapendio",
-     note="5 minuti a piedi verso est dal Nord. Piu facile.",
-     fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="decollo", nome="Saentis", lat=47.2494, lon=9.3428, quota=2502,
-     vento="W-SW deboli", diff="ALPINISTICO", aff="V", cat="Parapendio",
-     note="NON SI PUO DECOLLARE ALLA STAZIONE DELLA FUNIVIA. Esposizione W-SW, molto sensibile al vento: "
-          "solo con W-SW DEBOLI. Terreno di decollo relativamente facile ma servono passo sicuro ed "
-          "esperienza alpina. ATTERRAGGIO A UNTERWASSER (Toggenburg): a nord c'e la zona di protezione "
-          "Falalp-Saentis con quota minima 3000 m. Stagione migliore: da fine estate alla prima neve di ottobre. "
-          "Con vento da sud esiste il Chalbersaentis: sentire prima un local del Toggenburg.",
-     fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="atterraggio", nome="A1 Wasserauen (parapendio)", lat=47.2835, lon=9.4277, quota=870,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Delta e parapendii atterrano su campi SEPARATI. SEMPRE CIRCUITO A SINISTRA (Linksvolte). "
-          "Non atterrare mai nell'erba alta. Cammina lungo il recinto con la vela raccolta. "
-          "Ripiega SOLO sull'area blu segnata. Non e campo scuola ne area picnic. Parcheggi alla stazione a valle.",
-     fonte="SHV Gleitschirmlandeplatz Wasserauen"),
-dict(zona="1 Alpstein", tipo="atterraggio", nome="A2 Wasserauen (delta)", lat=47.2874, lon=9.4288, quota=870,
-     vento="", diff="", aff="V", cat="Delta", note="Campo separato per i delta.",
-     fonte="SHV Gleitschirmlandeplatz Wasserauen"),
-dict(zona="1 Alpstein", tipo="atterraggio", nome="B Bruelisau (parapendio)", lat=47.2975, lon=9.4570, quota=920,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Subito accanto a quello dei delta. Osserva attentamente lo spazio aereo. Mai atterrare nell'erba alta. "
-          "Ripiega solo sull'area blu.",
-     fonte="SHV Gleitschirmlandeplatz Bruelisau"),
-dict(zona="1 Alpstein", tipo="zona", nome="ZONA VIETATA Heliport Trogen (LSXT)", lat=47.4067, lon=9.4611, quota=811,
-     vento="", diff="", aff="V", cat="Spazio aereo",
-     note="DIVIETO DI VOLO SOTTO I 1200 m nella zona rossa. Nella zona di 2.5 km si puo volare con "
-          "cautela aumentata. Attivo TUTTI I GIORNI 07:00-19:00, chiuso domenica e festivi. "
-          "Fuori orario tutto lo spazio aereo e libero. Liberazione temporanea richiedibile per telefono: "
-          "+41 71 343 71 71. Consigliato volare con FLARM. I piloti in difetto vengono segnalati alle autorita.",
-     fonte="SHV Sonderregelung LSXT"),
-dict(zona="1 Alpstein", tipo="zona", nome="Zone a quota minima Alpstein", lat=47.2494, lon=9.3428, quota=0,
-     vento="", diff="", aff="V", cat="Spazio aereo",
-     note="Le zone rosse della carta FGA si sorvolano solo sopra la quota indicata: "
-          "min 3000 m sul massiccio del Saentis, min 2000 m in piu settori (Marwees, Hundstein, Sammtis), "
-          "min 1800 m a ovest, min 1500 m nella zona Ebenalp/Schaefler. "
-          "CAVI E TELEFERICHE: uno poco visibile dalla cima dello Schaefler verso nord (Lehmental): "
-          "chi vola sotto la cresta sulla linea Saentis-Ebenalp deve passarci SOPRA o intorno, mai sotto. "
-          "Altro cavo elettrico sotto il decollo Ebenalp dopo il salto di pendio. "
-          "Vietato volare sotto i cavi della funivia.",
-     fonte="SHV/FGA + fga.ch"),
-dict(zona="1 Alpstein", tipo="cima", nome="Saentis via Rotsteinpass e Lisengrat", lat=47.2494, lon=9.3428, quota=2502,
-     disl=1634, partenza="Wasserauen 868 m", diff="Cresta esposta e attrezzata, 5 h", aff="V", cat="Alpinismo",
-     note="Via Seealpsee, Meglisalp, Rotsteinpass, poi il Lisengrat. La traversata classica dell'Alpstein. "
-          "Dalla Schwaegalp (1352 m) sono solo 1150 m e 3h30.", fonte="ricerca web"),
-dict(zona="1 Alpstein", tipo="cima", nome="Ebenalp a piedi", lat=47.2844, lon=9.4110, quota=1600,
-     disl=770, partenza="Wasserauen 868 m", diff="Sentiero", aff="V", cat="Cross",
-     note="Via Seealpsee. Rientra nel budget cross.", fonte="ricerca web"),
-dict(zona="1 Alpstein", tipo="cima", nome="Kronberg a piedi", lat=47.2758, lon=9.2811, quota=1640,
-     disl=770, partenza="Jakobsbad 870 m", diff="Sentiero", aff="V", cat="Cross",
-     note="4 decolli in cima: qualunque vento trovi, uno funziona. Atterraggio alla stazione a valle, "
-          "dietro il parco avventura: recupero a piedi.", fonte="fga.ch"),
-dict(zona="1 Alpstein", tipo="cima", nome="Hoher Kasten a piedi", lat=47.2859, lon=9.4864, quota=1794,
-     disl=810, partenza="Bruelisau 920 m", diff="Sentiero", aff="V", cat="Cross",
-     note="3 decolli (W, Starkwind, Est).", fonte="ricerca web"),
-dict(zona="1 Alpstein", tipo="cima", nome="Kreuzberge (arrampicata)", lat=47.2200, lon=9.4000, quota=2065,
-     disl=None, partenza="Bruelisau / Saemtisersee", diff="Placche e spigoli, calcare", aff="?", cat="Arrampicata",
-     note="Il gruppo di arrampicata piu frequentato dell'Alpstein. Nessun decollo documentato: "
-          "salita e discesa a piedi.", fonte="conoscenza generale, da verificare"),
-dict(zona="1 Alpstein", tipo="cima", nome="Altmann", lat=47.2394, lon=9.3697, quota=2435,
-     disl=None, partenza="Meglisalp / Saemtisersee", diff="Via normale con passaggi di III", aff="?", cat="Alpinismo",
-     note="Seconda cima del massiccio. Nessun decollo documentato.", fonte="conoscenza generale, da verificare"),
-
-# ============ 2. ZURIGO / SVIZZERA CENTRALE ============
-dict(zona="2 Zurigo", tipo="decollo", nome="Rigi Staffelhoehe", lat=47.0570, lon=8.4750, quota=1550,
-     vento="W-NW", diff="Piccolo", aff="V", cat="Parapendio",
-     note="3 minuti a piedi dalla stazione verso il Chaenzeli. FUNZIONA DALLE 14 FINO A SERA, "
-          "buono per i voli lunghi serali. Esiste anche una variante sud verso Weggis, non sempre "
-          "praticabile secondo l'erba. Atterraggi: Kuessnacht, Arth, Goldau, Weggis. "
-          "Salita da Weggis/Vitznau (435 m) = 1115 m.", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Rigi Kulm", lat=47.0570, lon=8.4853, quota=1798,
-     vento="S/SE-SW", diff="", aff="V", cat="Parapendio",
-     note="Considerato meno affidabile di Staffelhoehe. Salita da Weggis = 1360 m.", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Rigi Scheidegg", lat=47.0430, lon=8.5250, quota=1665,
-     vento="NE", diff="", aff="V", cat="Parapendio",
-     note="IL DECOLLO DA BISE. Utile quando l'alta si riforma sul Mittelland. Meno affidabile degli altri.",
-     fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Rigi Rotstoeckli", lat=47.0600, lon=8.4700, quota=1600,
-     vento="N-NW", diff="", aff="V", cat="Parapendio", note="", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Rotenflue", lat=47.0330, lon=8.6800, quota=1571,
-     vento="N e S (no W)", diff="", aff="V", cat="Parapendio",
-     note="Sopra Svitto, funivia riaperta. Due decolli, nord e sud. Non ideale con vento da ovest. "
-          "ATTERRAGGIO RICKENBACH: accesso e piazzale di ripiegatura sul LATO EST, il vecchio accesso non "
-          "si usa piu, i campi a nord e sud non si calpestano. Sotto l'aerovia A9: QUOTA MASSIMA 2750 m.",
-     fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Hoch Ybrig - Sternen", lat=47.0180, lon=8.7800, quota=1820,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Atterraggio Weglosen 1035 m, ~800 m di dislivello. Start e landing accanto agli impianti. "
-          "Funivia da Weglosen a Seebli 1460 m, poi seggiovia.", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Niederbauen", lat=46.9450, lon=8.5200, quota=1575,
-     vento="", diff="Facile", aff="V", cat="Parapendio",
-     note="Sopra Emmetten. Decollo grande e progressivamente piu ripido, 850 m. Funivia ogni 30 minuti "
-          "da Emmetten (8 min). Atterraggio leggermente inclinato, buono se il vento da ovest non e forte. "
-          "Buone condizioni anche nel tardo pomeriggio. Il piu facile del gruppo.", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Schrina / Walenstadtberg", lat=47.1200, lon=9.3200, quota=1290,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Ai piedi delle Churfirsten sopra il Walensee. NIENTE IMPIANTO: si sale con servizio taxi. "
-          "Si soara spesso sulle pareti e poi si fa cross lungo la Seeztal.", fonte="ricerca web"),
-dict(zona="2 Zurigo", tipo="decollo", nome="Alp Scheidegg", lat=47.2700, lon=8.9200, quota=1200,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Sopra Wald nel Toesstal, 40 min da Zurigo. Buono per soaring.", fonte="ricerca web"),
-# cime Svizzera centrale (touch and go)
-dict(zona="2 Zurigo", tipo="cima", nome="Chaiserstuel", lat=46.8300, lon=8.4000, quota=2400, disl=690,
-     partenza="", diff="T2, ~2 h", aff="V", cat="Cross",
-     note="Miglior rapporto quota/fatica del gruppo.", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Niederbauen-Kulm", lat=46.9450, lon=8.5200, quota=1920, disl=400,
-     partenza="", diff="T2, ~1h30", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Hagelstock", lat=46.9000, lon=8.5500, quota=2182, disl=460,
-     partenza="", diff="T2, ~1h30", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Arvigrat", lat=46.8600, lon=8.3200, quota=2013, disl=600,
-     partenza="", diff="T2, ~2 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Buochserhorn", lat=46.9500, lon=8.4200, quota=1800, disl=650,
-     partenza="", diff="T2, ~2 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Halgeren", lat=46.9000, lon=8.4500, quota=1950, disl=800,
-     partenza="", diff="T2, ~2h30", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Bockmattli", lat=47.0700, lon=8.9200, quota=1932, disl=1000,
-     partenza="", diff="T2, ~3 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Rossberg-Gnipen", lat=47.0700, lon=8.5600, quota=1570, disl=1020,
-     partenza="", diff="T2, ~3 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Waengihorn", lat=46.9500, lon=8.8000, quota=2150, disl=1060,
-     partenza="", diff="T3, ~3 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Forstberg", lat=46.9900, lon=8.8500, quota=2215, disl=1189,
-     partenza="", diff="T3, ~3 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="2 Zurigo", tipo="cima", nome="Fluebrig-Diethelm", lat=47.0200, lon=8.8700, quota=2090, disl=1160,
-     partenza="", diff="T2-T5, ~3h30", aff="V", cat="Alpinismo",
-     note="Arriva a T5: alpinismo vero.", fonte="paragliding.ch"),
-
-# ============ 3. OBERLAND / EIGER ============
-dict(zona="3 Oberland", tipo="decollo", nome="Schynige Platte", lat=46.6560, lon=7.9060, quota=1967,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Decollo parapendio A EST DELLA STAZIONE A MONTE (quello delta e vicino all'antenna). Piatto, "
-          "spesso aria discendente all'inizio della termica. FINESTRA: DA MEZZOGIORNO AL TRAMONTO. "
-          "NO-GO: con vento di valle a Lehn il decollo e sottovento, non si parte; con NW e turbolento; "
-          "con bise forte di nuovo sottovento, non si parte. "
-          "Ferrovia a cremagliera da Wilderswil (7 km, 1420 m, 40 min), maggio-ottobre. L'ultima corsa in "
-          "salita prende solo parapendisti. ATTENZIONE agli spazi aerei della base REGA di Wilderswil.",
-     fonte="SHV Infotafel / deltaclub-interlaken"),
-dict(zona="3 Oberland", tipo="decollo", nome="Breitlauenen", lat=46.6480, lon=7.8940, quota=1542,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Stazione intermedia della ferrovia della Schynige Platte. Decollo mosso, stessa finestra "
-          "pomeridiana. ~958 m a piedi da Wilderswil.", fonte="ricerca web"),
-dict(zona="3 Oberland", tipo="decollo", nome="Grindelwald-First", lat=46.6650, lon=8.0540, quota=2150,
-     vento="S", diff="", aff="V", cat="Parapendio",
-     note="Esposto a sud, cabinovia da Grindelwald in 25 min. Vista su Grosse Scheidegg, Wetterhorn, "
-          "Schreckhorn e parete nord dell'Eiger. Si vedono spesso le aquile. "
-          "Il ripiego quando la Schynige Platte non va per vento.", fonte="ricerca web"),
-dict(zona="3 Oberland", tipo="decollo", nome="Beatenberg-Amisbuehl", lat=46.6900, lon=7.7700, quota=1350,
-     vento="", diff="Facile", aff="V", cat="Parapendio",
-     note="Bus da Interlaken ~20 min. Il piu semplice della zona. Si fa akro sopra il Thunersee "
-          "da qui e da Luegibrueggli.", fonte="ricerca web"),
-dict(zona="3 Oberland", tipo="decollo", nome="Morgenberghorn", lat=46.6560, lon=7.7500, quota=2190,
-     vento="S, SW, W", diff="", aff="V", cat="Parapendio",
-     note="Partenza MUELENEN, 1498 m di salita, atterraggio a INTERLAKEN, 1622 m di volo. "
-          "Via alternativa da AESCHIRIED (fermata postale Schulhaus) lungo la cresta: alla stazione a monte "
-          "dello skilift superiore c'e gia il STARTPLATZ SPITZ, utile per chiudere prima se in alto non va.",
-     fonte="hikeandfly.com / baern-gliders.ch"),
-dict(zona="3 Oberland", tipo="atterraggio", nome="Lehn (Interlaken)", lat=46.6830, lon=7.8550, quota=565,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Il centro dell'attivita parapendio della zona. NUOVA REGOLA: virata a destra con vento di valle.",
-     fonte="SHV Infotafel"),
-dict(zona="3 Oberland", tipo="atterraggio", nome="Hoehematte (Interlaken)", lat=46.6860, lon=7.8620, quota=568,
-     vento="", diff="", aff="V", cat="Parapendio", note="In mezzo a Interlaken.", fonte="SHV Infotafel"),
-dict(zona="3 Oberland", tipo="cima", nome="Faulhorn", lat=46.6710, lon=8.0250, quota=2680, disl=516,
-     partenza="First (cabinovia)", diff="T2, ~2 h", aff="V", cat="Cross",
-     note="I 516 m sono da First. Da Grindelwald per il Bachalpsee sono 1660 m. "
-          "Traversata integrale Wilderswil-Schynige Platte-Faulhorn: 2330 m su 25 km, ~10 h.",
-     fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Hoeji Sulegg", lat=46.6100, lon=7.8100, quota=2413, disl=900,
-     partenza="Saxeten / Sulwald", diff="T2, ~3 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Elsighorn", lat=46.5100, lon=7.6300, quota=2341, disl=545,
-     partenza="", diff="T2, ~1h30", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Bluemlisalphuette", lat=46.4950, lon=7.7500, quota=2834, disl=1420,
-     partenza="", diff="T2, ~4h30", aff="V", cat="Alpinismo", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Hohgant", lat=46.7800, lon=7.8900, quota=2146, disl=1190,
-     partenza="", diff="T2/T3, ~4 h", aff="V", cat="Cross", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Glecksteinhuette", lat=46.6300, lon=8.1100, quota=2316, disl=760,
-     partenza="Grindelwald", diff="T3, ~2h30", aff="V", cat="Alpinismo", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Bunderspitz", lat=46.4700, lon=7.6200, quota=2546, disl=823,
-     partenza="", diff="T3, ~2h30", aff="V", cat="Alpinismo", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Albristhorn", lat=46.4400, lon=7.5300, quota=2762, disl=810,
-     partenza="", diff="T3, ~3 h", aff="V", cat="Alpinismo", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Wildstrubel", lat=46.4100, lon=7.5300, quota=3244, disl=1195,
-     partenza="", diff="T3, ~4 h", aff="V", cat="Alpinismo", note="", fonte="paragliding.ch"),
-dict(zona="3 Oberland", tipo="cima", nome="Schynige Platte a piedi", lat=46.6560, lon=7.9060, quota=1967,
-     disl=1383, partenza="Wilderswil 584 m", diff="4-4h30", aff="V", cat="Cross",
-     note="Poco sopra la soglia cross. Sali in mattinata, decolli nella finestra pomeridiana, "
-          "atterri a Lehn: 3 km dal parcheggio di Wilderswil, treno e bus ogni pochi minuti.",
-     fonte="ricerca web"),
-dict(zona="3 Oberland", tipo="cima", nome="Eiger (nota)", lat=46.5775, lon=8.0053, quota=3967,
-     disl=None, partenza="Grindelwald", diff="Mittellegi D / pilastro ovest AD", aff="V", cat="Alpinismo",
-     note="La Mittellegi vuole la notte alla Mittellegihuette e una giornata piena. Il pilastro ovest e "
-          "lungo e serio. Nessuna delle due sta in una giornata singola dal fondovalle. "
-          "Anche Moench e Jungfrau hanno lo stesso vincolo di rifugio.", fonte="ricerca web"),
-
-# ============ 4. ANNECY ============
-dict(zona="4 Annecy", tipo="decollo", nome="Planfait", lat=45.8532, lon=6.2230, quota=1250,
-     vento="W-NW", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato sintetico molto bello, quasi sempre affollato. "
-          "LORENZO: e' il decollo a meta' lago, piu' BASSO della Forclaz. "
-          "SI ARRIVA IN DECOLLO IN AUTO e si parcheggia bene. Alcuni giorni della settimana ci sono "
-          "anche bus gratuiti che partono dall'atterraggio. "
-          "Per partire in XC meglio la Forclaz.", fonte="KML Delbene + Lorenzo"),
-dict(zona="4 Annecy", tipo="decollo", nome="La Forclaz", lat=45.8142, lon=6.2468, quota=1240,
-     vento="SW-W-NW", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Stesse caratteristiche di Planfait, quasi sempre affollato. "
-          "Salita da Doussard (490 m) = ~750 m. "
-          "LORENZO: e' a SUD e piu' ALTO di Planfait. PER PARTIRE IN XC VAI QUI. "
-          "MA non ci arrivi in auto: la strada e' privata, devi parcheggiare un bel pezzo prima. "
-          "In compenso dall'atterraggio a sud del lago partono navette organizzate benissimo.",
-     fonte="KML Delbene + Lorenzo"),
-dict(zona="4 Annecy", tipo="hike&fly", nome="Col des Fretes", lat=45.8564, lon=6.2466, quota=1584,
-     vento="S-SW / W-SW", diff="4/5", aff="V", cat="Hike & Fly",
-     note="Pendio erboso grande e bello. Dall'atterraggio ufficiale di Perroix (550 m) sono D+ 1030. "
-          "La prima parte della salita e quella che porta al decollo di Planfait. "
-          "LORENZO: L'HIKE & FLY BELLO DELLA ZONA. Il punto di partenza e' il PARCHEGGIO ALTO DEL "
-          "DECOLLO PLANFAIT (45.8526, 6.2237): puoi arrivare li' con navetta o bus e camminare solo "
-          "l'ultimo pezzo, oppure farla tutta a piedi da sotto. Da li' a piedi si raggiungono "
-          "comunque tutti i decolli della zona.",
-     fonte="KML Delbene + lespiedssurterre + Lorenzo"),
-dict(zona="4 Annecy", tipo="decollo", nome="Sambuy", lat=45.7500, lon=6.2800, quota=2100,
-     vento="N / NE-E", diff="", aff="V", cat="Parapendio",
-     note="Pendio erboso. Dall'atterraggio del Val de Tamie (780 m): D+ 1420 per la cima 2198 m, "
-          "1300 per il decollo al colle verso la Petite Sambuy.", fonte="KML Delbene + lespiedssurterre"),
-dict(zona="4 Annecy", tipo="atterraggio", nome="Doussard", lat=45.7880, lon=6.2200, quota=490,
-     vento="", diff="5/5", aff="V", cat="Parapendio",
-     note="Grande e bello. In primavera ed estate attenzione alle bolle nelle ore centrali. "
-          "NAVETTA MOLTO BEN ORGANIZZATA: punto d'attesa dove il parcheggio incontra l'atterraggio, "
-          "massimo 8 persone per corsa, la fila si fa con gli zaini.", fonte="KML Delbene"),
-dict(zona="4 Annecy", tipo="atterraggio", nome="Planfait (atterraggio)", lat=45.8486, lon=6.2138, quota=460,
-     vento="", diff="5/5", aff="V", cat="Parapendio",
-     note="Stesse note sulle bolle. Navette solo bus urbani nei weekend estivi, gratuiti. "
-          "MOLTO BUONO PER L'AUTOSTOP.", fonte="KML Delbene"),
-dict(zona="4 Annecy", tipo="cima", nome="La Tournette / Pointe de la Bajulaz", lat=45.8180, lon=6.2650, quota=2250,
-     disl=1600, partenza="Tornante dopo Verel, tra Perroix e col de la Forclaz",
-     diff="", aff="V", cat="Alpinismo",
-     note="Decollo nei pendii della Bajulaz, SUD/SUD-OVEST. Atterraggio a RIANT DESSUS (plateau sotto la "
-          "Talamarche). Concatenabile con la Pointe de Talamarche (+250 m, decollo sud, atterraggio nel "
-          "prato vicino a Verel).", fonte="lespiedssurterre.blog"),
-dict(zona="4 Annecy", tipo="cima", nome="Pointe des Fretes", lat=45.8250, lon=6.2450, quota=2019,
-     disl=1000, partenza="Montmin 1020 m", diff="", aff="V", cat="Cross",
-     note="Decollo OVEST, possibile anche est risalendo dall'altro versante. Atterraggio vicino al "
-          "cimitero di Montmin. In primavera serve la piccozza per i passaggi su neve.",
-     fonte="lespiedssurterre.blog"),
-dict(zona="4 Annecy", tipo="cima", nome="Tardevant", lat=45.9100, lon=6.4300, quota=2501,
-     disl=1090, partenza="Les Confins", diff="", aff="V", cat="Alpinismo",
-     note="Decollo dall'Ambrevetta, OVEST.", fonte="lespiedssurterre.blog"),
-dict(zona="4 Annecy", tipo="cima", nome="Croisse Baulet", lat=45.8800, lon=6.5100, quota=2236,
-     disl=1000, partenza="Le Plan, dopo La Giettaz", diff="", aff="V", cat="Cross",
-     note="Decollo EST o OVEST.", fonte="lespiedssurterre.blog"),
-dict(zona="4 Annecy", tipo="cima", nome="Mont Colombier", lat=45.6500, lon=6.0600, quota=2045,
-     disl=1125, partenza="La Bottiere 920 m", diff="", aff="V", cat="Cross",
-     note="Decollo OVEST 50 m sotto la cima. ATTENZIONE a una linea elettrica all'atterraggio.",
-     fonte="lespiedssurterre.blog"),
-dict(zona="4 Annecy", tipo="cima", nome="Mont Trelod", lat=45.6900, lon=6.1300, quota=2181,
-     disl=None, partenza="", diff="", aff="K", cat="Cross", note="", fonte="parapenterando.free.fr"),
-
-# ============ 5. CHARTREUSE / SAINT-HILAIRE ============
-dict(zona="5 Saint-Hilaire", tipo="decollo", nome="Saint-Hilaire NORD", lat=45.3069, lon=5.88806, quota=906,
-     vento="tutte", diff="", aff="V", cat="Parapendio",
-     note="Grande tappeto comodo, ma PUO TROVARSI SOTTOVENTO alla termica che soffia davanti. "
-          "REGOLA D'ARIA: NON SI SALE SOPRA I 3000 m, per la vicinanza dell'aeroporto di Lione. "
-          "Attenzione al vento da sud. In primavera condizioni dure vicino alla falesia. "
-          "Il 19-20 settembre e occupato dall'Icarnaval.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="decollo", nome="Saint-Hilaire SUD", lat=45.3104, lon=5.89052, quota=953,
-     vento="tutte", diff="", aff="V", cat="Parapendio",
-     note="In erba, ci trovi piu spesso brezza di fronte. L'USCITA PUO ESSERE MOSSA, resta all'erta. "
-          "Accesso: NON svoltare dopo la caserma dei pompieri, parcheggia 100 m piu avanti a destra, "
-          "poi 5 minuti di pista, decollo sulla destra.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="decollo", nome="Saint-Hilaire EST (il segreto)", lat=45.3084, lon=5.88795, quota=935,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="PICCOLO DECOLLO NASCOSTO E PULITO per quando il tappeto e troppo affollato. Attenzione alle "
-          "vele che arrivano di lato. LA TUA CARTA PER VOLARE DURANTE LA COUPE ICARE.",
-     fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="atterraggio", nome="Lumbin", lat=45.302, lon=5.90612, quota=229,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="All'ingresso del paese venendo da Grenoble. Top landing con vento o brezza da nord vicino alla "
-          "strada principale, al syndicat d'initiative, vicino al parcheggio grande. "
-          "PARCHEGGIO UFFICIALE: non lasciare oggetti in vista in auto. "
-          "Da 906 a 229 sono solo 680 m: il sito vive di termica, non di quota.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="atterraggio", nome="Top landing ufficio turismo", lat=45.3107, lon=5.88863, quota=963,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Sul plateau. Utile se hai parcheggiato in decollo.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="atterraggio", nome="Saint-Nazaire", lat=45.2653, lon=5.84198, quota=446,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Utile se lasci l'auto li e sali in autostop. DELICATO: area autorizzata stretta, di traverso "
-          "alla brezza, alberi intorno.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="parcheggio", nome="Parcheggio decollo St-Hilaire", lat=45.3076, lon=5.8855, quota=940,
-     vento="", diff="", aff="V", cat="",
-     note="Consiglio della scheda: lasciare l'auto all'ATTERRAGGIO e salire con la funicolare. "
-          "Durante la Coupe Icare navette gratuite Saint-Hilaire-Lumbin.", fonte="paraglidingearth"),
-dict(zona="5 Saint-Hilaire", tipo="cima", nome="Dent de Crolles", lat=45.3010, lon=5.8570, quota=2062,
-     disl=650, partenza="Col du Coq (la scorciatoia)", diff="", aff="V", cat="Cross",
-     note="Decollo nel pendio sommitale, SUD oppure NORD. Attenzione a un effetto di COMPRESSIONE sulla cima. "
-          "Altre vie: da Saint-Hilaire 1100 m, da Saint-Nazaire-les-Eymes (460 m) 1700 m, da Lumbin 1800 m. "
-          "E' la linea di cross classica del sito: dopo il Manival si sale alla Dent de Crolles e si segue "
-          "la grande cresta a nord fino al Granier.", fonte="lespiedssurterre + infos-parapente"),
-dict(zona="5 Saint-Hilaire", tipo="cima", nome="Chamechaude", lat=45.2880, lon=5.7700, quota=2082,
-     disl=1050, partenza="Le Sappey-en-Chartreuse 1050 m", diff="", aff="V", cat="Cross",
-     note="Decollo pendio sommitale OVEST. Atterraggio nel prato vicino al cimitero o al Bruchet. "
-          "IDEALE IN VOLO SERALE, con soaring.", fonte="lespiedssurterre.blog"),
-dict(zona="5 Saint-Hilaire", tipo="cima", nome="Grand Som", lat=45.3600, lon=5.8000, quota=2026,
-     disl=900, partenza="Col du Cucheron 1139 m", diff="", aff="V", cat="Cross",
-     note="Decollo NE/E/SE, atterraggio ufficiale di Saint-Hugues. Si puo atterrare sotto il colle ma e "
-          "delicato: poco spazio e in pendenza. Concatenabile con il Charmant Som.",
-     fonte="lespiedssurterre.blog"),
-dict(zona="5 Saint-Hilaire", tipo="cima", nome="Charmant Som", lat=45.3080, lon=5.7500, quota=1867,
-     disl=1000, partenza="Saint-Hugues 880 m", diff="", aff="V", cat="Cross",
-     note="Decollo nel pendio PRIMA DELLA CROCE, EST.", fonte="lespiedssurterre.blog"),
-dict(zona="5 Saint-Hilaire", tipo="cima", nome="Saint-Eynard (linea di cross)", lat=45.2400, lon=5.7800, quota=1359,
-     disl=None, partenza="", diff="", aff="V", cat="Cross",
-     note="LINEA DI CROSS CLASSICA: dal decollo verso sud lungo la falesia, attraversare il Manival, "
-          "lavorare la prima termica, salire alla cresta del Saint-Eynard, seguirla a sud fino a un "
-          "vecchio forte, ritorno per la stessa via.", fonte="paraglidingearth"),
-
-# ============ 6. ECRINS / BRIANCON ============
-dict(zona="6 Ecrins", tipo="cima", nome="Dome de Neige des Ecrins", lat=44.9200, lon=6.3500, quota=4015,
-     disl=2141, partenza="Pre de Madame Carle 1874 m", diff="Ghiacciaio, ~11 km", aff="V", cat="Alpinismo",
-     note="TRE OPZIONI DI VOLO: verso La Berarde per il col des Ecrins; sorvolo del Glacier Blanc; "
-          "scavalco del col de Barre Noire per uscire sul Glacier Noir. "
-          "IL DECOLLO SI FA SOTTO LA CREPACCIA TERMINALE. Attenzione alla NEVE TROPPO SCALDATA in cui "
-          "sprofondi mentre corri: si parte presto. Chi l'ha fatto: in cima verso le 8, vento nullo, "
-          "spazio giusto per due vele; variante Glacier Noir per non farsi schiacciare dal catabatico in "
-          "fondo al Glacier Blanc; parcheggio in meno di 30 minuti. "
-          "La Barre des Ecrins (4102 m) sono 2230 m. A fine settembre il ghiacciaio e scoperto e "
-          "crepacciato, la crepaccia sotto la Barre e la crux.", fonte="FFCAM + relazioni"),
-dict(zona="6 Ecrins", tipo="cima", nome="Roche Faurio", lat=44.9350, lon=6.3800, quota=3730,
-     disl=1850, partenza="Pre de Madame Carle 1874 m", diff="Misto neve e roccia, senza grandi difficolta",
-     aff="V", cat="Alpinismo",
-     note="DECOLLO EST/SUD-EST, funziona bene. Due piazzali: uno a OVEST poco pendente con spazio per "
-          "correre, uno a SUD sopra la fine del ghiacciaio, grande e piatto. "
-          "PORTARE PICCHETTI da piantare nella neve perche la vela non scivoli. "
-          "Volo sopra il Glacier Blanc con Barre e Dome di fronte, fino al Pre de Madame Carle.",
-     fonte="FFCAM + relazioni"),
-dict(zona="6 Ecrins", tipo="cima", nome="Mont Pelvoux", lat=44.9200, lon=6.4100, quota=3946,
-     disl=2435, partenza="Ailefroide 1512 m (parcheggio dietro il campeggio)", diff="", aff="V", cat="Alpinismo",
-     note="Decollo dalle pendici sommitali, TUTTE LE ORIENTAZIONI TRANNE OVEST (scheda 'vue d'ensemble des "
-          "decos' su camptocamp). Chi l'ha fatto non e riuscito a partire dalla cima e ha decollato in "
-          "discesa sotto il COULOIR COOLIDGE. Atterraggi: Vallouise, Ailefroide, Pre de Madame Carle - "
-          "ha scelto Ailefroide ma i local dicono che e spesso caotico. Notte al refuge du Pelvoux. "
-          "35 m oltre la tua soglia dei 2400.", fonte="lespiedssurterre + camptocamp"),
-dict(zona="6 Ecrins", tipo="cima", nome="Pic du Glacier d'Arsine", lat=44.9800, lon=6.3900, quota=3364,
-     disl=1500, partenza="Pre de Madame Carle 1874 m", diff="", aff="V", cat="Alpinismo",
-     note="Decollo su ripiano sotto la cima, OVEST e SUD. Complementare alla Roche Faurio (est/sud-est): "
-          "con qualsiasi vento uno dei due funziona. Possibile atterrare sul Glacier Blanc per concatenare.",
-     fonte="lespiedssurterre.blog"),
-dict(zona="6 Ecrins", tipo="cima", nome="Pointe des Cerces", lat=45.0800, lon=6.4700, quota=3098,
-     disl=1150, partenza="Plan Lachat 1960 m (sulla sinistra salendo al Galibier)", diff="", aff="V", cat="Cross",
-     note="Decollo su ripiano sotto la cima seguendo la cresta verso ovest, NORD/NORD-OVEST. "
-          "Atterraggio a Plan Lachat, grandi spazi. Rientra nel budget cross.", fonte="lespiedssurterre.blog"),
-dict(zona="6 Ecrins", tipo="cima", nome="Mont Thabor", lat=45.1400, lon=6.5700, quota=3178,
-     disl=1400, partenza="Le Lavoir, dopo Valfrejus, 1925 m", diff="", aff="V", cat="Alpinismo",
-     note="Decollo nel pendio sommitale, SUD-EST a SUD-OVEST (scheda su camptocamp). Atterraggio al piano "
-          "sopra il Lavoir, vicino alla piccola presa d'acqua, ci si passa salendo, spazio grande. "
-          "Con la Pointe des Cerces copri regimi opposti (NW e SW).", fonte="lespiedssurterre.blog"),
-dict(zona="6 Ecrins", tipo="cima", nome="Aiguille Dibona", lat=44.9600, lon=6.2100, quota=3131,
-     disl=1150, partenza="Les Etages 1590 m (Vallee du Veneon)", diff="Normale III / Voie du Nain AD 5a / Madier TD VII-",
-     aff="V", cat="Arrampicata",
-     note="LA CIMA E UNA GUGLIA AFFILATA: NON SI DECOLLA. "
-          "VIE: Normale cresta nord (III) - dal rifugio si traversa la pietraia a ovest, canale di rocce "
-          "facili, nevaio del Colle occidentale, Breche des Clochetons, cengia fino alla Breche Gunneng. "
-          "Voie du Nain (AD, 6L max 5a, IV obbligatorio, + traverso 50 m di II + 2L in comune con la "
-          "normale) tutta a spit, roccia splendida, ~150 m. Madier (TD, VII-) classicissima della sud. "
-          "Visite Obligatoire (fino a 6a+) fix da 10 mm, soste con catena e maillon per calarsi sui primi "
-          "5 tiri, poi si esce dalla normale, utile qualche nut, attacco a 5 min dal rifugio. "
-          "Lady Bona sportiva, fix 10 e 12 mm, 14 rinvii. "
-          "DISCESE IN DOPPIA: dalla normale una doppia da 50 m, frazionabile in due da 25 con una singola "
-          "da 50. Dalla Voie du Nain due doppie da 30 m, fattibili con una singola da 60. "
-          "ACCESSO: dal 1 settembre 2026 la D530 e pienamente aperta alle auto fino a Les Etages, ultima "
-          "zona di sosta li. La Berarde resta CHIUSA al pubblico, perimetro di esclusione da rispettare.",
-     fonte="vienormali + camptocamp + parc national"),
-dict(zona="6 Ecrins", tipo="rifugio", nome="Refuge des Ecrins", lat=44.9280, lon=6.3620, quota=3175,
-     vento="", diff="", aff="V", cat="Rifugio",
-     note="Custodito fino al 27 SETTEMBRE (verificare telefonando). Prenotazione obbligatoria. "
-          "Dal Pre de Madame Carle: 1300 m. Il gardien e la fonte migliore per lo stato della crepaccia.",
-     fonte="CAF / refuges-ecrins"),
-dict(zona="6 Ecrins", tipo="rifugio", nome="Refuge du Glacier Blanc", lat=44.9420, lon=6.3830, quota=2542,
-     vento="", diff="", aff="V", cat="Rifugio",
-     note="Custodito fino al 20 SETTEMBRE, poi resta il LOCALE INVERNALE. "
-          "Dormirci senza prenotazione dimezza la giornata verso il Dome (restano 1470 m) e ti da "
-          "una notte di acclimatamento. Dal Pre de Madame Carle: 670 m.", fonte="CAF"),
-dict(zona="6 Ecrins", tipo="rifugio", nome="Refuge du Soreiller", lat=44.9650, lon=6.2000, quota=2719,
-     vento="", diff="", aff="V", cat="Rifugio",
-     note="DATE DISCORDANTI: la scheda del parco da aperto dal 6 giugno al 10 ottobre 2026, il CAF Isere "
-          "dice custodito fino al 13 settembre e oltre solo se ci sono le navette (a settembre non ci sono). "
-          "TELEFONA: 04 76 79 08 32. Mezza pensione 57 euro, notte semplice 22 euro. "
-          "Da Les Etages: 1150 m, 2-3 h.", fonte="CAF / parc national des Ecrins"),
-dict(zona="6 Ecrins", tipo="zona", nome="Regola volo parco Ecrins", lat=44.9200, lon=6.3500, quota=0,
-     vento="", diff="", aff="V", cat="Spazio aereo",
-     note="Il volo libero sopra il CUORE del parco degli Ecrins e autorizzato dal 1 LUGLIO al 31 OTTOBRE. "
-          "Il 21-23 settembre sei dentro. Bivacco tollerato in prossimita dei rifugi, da confermare con "
-          "i gardien.", fonte="Parc national des Ecrins"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard High", lat=44.8143, lon=6.7224, quota=2360,
-     vento="SW-S-SE", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato bello. "
-          "LORENZO: la zona dell'Izoard e' bellissima (parco del Queyras) MA e' LA RAMPA DI LANCIO "
-          "PER I VOLI DA 300 KM. D'estate e' davvero forte forte; A SETTEMBRE MOLTO MEGLIO. "
-          "C'e' anche una scuola di volo, quindi puo' essere un posto tranquillo oppure il delirio.",
-     fonte="KML Delbene + Lorenzo"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard 2", lat=44.8036, lon=6.7472, quota=2300,
-     vento="NW-W-SW-S-SE", diff="3/5", aff="V", cat="Parapendio",
-     note="Prato ripido sul lato NW. IL LATO SUD E ROCCIOSO CON SASSI PICCOLI CHE TAGLIANO FACILMENTE "
-          "LE FUNI.", fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Col d'Izoard (basso)", lat=44.8191, lon=6.7288, quota=2250,
-     vento="SE", diff="2,5/5", aff="V", cat="Parapendio",
-     note="Piccolo. Serve solo a evitare di camminare fino a quello bello.", fonte="KML Delbene"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud", lat=44.8503, lon=6.4791, quota=1650,
-     vento="SE-E", diff="4/5", aff="V", cat="Parapendio",
-     note="Tutto l'anno. Prato non enorme ma con spazio. "
-          "E' IL DECOLLO UFFICIALE DI VALLOUISE. 525 m di dislivello, esposto SUD-EST, "
-          "15 min a piedi dal paese di Puy Aillaud seguendo il sentiero che parte in cima al "
-          "villaggio (segnaletica). "
-          "CONDIZIONI: tutte le orientazioni di vento meteo DEBOLE (meno di 30 km/h a 3000 m) "
-          "TRANNE IL NORD. Il sito e circondato da cime altissime: si vola nell'aerologia "
-          "(brezza di pendio e di valle), non nel vento meteo. "
-          "TRAPPOLE: vento da NORD (vento in coda al decollo e al parcheggio di Puy-Aillaud); "
-          "condizioni termiche di inizio e meta pomeriggio; LINEA ELETTRICA discendente vicina "
-          "al rilievo sulla FACCIA EST di Puy-Aillaud. "
-          "Diffida dei flussi da OVEST che entrano spesso la sera dai BANS (vento al traverso a "
-          "destra al decollo). Volo serale molto raro per via dell'orientamento. "
-          "Aria calma: primo mattino. Termica: prime ascendenze a meta mattina. "
-          "ATTERRAGGIO: parcheggio delle Chambonettes a Vallouise, poi si attraversa il campeggio "
-          "a piedi (3 min); immenso e visibile dal decollo. "
-          "LORENZO: Vallouise e' uno dei due posti che consiglia vivamente nel Brianconnese. "
-          "Dal decollo ufficiale SI PUO SALIRE ANCORA PIU SU per hike & fly molto belli. "
-          "Dietro c'e il parco nazionale degli Ecrins con i ghiacciai. "
-          "Hike & fly Puy Aillaud a 44.8526, 6.4556. Atterraggio a 44.8416, 6.4888.",
-     fonte="KML Delbene + Lorenzo"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Puy Aillaud 2", lat=44.8503, lon=6.4781, quota=1680,
-     vento="S", diff="3,5/5", aff="V", cat="Parapendio",
-     note="Bello ma stretto.", fonte="KML Delbene"),
-# Val di Susa / Val Chisone (rientro)
-dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Condotte", lat=45.0500, lon=6.9500, quota=1600,
-     vento="E", diff="4,5/5", aff="V", cat="Parapendio",
-     note="Bello e grande. IL VENTO DI VALLE E TROPPO FORTE DALLE 10 ALLE 17 in primavera ed estate. "
-          "In estate il posto migliore per lunghi voli serali. Atterraggio Condotte 3,5/5, grande.",
+# ===================== 1 FRIULI =====================
+dict(zona="1 Friuli", tipo="decollo", nome="Monte Cuarnan", lat=46.2741, lon=13.1758, quota=1200,
+     vento="SW-S-SE", diff="4,5/5", aff="V", cat="Decollo ufficiale",
+     note="IL SITO DI CASA. Prato ampio, bello e grande. Circa 1000 m di dislivello sulla pianura. "
+          "VOLI CONSENTITI CON VENTO DA SUD. Buona attivita' termica ed esposizione: possibili voli "
+          "cross in quasi tutte le direzioni. "
+          "ACCESSO: da Gemona si sale lungo la STRADA DI FOREDOR fino a Malga Cuarnan, poi a piedi "
+          "per un sentiero nel bosco di faggi fino al prato di decollo. "
+          "PANORAMA: pianura friulana, il mare nelle giornate limpide, la Carnia verso Tolmezzo, "
+          "il San Simeone e la catena dei Musi. "
+          "Qui si e' volata la Paragliding World Cup.",
+     fonte="vololiberofriuli.it + KML Delbene"),
+dict(zona="1 Friuli", tipo="decollo", nome="Monte San Simeone", lat=46.3301, lon=13.1016, quota=1180,
+     vento="S", diff="Da principianti a esperti", aff="V", cat="Decollo ufficiale",
+     note="Prato ampio che parte da un pianoro e AUMENTA GRADUALMENTE DI PENDENZA. Circa 1000 m di "
+          "dislivello sulla pianura. VOLI CONSENTITI CON VENTO DA SUD. "
+          "CONDIZIONI: prevalentemente DINAMICA (soaring su pendio), con attivita' termica nei mesi "
+          "piu' caldi. Per questo e' adatto a tutti i livelli. "
+          "ACCESSO: strada forestale INTERAMENTE ASFALTATA che parte da Bordano. "
+          "ATTERRAGGIO di dimensioni considerevoli e libero da ostacoli. "
+          "PANORAMA: Bordano, piana del Tagliamento, valle del Lago dei Tre Comuni, Gemona.",
+     fonte="vololiberofriuli.it"),
+dict(zona="1 Friuli", tipo="atterraggio", nome="Atterraggio Bordano", lat=46.3220, lon=13.1050, quota=230,
+     vento="", diff="", aff="V", cat="Atterraggio ufficiale",
+     note="REGOLAMENTO ASD VOLO LIBERO FRIULI, v1.0 settembre 2024. "
+          "Uso consentito a parapendio, deltaplano, VDS-VL e VDS-VM e alla scuola di volo. "
+          "GROUND-HANDLING VIETATO nelle zone 'Atterraggio' e 'Ripiegamento', solo per il tempo "
+          "necessario. Vietate altre attivita': picnic, campeggio, giochi con la palla, altri sport. "
+          "NON SORVOLARE L'ABITATO DI BORDANO SOTTO I 300 m AGL. "
+          "Vietate acrobazie, simulazioni di emergenza e manovre non prudenti sopra centri abitati, "
+          "edifici o installazioni. Rispettare le precedenze in atterraggio. "
+          "Dopo l'atterraggio ripiegare la vela nella zona 'Ripiegamento'. "
+          "Servono attestato, visita medica valida, assicurazione e CASCO. "
+          "Corsi, raduni e iniziative di gruppo richiedono autorizzazione preventiva dell'ASD. "
+          "Gli incidenti vanno segnalati subito all'ASD. Il soccorso ha priorita' e l'area va sgomberata. "
+          "Coordinate approssimative.",
+     fonte="vololiberofriuli.it"),
+dict(zona="1 Friuli", tipo="atterraggio", nome="Atterraggio Gemona", lat=46.2688, lon=13.1410, quota=200,
+     vento="", diff="4/5", aff="V", cat="Atterraggio ufficiale",
+     note="Campo grande e bello. In primavera ed estate, NELLE ORE CENTRALI, attenzione alle bolle.",
      fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="decollo", nome="Colle Azzara", lat=45.0300, lon=6.9800, quota=1700,
-     vento="S-SE", diff="5/5", aff="V", cat="Parapendio",
-     note="Campo molto grande, ottimo per il groundhandling. SE NON RIESCI A GUADAGNARE QUOTA DEVI "
-          "TOPLANDARE: l'atterraggio e troppo lontano e non ci sono atterraggi di fortuna in mezzo. "
-          "Quasi sempre vento forte.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Monte Vandalino", lat=44.8600, lon=7.1700, quota=2121,
-     vento="SW-S-SE", diff="5/5", aff="V", cat="Hike & Fly",
-     note="Bel decollo alpino, buono anche per groundhandling.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Punta Curbasiri", lat=44.9500, lon=7.0500, quota=1800,
-     vento="SE-S-SW-W", diff="4/5", aff="V", cat="Hike & Fly", note="", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="hike&fly", nome="Pian dell'Alpe", lat=45.0100, lon=6.9900, quota=1980,
-     vento="SW-S-SE", diff="4/5", aff="V", cat="Hike & Fly",
-     note="Usato dalle scuole per i voli intermedi.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="atterraggio", nome="Riposa", lat=45.0400, lon=6.9300, quota=1100,
-     vento="", diff="4/5", aff="V", cat="Parapendio",
-     note="Grande. NELLA PARTE OVEST attenzione a TONDINI DI FERRO E CAVI ALTI 1 m.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="atterraggio", nome="Fenestrelle", lat=45.0400, lon=7.0500, quota=1150,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Bello. ATTENZIONE AI CAVI ELETTRICI.", fonte="KML Delbene"),
-dict(zona="7 Val Susa/Chisone", tipo="atterraggio", nome="Prali", lat=44.8900, lon=7.0500, quota=1400,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Stretto ma lungo. NAVETTE: raramente organizzate in Val di Susa. Chiedere ai local di "
-          "'BICIO', il tizio che gestisce le navette dei decolli della valle.", fonte="KML Delbene"),
-# ---- aggiunte da Lorenzo (pilota, c'e stato) ----
-dict(zona="6 Ecrins", tipo="decollo", nome="Ceillac", lat=44.6670, lon=6.7854, quota=1900,
-     vento="", diff="", aff="L", cat="Parapendio",
-     note="LORENZO: proprio PARADISO VAN LIFE. Valle alpina con mega pianoro e paesino super "
-          "caratteristico. DECOLLO A 200 m DALL'ATTERRAGGIO, con SEMPRE DINAMICA che stai su. "
-          "Ci sono anche hike & fly belli alti con viste spettacolari. "
-          "UNICO CONTRO: partire per fare XC da li NON E NIENTE FACILE. Sei molto in alto e giri in "
-          "valli alpine. Pero anche solo un giretto e bellissimo. "
-          "Atterraggio a 44.6636, 6.7809, parcheggio atterraggio a 44.6650, 6.7761.",
-     fonte="Lorenzo"),
-dict(zona="6 Ecrins", tipo="atterraggio", nome="Ceillac (atterraggio)", lat=44.6636, lon=6.7809, quota=1640,
-     vento="", diff="", aff="L", cat="Parapendio",
-     note="A 200 m dal decollo. Parcheggio a 44.6650, 6.7761.", fonte="Lorenzo + KML"),
-dict(zona="6 Ecrins", tipo="logistica", nome="Vallouise e Ceillac (i due consigli)", lat=44.8500, lon=6.4900, quota=0,
-     vento="", diff="", aff="L", cat="Base",
-     note="LORENZO consiglia vivamente DUE POSTI nel Brianconnese: VALLOUISE e CEILLAC. "
-          "Vallouise: decollo ufficiale (Puy Aillaud) e hike & fly molto belli salendo piu su, "
-          "con gli Ecrins e i ghiacciai dietro. "
-          "Ceillac: paradiso van life, decollo a 200 m dall'atterraggio, dinamica costante, hike & fly "
-          "alti con viste spettacolari, ma XC difficile. "
-          "L'Izoard/Queyras e bellissimo ma e la rampa dei 300 km: a settembre e molto piu gestibile "
-          "che d'estate.", fonte="Lorenzo"),
-dict(zona="4 Annecy", tipo="logistica", nome="Dormire ad Annecy", lat=45.8000, lon=6.2100, quota=0,
-     vento="", diff="", aff="L", cat="Pernottamento",
-     note="LORENZO: MEGLIO NON STARE IN ZONA LAGO, rischio multe. Uscire un pochino: a sud del lago "
-          "da qualche parte defilata, o in qualche valle. "
-          "Usare l'app PARK4NIGHT, ci sono tante soluzioni.", fonte="Lorenzo"),
-dict(zona="4 Annecy", tipo="logistica", nome="Affollamento e XC ad Annecy", lat=45.8300, lon=6.2200, quota=0,
-     vento="", diff="", aff="L", cat="Note generali",
-     note="LORENZO: posto molto famoso e bello, si fanno CROSS FACILI - piu che altro c'e cosi tanta "
-          "gente che basta seguire gli altri come paperelle. Il contro e proprio la quantita di gente, "
-          "ma dipende dalla stagione: A SETTEMBRE probabilmente MOLTA MENO GENTE (ma comunque ce n'e). "
-          "I decolli ufficiali sono due: Planfait (meta lago, piu basso) e La Forclaz (sud, piu alto). "
-          "PER PARTIRE IN XC: LA FORCLAZ.", fonte="Lorenzo"),
-dict(zona="4 Annecy", tipo="parcheggio", nome="Parcheggio alto Planfait / Col de Fretes", lat=45.8526, lon=6.2237, quota=1150,
-     vento="", diff="", aff="L", cat="",
-     note="PUNTO DI PARTENZA dell'hike & fly al Col de Fretes. Ci si arriva in auto, in navetta o "
-          "col bus gratuito dall'atterraggio.", fonte="Lorenzo + KML"),
-dict(zona="4 Annecy", tipo="parcheggio", nome="Parcheggio La Forclaz", lat=45.8081, lon=6.2459, quota=1050,
-     vento="", diff="", aff="L", cat="",
-     note="LA STRADA SOPRA E PRIVATA: si parcheggia un bel pezzo prima del decollo. "
-          "Alternativa migliore: navette dall'atterraggio a sud del lago, organizzate benissimo.",
-     fonte="Lorenzo + KML"),
-# ---- cime mancanti ----
-dict(zona="6 Ecrins", tipo="cima", nome="Barre des Ecrins", lat=44.9219, lon=6.3606, quota=4102,
-     disl=2230, partenza="Pre de Madame Carle 1874 m", diff="Ghiacciaio + cresta, PD+/AD-", aff="V",
-     cat="Alpinismo",
-     note="90 m piu in alto del Dome de Neige, ma il decollo si fa dal Dome. "
-          "A fine settembre il ghiacciaio e scoperto e crepacciato: LA CREPACCIA SOTTO LA BARRE E LA CRUX. "
-          "Sentire il gardien del Refuge des Ecrins il giorno prima.", fonte="FFCAM + relazioni"),
-dict(zona="3 Oberland", tipo="cima", nome="Morgenberghorn (salita)", lat=46.6560, lon=7.7500, quota=2190,
-     disl=1498, partenza="Muelenen", diff="", aff="V", cat="Alpinismo",
-     note="Decollo S/SW/W, atterraggio a Interlaken, 1622 m di volo. "
-          "Via alternativa da Aeschiried lungo la cresta, con lo Startplatz Spitz a meta per chiudere prima.",
-     fonte="hikeandfly.com / baern-gliders.ch"),
-dict(zona="4 Annecy", tipo="cima", nome="Pointe de la Sambuy", lat=45.7500, lon=6.2800, quota=2198,
-     disl=1420, partenza="Atterraggio Val de Tamie 780 m", diff="", aff="V", cat="Cross",
-     note="1420 m per la cima, ma solo 1300 PER IL DECOLLO AL COLLE verso la Petite Sambuy. "
-          "Orientamento NE a E.", fonte="lespiedssurterre.blog"),
+dict(zona="1 Friuli", tipo="decollo", nome="Bernadia", lat=46.2253, lon=13.2638, quota=850,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Esposizione da verificare. Ha il suo atterraggio dedicato.", fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="decollo", nome="Porzus", lat=46.1839, lon=13.3327, quota=700,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Prealpi Giulie meridionali, sopra Attimis. Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="decollo", nome="Karcos", lat=46.1046, lon=13.4866, quota=600,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Valli del Natisone, vicino al confine. Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="decollo", nome="Stol (versante italiano)", lat=46.2726, lon=13.4731, quota=1400,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Sul confine. Dal lato sloveno e' il Kobariski Stol, molto meglio documentato: "
+          "vedi quella scheda per esposizione e accesso.", fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="hike&fly", nome="Hike & Fly Monte Plauris", lat=46.3400, lon=13.1900, quota=1958,
+     vento="", diff="", aff="K", cat="Hike & Fly",
+     note="Una delle cime grosse delle Prealpi Giulie sopra Venzone. Esposizione da verificare.",
+     fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="hike&fly", nome="Hike & Fly Monte Amariana", lat=46.3998, lon=13.0858, quota=1906,
+     vento="", diff="", aff="K", cat="Hike & Fly",
+     note="La piramide sopra Tolmezzo. Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="hike&fly", nome="Hike & Fly Musi", lat=46.3301, lon=13.2603, quota=1600,
+     vento="", diff="", aff="K", cat="Hike & Fly",
+     note="Catena dei Musi. Ha un atterraggio dedicato nel KML. Esposizione da verificare.",
+     fonte="KML Delbene"),
+dict(zona="1 Friuli", tipo="hike&fly", nome="Hike & Fly Matajur", lat=46.1750, lon=13.5700, quota=1641,
+     vento="", diff="", aff="K", cat="Hike & Fly",
+     note="Sul confine sopra Cividale. Dal lato sloveno c'e' il decollo Mrzli vrh-Matajur, "
+          "documentato: N-NE, difficolta' 2/5. Esposizione lato italiano da verificare.",
+     fonte="KML Delbene"),
 
-# ---- decolli hike & fly dell'Oberland (nomi dal listino di una guida locale) ----
-dict(zona="3 Oberland", tipo="hike&fly", nome="Baellenhoechst", lat=46.6300, lon=7.8300, quota=1750,
-     vento="", diff="", aff="?", cat="Hike & Fly",
-     note="Regione Interlaken. Coordinate approssimative: verifica su camptocamp o SHV.", fonte="highabove.me"),
-dict(zona="3 Oberland", tipo="hike&fly", nome="Tanzboedeli", lat=46.5600, lon=7.9000, quota=1670,
-     vento="", diff="", aff="?", cat="Hike & Fly",
-     note="Lauterbrunnental. Coordinate approssimative.", fonte="highabove.me"),
-dict(zona="3 Oberland", tipo="hike&fly", nome="Gemmenalphorn", lat=46.7100, lon=7.7600, quota=2061,
-     vento="", diff="", aff="?", cat="Hike & Fly",
-     note="Zona Niederhorn. Coordinate approssimative.", fonte="highabove.me"),
-dict(zona="3 Oberland", tipo="hike&fly", nome="Rotschalp", lat=46.7300, lon=8.0000, quota=1600,
-     vento="", diff="", aff="?", cat="Hike & Fly",
-     note="Brienzersee. Coordinate approssimative.", fonte="highabove.me"),
-dict(zona="3 Oberland", tipo="hike&fly", nome="Startplatz Spitz (Morgenberghorn)", lat=46.6700, lon=7.7400, quota=1600,
-     vento="S-SW-W", diff="", aff="V", cat="Hike & Fly",
-     note="Alla stazione a monte dello skilift superiore salendo da Aeschiried lungo la cresta. "
-          "PRIMA POSSIBILITA DI DECOLLO: se hai gia abbastanza quota o se sopra le condizioni non "
-          "vanno, chiudi qui. Coordinate approssimative.", fonte="baern-gliders.ch"),
-# ---- DELFINATO / BRIANCONNESE: decolli con esposizione (ricerca mirata) ----
-dict(zona="6 Ecrins", tipo="decollo", nome="Col du Granon", lat=44.9633, lon=6.6025, quota=2421,
-     vento="SE-S-SW", diff="", aff="V", cat="Decollo ufficiale",
-     note="Domina Briancon da nord. In alto c'e prima una PENDENTE SCUOLA sulla ex pista ULM, "
-          "poi piu possibilita di decollo: Tronchets, Petit Area, deco delta, deco accesso. "
-          "SOARING possibile con SW debole e con venti da N a E. Interessante con brezza montante. "
-          "LA RIPOSA AL DECOLLO E FACILE OVUNQUE. Voli da 60 a 1200 m di dislivello, e partenze di cross. "
-          "ATTENZIONE: le brezze diventano in fretta molto forti, in particolare sul lato del Granon "
-          "NEL POMERIGGIO. "
-          "ATTERRAGGI: Chantemerle VIETATO DAL 1 MAGGIO AL 15 LUGLIO (prato da sfalcio), spesso "
-          "turbolento d'estate; in alternativa Villeneuve al Pontillas. Si puo anche toplandare. "
-          "Accesso dalla D234 da Chantemerle, o da St Chaffrey verso il col de Granon.",
-     fonte="barbules.fr + Club Parapente Briancon"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Prorel - Croix de la Nore", lat=44.9053, lon=6.5811, quota=2404,
-     vento="E-NE-SE", diff="Tecnico", aff="V", cat="Decollo ufficiale",
-     note="Cabinovia del Prorel piu un po' di cammino. Condizioni standard di brezza di valle con "
-          "TERMICHE A VOLTE VIOLENTE A META GIORNATA. Molte possibilita di decollo. "
-          "PERICOLI: volo tecnico in prossimita della cabinovia. NON DECOLLARE nei pressi della "
-          "cappella Notre Dame des Neiges.",
-     fonte="cataloguevollibre.free.fr"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Prorel - Sommet", lat=44.9015, lon=6.5872, quota=2572,
-     vento="tutte", diff="", aff="V", cat="Decollo ufficiale",
-     note="TUTTE LE ORIENTAZIONI. Cabinovia del Prorel piu un po' di cammino. Stesse condizioni della "
-          "Croix de la Nore: brezza di valle con termiche a volte violente a meta giornata. "
-          "I DECOLLI LATO NORD E NORD-EST SONO TECNICI. "
-          "D'inverno e il sito di riferimento, d'estate si usa piu il Granon.",
-     fonte="cataloguevollibre.free.fr"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Les Vigneaux / Tete d'Aval", lat=44.8600, lon=6.5200, quota=1500,
-     vento="S", diff="", aff="?", cat="Decollo ufficiale",
-     note="Decollo a SUD, ai piedi delle grandi falesie della Tete d'Aval. "
-          "CONDIZIONI: restituzione a partire dalle 19 d'estate, volo termico in autunno. "
-          "ATTERRAGGIO: Les Vigneaux (campi grandi, PRUDENZA CON L'AEROLOGIA VICINO AL SUOLO), "
-          "oppure Vallouise. "
-          "Accesso per la strada tra Prelles e Les Vigneaux, o a piedi dai Vigneaux (45 min). "
-          "Navetta un po' lunga. Coordinate approssimative.",
-     fonte="Club Parapente Briancon"),
-dict(zona="6 Ecrins", tipo="decollo", nome="Puy Chalvin", lat=44.8830, lon=6.6100, quota=1800,
-     vento="", diff="", aff="?", cat="Decollo ufficiale",
-     note="Accesso: venendo da sud, al primo semaforo di Briancon si gira a sinistra fino al paese di "
-          "Puy Chalvin (10 min), si parcheggia vicino al caseificio o al decollo (pista). "
-          "Usato dalle scuole locali. Coordinate approssimative.",
-     fonte="Club Parapente Briancon"),
-dict(zona="6 Ecrins", tipo="atterraggio", nome="Pralong (Prorel)", lat=44.8950, lon=6.6100, quota=1610,
-     vento="", diff="", aff="V", cat="Parapendio",
-     note="Vicino alla stazione intermedia della cabinovia del Prorel. Fascia di prati da sfalcio, "
-          "una bandierina su un pilone alla partenza dello skilift baby. "
-          "ATTERRAGGIO A META PENDIO che permette di concatenare molti voli: tutto il giorno d'inverno, "
-          "solo la mattina d'estate. 700-794 m di dislivello dai decolli di Cote Belle o Croix de la Nore.",
-     fonte="alpes-guide.com"),
-dict(zona="6 Ecrins", tipo="zona", nome="Aerologia del Briançonnais", lat=44.8990, lon=6.6450, quota=0,
-     vento="", diff="", aff="V", cat="Note generali",
-     note="L'aerologia puo essere molto particolare, con la CONFLUENZA DI TRE VALLI all'altezza di "
-          "Briancon. LE BREZZE DIVENTANO IN FRETTA MOLTO FORTI, in particolare sul lato del Granon "
-          "nel pomeriggio. "
-          "Citazione della scuola locale: dalla brezza leggera alle termiche potenti, senza dimenticare "
-          "la restituzione dolce, nel Brianconnese c'e tutta la gamma. "
-          "ALTRI SITI usati dalle scuole secondo la meteo: Col du Galibier, Col de l'Izoard, Ceillac, "
-          "Puy Aillaud, Bouchier, Chateauroux-les-Alpes, Mont Guillaume, Lac du Pontet (La Grave), "
-          "Lac de Serre-Poncon. "
-          "Decolli di Serre-Chevalier censiti: Le Granon, Le Petit Area, Le Grand Area, L'Yret, "
-          "Sommet de Serre-Chevalier, Le Prorel, L'Ombilic-Les Gondrands, Croix de la Nore, Les Tronchets. "
-          "Atterraggi: Villar Saint Pancrace, Le Bez, Chantemerle.",
-     fonte="barbules.fr + brianconparapente.com"),
-# ---- uscite alpinistiche SENZA ghiacciaio nel Brianconnese ----
-dict(zona="6 Ecrins", tipo="cima", nome="Aiguillette du Lauzet", lat=44.9800, lon=6.5200, quota=2717,
-     disl=900, partenza="Le Casset / Lauzet (~1500 m)", diff="Vie di piu tiri su granito",
-     aff="?", cat="Arrampicata",
-     note="SENZA GHIACCIAIO. Falesia e vie di piu tiri su granito sopra il vallone del Lauzet, "
-          "a mezz'ora da Briancon sulla strada del Lautaret. Classica alternativa quando i "
-          "ghiacciai non sono in condizione. Dettagli da verificare su camptocamp.",
-     fonte="conoscenza generale, da verificare"),
-dict(zona="6 Ecrins", tipo="cima", nome="Tete d'Aval / Tete d'Amont", lat=44.8600, lon=6.5200, quota=2582,
-     disl=1000, partenza="Les Vigneaux / Prelles", diff="Vie su calcare, piu tiri",
-     aff="?", cat="Arrampicata",
-     note="SENZA GHIACCIAIO. Le grandi falesie sopra Les Vigneaux, alla bocca della Vallouise. "
-          "Sotto ci passa il decollo sud della Tete d'Aval. Dettagli da verificare.",
-     fonte="conoscenza generale, da verificare"),
-dict(zona="6 Ecrins", tipo="cima", nome="Pic de Rochebrune", lat=44.7600, lon=6.7900, quota=3320,
-     disl=1300, partenza="Col d'Izoard / Souliers", diff="Escursionistico-alpinistico, sfasciumi",
-     aff="?", cat="Alpinismo",
-     note="SENZA GHIACCIAIO. La cima piu alta del Queyras, si sale su sfasciumi e roccia rotta. "
-          "Vicino ai decolli dell'Izoard. Dettagli da verificare.",
-     fonte="conoscenza generale, da verificare"),
-dict(zona="6 Ecrins", tipo="cima", nome="Mont Chaberton", lat=44.9649, lon=6.7506, quota=3131,
-     disl=1250, partenza="Monginevro / Fenils", diff="Sentiero e mulattiera militare",
-     aff="?", cat="Cross",
-     note="SENZA GHIACCIAIO. Si sale per la mulattiera militare, in cima ci sono le torri della "
-          "batteria. C'e gia il punto hike & fly nel KML. Sul confine, versante italiano.",
-     fonte="KML Delbene + conoscenza generale"),
-# ---- BASE AILEFROIDE: accessi a piedi, blocchi, falesia ----
-dict(zona="6 Ecrins", tipo="logistica", nome="Ailefroide — la base", lat=44.8990, lon=6.4030, quota=1500,
-     vento="", diff="", aff="V", cat="Base",
-     note="Paese a 1500 m in fondo alla Vallouise. IL CAMPEGGIO MUNICIPALE OCCUPA UNA GRANDE "
-          "SUPERFICIE PROPRIO VICINO AI BLOCCHI. "
-          "DA QUI A PIEDI: refuge du Sele (939 m, 3 h) e refuge du Pelvoux (1178 m, 3h30). "
-          "IN AUTO: Pre de Madame Carle a 6 km in fondo alla strada, da cui partono Glacier Blanc "
-          "(668 m, 2 h) e refuge des Ecrins (1301 m, 4 h). "
-          "Si combina bloc + falesia + alta montagna senza spostare l'auto.",
-     fonte="guidebook Ecrins + zebloc + thetopo"),
-dict(zona="6 Ecrins", tipo="cima", nome="Blocchi di Ailefroide", lat=44.8990, lon=6.4030, quota=1500,
-     disl=0, partenza="Il campeggio stesso", diff="4+ / 8B, granito", aff="V", cat="Bloc",
-     note="UNO DEI PRINCIPALI SITI DI BLOC DI FRANCIA. Circa 800 passaggi su 17 SETTORI, "
-          "dal 4+ all'8B, con apertura verso la valle vicina di Entraygues. "
-          "SETTORI: Chaos de Pelvoux, Glacier Noir, La Steppe, Pelvoux, Dalle, "
-          "Pave (A-F e Gros Bloc), Philemon, Tunnel. Due circuiti per bambini. "
-          "Granito TECNICO E VARIO, le prese 'brucano'. LE QUOTAZIONI SONO UN PO' DURE rispetto "
-          "ad altri spot, e i blocchi possono essere distanti tra loro. "
-          "Blocchi sparsi ai piedi di alte falesie granitiche: alcuni all'ombra in riva al fiume, "
-          "altri nell'erba, altri in mezzo a una steppa di montagna. "
-          "Essendo in quota si arrampica da primavera ad autunno, anche d'estate. "
-          "TOPO: 'Topo des blocs d'Ailefroide et Entraygues', edizione 2024, 96 pagine, "
-          "francese/inglese, con coordinate GPS dei parcheggi e mappa interattiva online. "
-          "Si trova nei negozi della zona e all'ufficio del turismo dell'Argentiere.",
-     fonte="topo 2024 + zebloc.com + thetopo.com"),
-dict(zona="6 Ecrins", tipo="cima", nome="Falesia e vie lunghe di Ailefroide", lat=44.9000, lon=6.4050,
-     quota=1600, disl=0, partenza="Ailefroide", diff="5a-6c vie lunghe, 3-9a monotiri",
-     aff="V", cat="Arrampicata",
-     note="168 VIE LUNGHE dal 5a al 6c e 343 MONOTIRI sportivi dal 3 al 9a intorno ad Ailefroide. "
-          "Vie classiche alpine fino a 600 m di sviluppo. "
-          "Granito. Il topo di riferimento copre tutta la valle della Durance: Briancon, Ailefroide, "
-          "Vallouise, L'Argentiere-la-Bessee, Guillestre. "
-          "E' L'ALTERNATIVA GIUSTA QUANDO I GHIACCIAI NON SONO IN CONDIZIONE.",
-     fonte="thecrag.com + climbing-guide.eu"),
-dict(zona="6 Ecrins", tipo="rifugio", nome="Refuge du Sele", lat=44.8830, lon=6.3750, quota=2511,
-     vento="", diff="", aff="V", cat="Rifugio",
-     note="DA AILEFROIDE A PIEDI: 939 m di dislivello, 3 h. CAF, 76 posti, custodito. "
-          "Tel +33 4 92 23 39 49. "
-          "Percorso: da Ailefroide si segue il sentiero sulla riva sinistra del torrente Celse Niere "
-          "fino al bivio dei sentieri per Sele e Pelvoux (1993 m); si continua sulla riva sinistra "
-          "fino a una fascia di rocce, si seguono i segni bianchi e i cavi, poi zigzag fino al rifugio.",
-     fonte="guidebook Ecrins"),
-dict(zona="6 Ecrins", tipo="rifugio", nome="Refuge du Pelvoux", lat=44.8920, lon=6.4300, quota=2700,
-     vento="", diff="", aff="V", cat="Rifugio",
-     note="DA AILEFROIDE A PIEDI: 1178 m di dislivello, 3h30. CAF, 56 posti, custodito. "
-          "Tel +33 4 92 23 39 47. Primo rifugio del 1891, ex rifugio Lemercier. "
-          "Percorso: si gira a sinistra appena prima del ponte a fine paese e si segue la stradina "
-          "stretta DIETRO IL CAMPEGGIO fino al parcheggio. Poi riva sinistra del Celse Niere, "
-          "Plan des Durs, Serre des Hommes Morts, Source Puiseux, fino al bivio (1993 m); "
-          "a destra, sentiero battuto su pendio ripido, 800 m di salita. "
-          "Il rifugio sta su un ripiano vicino al ravin del torrente Clot de l'Homme.",
-     fonte="guidebook Ecrins"),
+# ===================== 2 ALPI GIULIE / TARVISIANO =====================
+dict(zona="2 Alpi Giulie", tipo="decollo", nome="Monte Lussari", lat=46.4650, lon=13.5300, quota=1760,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Servito da cabinovia da Camporosso. Ha il suo atterraggio. Esposizione da verificare.",
+     fonte="KML Delbene"),
+dict(zona="2 Alpi Giulie", tipo="decollo", nome="Canin", lat=46.3600, lon=13.4300, quota=1800,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Lato italiano del Canin, sopra Sella Nevea. Dal lato sloveno c'e' Kanin-Skripi, "
+          "documentato. Esposizione lato italiano da verificare.", fonte="KML Delbene"),
+dict(zona="2 Alpi Giulie", tipo="hike&fly", nome="Hike & Fly Montasio", lat=46.4214, lon=13.4257, quota=2000,
+     vento="", diff="", aff="K", cat="Hike & Fly",
+     note="Altopiano del Montasio. Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="2 Alpi Giulie", tipo="decollo", nome="Mittagskogel", lat=46.5065, lon=13.9527, quota=1700,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Lato austriaco, sopra il Worthersee. Esposizione da verificare.", fonte="KML Delbene"),
 
-# ---- relazioni dal libro fotografato ----
-dict(zona="6 Ecrins", tipo="cima", nome="Roche Faurio - parete SE (relazione)", lat=44.9350, lon=6.3800,
-     quota=3730, disl=650, partenza="Refuge des Ecrins 3175 m", diff="II/F, 2-3 h dal rifugio",
-     aff="V", cat="Alpinismo",
-     note="SALITA SU NEVE SENZA DIFFICOLTA TECNICHE. Materiale: piccozza, ramponi, corda singola "
-          "corta, imbrago, attrezzatura da recupero in crepaccio. "
-          "PERCORSO: dal refuge des Ecrins si scende il largo couloir a est del rifugio fino al "
-          "Glacier Blanc (guardalo il giorno prima). Si risale la riva sinistra del ghiacciaio verso "
-          "il Col des Ecrins, la stessa traccia di chi va al Dome o alla Barre. Superata la cresta "
-          "che scende dalla Pointe Xavier Blanc, verso 3350 m, poco sotto il Col des Ecrins, si piega "
-          "a DESTRA e si salgono i pendii nevosi sotto la cima fino a un ripiano sulla cresta sud, "
-          "vicino all'anticima 3550 m. Si segue la cresta nevosa e si esce su roccia facile. "
-          "Discesa per la stessa via. Variante diretta al centro del pendio: piu ripida e veloce ma "
-          "molto meno panoramica. "
-          "NOTA DEL LIBRO: tre quarti della gente al rifugio va alla normale del Dome de Neige, "
-          "quindi la Roche Faurio e il punto di osservazione perfetto per studiare il Dome e tornare "
-          "a farlo in un periodo piu tranquillo. "
-          "ATTRAVERSA IL GLACIER BLANC.",
-     fonte="foto relazione (Ecrins guidebook)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Sirac - Cresta Nord (relazione)", lat=44.7800, lon=6.1700,
-     quota=3440, disl=None, partenza="Parking du Crepon 1572 m (Valgaudemar), rifugio 2h30",
-     diff="AD, passaggi fino al IV+", aff="V", cat="Alpinismo",
-     note="Come l'Olan e Les Bans, il Sirac e uno dei colossali monumenti isolati nell'area piu "
-          "selvaggia degli Ecrins. La Cresta Nord e una linea ripida e rocciosa che attrae e "
-          "intimidisce: ci si trova spesso a cercare la propria rotta in piena parete, su risalti "
-          "piu ampi e ripidi di quanto ci si aspetti a media difficolta. "
-          "ASCENSIONE E DISCESA COMPLESSIVAMENTE IMPEGNATIVE, e l'AD originario puo apparire severo: "
-          "il percorso si e evoluto negli anni e le difficolta, in origine aggirate a sinistra sui "
-          "nevai della parete nord, ora si affrontano piu direttamente. In basso, per evitare la "
-          "pericolosa risalita di un canale franoso, e stata attrezzata una variante che impone un "
-          "tratto di IV+. "
-          "ACCESSO: da La-Chapelle-en-Valgaudemar in auto verso lo Chalet-Hotel du Gioberney "
-          "(strada stretta, CADUTA SASSI), parcheggio poco a valle (Parking du Crepon, 1572 m). "
-          "Al rifugio 2h30 per il 'Sentier du Ministre'. Avvicinamento all'attacco 30 min-1 h. "
-          "Tiri di IV+, IV e II da ~25 m, soste a spit. "
-          "NEVAI FREQUENTI ma NESSUN GHIACCIAIO DA ATTRAVERSARE. "
-          "MOLTO LONTANO DA AILEFROIDE: e in Valgaudemar, versante opposto.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Tete de Lauranoure (relazione)", lat=44.9500, lon=6.1600,
-     quota=3326, disl=1520, partenza="Alpe du Pin Hut 1805 m", diff="II/E, 4h30-5h30",
-     aff="V", cat="Alpinismo",
-     note="Via lunga con pendio nevoso ripido (35 gradi) e cresta di roccia facile. "
-          "Materiale: bastoncini, piccozza, ramponi, imbrago, corda singola, recupero in crepaccio. "
-          "PERCORSO: dall'Alpe du Pin verso sud-ovest a la Rama, si attraversa il torrente Grande "
-          "Pisse e si sale verso Le Pierroux; sentiero con ometti fino alla morena sotto la cresta "
-          "rocciosa che divide in due il Glacier du Pierroux. Su per la morena al ramo ovest del "
-          "ghiacciaio, riva sinistra vicino alla Crete du Vallonet, poi traversata ripida a sinistra "
-          "alla selletta nevosa sulla cresta NO (3240 m). Cresta facile fino alla cima centrale "
-          "(ROCCIA INSTABILE), 30 min dalla selletta. "
-          "ATTRAVERSA IL GLACIER DU PIERROUX. Lato Oisans, lontano da Ailefroide.",
-     fonte="foto relazione (Ecrins guidebook)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Tete des Fetoules (relazione)", lat=44.9800, lon=6.2400,
-     quota=3459, disl=1660, partenza="Lavey Hut 1797 m", diff="III/F, 5-6 h", aff="V", cat="Alpinismo",
-     note="Via lunga, per lo piu su neve e ATTRAVERSO UN GHIACCIAIO CREPACCIATO. Il breve tratto "
-          "roccioso sulla cresta e facile. Materiale: bastoncini, piccozza, ramponi, corda singola, "
-          "imbrago, recupero in crepaccio. "
-          "Il rifugio di La Lavey non e un rifugio d'alta montagna: sta a sole due ore dal fondovalle "
-          "su ottimo sentiero, in parte lastricato, con tavoli da picnic accanto a un torrente. "
-          "Lato Oisans, lontano da Ailefroide.",
-     fonte="foto relazione (Ecrins guidebook)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Traversata Promontoire - Aigle (relazione)", lat=45.0100,
-     lon=6.3100, quota=3450, disl=700, partenza="Promontoire Hut 3082 m", diff="IV/F, 4-5 h",
-     aff="V", cat="Alpinismo",
-     note="Salita su neve attraverso GHIACCIAI MOLTO CREPACCIATI con pendii nevosi ripidi (40 gradi). "
-          "IL COULOIR DU SERRET DU SAVON VA AFFRONTATO SOLO A INIZIO STAGIONE: le condizioni migliori "
-          "sono fino a fine luglio, quando il manto e ancora abbastanza spesso da tappare crepacci e "
-          "crepacce e da tenere fermi i sassi. I ramponi mordono molto meglio nella neve che nel "
-          "ghiaccio. "
-          "A SETTEMBRE E FUORI STAGIONE. Ambiente glaciale straordinario sotto la Meije, ma non ora.",
-     fonte="foto relazione (Ecrins guidebook)"),
-# ---- relazioni dal libro, seconda tornata ----
-dict(zona="6 Ecrins", tipo="cima", nome="Arete des Cineastes (relazione)", lat=44.9330, lon=6.3950,
-     quota=3205, disl=1330, partenza="Pre de Madame Carle 1874 m",
-     diff="Cresta di roccia, III con tratto chiave IV+", aff="V", cat="Arrampicata",
-     note="*** LA PIU VICINA AD AILEFROIDE SENZA GHIACCIAIO ***. "
-          "Superclassica molto frequentata, ADATTA ANCHE ALLE PRIME ESPERIENZE DI MANOVRE DI CRESTA "
-          "per brevita e vicinanza dei punti d'appoggio. Il tratto chiave pero e tecnico: occorre "
-          "sapersi muovere con sicurezza sui QUARTI GRADI ALL'ANTICA. In alternativa, METTERE LE "
-          "SCARPETTE. Il nome viene dai primi salitori, che cercavano una location per un film con "
-          "vista sul Pelvoux. "
-          "TEMPI: Pre de Madame Carle -> Refuge du Glacier Blanc 700 m D+, 1h30-2h (si puo dormire). "
-          "Poi avvicinamento 1 h, via 3-4 h, discesa 1-2 h al rifugio o 3 h al Pre de Madame Carle. "
-          "AVVICINAMENTO: dal Glacier Blanc si prosegue brevemente sul sentiero per il Ref. des Ecrins; "
-          "al ripiano poco a monte del rifugio si piega a DESTRA (est) sulla traccia per il Col du "
-          "Monetier; verso 2700 m si gira a SINISTRA (nord) su debole traccia e si risale la ripida "
-          "morena frontale del Glacier de la Pyramide; si abbandona la morena poco prima della sommita "
-          "e si sale a destra alla base delle rocce, puntando a un canalino erboso; in cima al canalino "
-          "si esce a sinistra con un passo esposto in traverso (II) fino a una vasta terrazza detritica. "
-          "L'attacco e all'estremita destra della terrazza, ~3000 m. "
-          "VIA: sperone (II, pass. III), canale fino all'intaglio, rampa a ovest (II), diedro breve e "
-          "scomodo (IV), Seconda Punta (III), cengia a est, primo diedro (IV) con sosta su terrazzino, "
-          "diedro piu difficile e lame sotto il tetto (IV+, alcuni chiodi), si aggira il tetto a "
-          "sinistra (IV, piu impressionante che difficile), diedro III+ alla Terza Punta. "
-          "Quarta Punta aggirabile a ovest per cenge oppure sul filo (III+, calata di 15 m). "
-          "Poi facile fino alla cima (III). "
-          "DISCESA: doppia da 20 m all'intaglio, poi canale di ROCCIA CATTIVA in versante est, "
-          "2-3 doppie da 25 m. PERICOLO CADUTA SASSI specie con altre cordate. Poi roccia rotta e "
-          "detriti fino ai nevai e alla morena del Glacier Tuckett, e giu alla traccia del Col du "
-          "Monetier. "
-          "CONDIZIONI: spesso buone grazie all'esposizione favorevole. INFORMARSI AL RIFUGIO sulla "
-          "presenza di nevai in accesso e discesa: puo servire portare PICCOZZA E RAMPONI. "
-          "NON ATTRAVERSA GHIACCIAIO: si sale per morena e si scende su nevai e morena. "
-          "VARIANTI: si possono traversare tutte le punte dell'Aiguille, affrontando le tre punte "
-          "successive (III/III+, 30 min-1 h in piu) con doppia da ciascuna; dopo la Nona Punta si "
-          "raggiunge un colletto a 3160 m e si scende per canale detritico a est (1-2 calate) sulla "
-          "morena del Glacier Tuckett. "
-          "ALTRA VIA IN ZONA: Cresta Sud del Pic du Glacier Blanc (AD, IV). "
-          "Le cordate allenate fanno i Cineastes in giornata, dormono al Glacier Blanc e il giorno "
-          "dopo salgono la Barre.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Barre des Ecrins - Cresta Ovest, normale (relazione)",
-     lat=44.9219, lon=6.3606, quota=4102, disl=1600, partenza="Refuge des Ecrins 3161 m",
-     diff="AD-, II su roccia, neve fino a 45 gradi e misto", aff="V", cat="Alpinismo",
-     note="Roccia 30%, GHIACCIO 70%. Prima ascensione Whymper, Croz, Almer, Moore, Walker, 1864. "
-          "Materiale: sicurezza su ghiacciaio, corda 1x60 m (o mezza da 60 usata doppia in cresta), "
-          "cordini lunghi, 2-3 friend medio-piccoli. "
-          "PERCORSO: dal rifugio si raggiunge il secondo plateau del ghiacciaio a ~3900 m sotto la "
-          "parete nord (pendio 35 gradi, terminale a meta), si traversa a ovest alla base del pendio "
-          "nord della Breche Lory, si supera la terminale (spesso molto a destra) e con pendio a 40 "
-          "gradi si arriva alla Breche 3974 m (2h30-3h). Poi il primo risalto triangolare della cresta: "
-          "NON salire direttamente ma spostarsi a sinistra in leggera discesa su neve o ghiaccio ai "
-          "piedi delle rocce fino a una cengetta ascendente. Poi cenge e rocce a tratti delicate e "
-          "VERGLASSATE (pass. II/I) in diagonale a sinistra sul versante nord fino al filo. "
-          "Rocce rotte miste a neve (prev. II), un piccolo intaglio impone un passo aereo. Dal Pic Lory "
-          "(4088 m) la cresta si fa piu facile fino in vetta. 4-5 h dal rifugio. "
-          "DISCESA per la via di salita, con doppia da 25-30 m alla Breche Lory. "
-          "AVVERTENZA GRAVE: L'AVVICINAMENTO E A TRATTI FORTEMENTE ESPOSTO A SERACCHI. Le scariche "
-          "sono sempre possibili e piu frequenti in certi periodi secondo l'evoluzione del ghiacciaio. "
-          "IN TALI PERIODI LA SALITA E SCONSIGLIATA: informarsi al rifugio. "
-          "Meglio condizioni estive secche che neve fresca e vetrato, ma col caldo il passaggio sul "
-          "ghiacciaio e delicato, le terminali difficili e si trova ghiaccio vivo.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Barre des Ecrins - Cresta Nord-Est (relazione)",
-     lat=44.9219, lon=6.3606, quota=4102, disl=1600, partenza="Refuge des Ecrins",
-     diff="Misto delicato, passo chiave III+/IV", aff="V", cat="Alpinismo",
-     note="La gemella capricciosa della Cresta Ovest. Se arrivati sotto l'attacco ci si accorge che "
-          "l'accesso e troppo secco o ghiacciato, si puo sempre continuare per la via normale. "
-          "Chiave: superamento della prima fascia rocciosa, su misto delicato, piu facile se ben "
-          "coperto di neve assestata e portante. Alcune cordate la affrontano per un diedro/camino "
-          "delicato e ostico (III+/IV, alcuni chiodi); meglio traversare a destra per neve/ghiaccio o "
-          "misto fino a un canale-goulotte. "
-          "FUORI STAGIONE ORA: per i cambiamenti climatici e il degrado della copertura glaciale "
-          "LA FINESTRA DI BUONE CONDIZIONI NON SI PRESENTA OGNI ANNO ed e di solito breve, "
-          "TRA FINE GIUGNO E INIZIO LUGLIO.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Traversata del Soreiller (relazione)", lat=44.9620, lon=6.2050,
-     quota=3358, disl=1150, partenza="Refuge du Soreiller 2719 m (da Les Etages)",
-     diff="III, roccia", aff="V", cat="Arrampicata",
-     note="NIENTE GHIACCIAIO. Traversata Aiguille Occidentale du Soreiller (Cresta Sud) -> "
-          "Aiguille Centrale (Cresta Ovest) -> Aiguille Dibona. "
-          "AVVICINAMENTO: dal rifugio verso ovest su pietraia, poi tracce e ometti a ovest e poi nord "
-          "fino alla base del ripido ghiaione che porta al Col Dalloz (Col Occidental du Soreiller) e "
-          "alla normale della Dibona; si lascia la traccia e si piega a sinistra (ovest) alla base della "
-          "Cresta Sud dell'Aiguille Occidentale. 40 min. "
-          "CRESTA SUD dell'Occidentale: si passa a ovest e si sale verso il filo senza via obbligata "
-          "(pass. I/II); placca (II), diedro levigato (III), altra placca (III), placca rossa lavorata, "
-          "diedrino nascosto, diedro appoggiato a ovest (III), tratto affilato (III), poi facile in "
-          "cima. 2-3 h. "
-          "DISCESA CRESTA EST: percorso non obbligato cercando il facile (I), possibile scendere un "
-          "largo diedro-canale di placche, oppure continuare in cresta con l'intaglio stretto detto "
-          "'boite aux lettres' e un passo esposto a nord. 1 h. "
-          "Si puo interrompere la traversata scendendo a sud su nevaio, detriti e roccette (ometti). "
-          "CRESTA OVEST della Centrale: dal Col Dalloz si risale sullo spartiacque cercando il passaggio "
-          "piu facile (diedro o placca, max III: difficolta superiori indicano che si e fuori strada), "
-          "poi Cresta Ovest (II, poi I) fino al gendarme caratteristico.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Traversata dell'Olan (relazione)", lat=44.8400, lon=6.1000,
-     quota=3564, disl=950, partenza="Refuge de Font Turbat 2170 m (Valjouffrey)",
-     diff="AD, fino al III+", aff="V", cat="Alpinismo",
-     note="ROCCIA 95%, GHIACCIO 5%. Cresta Nord + Voie Escarra, lunga traversata in ambiente selvaggio. "
-          "Dislivello ~500 m la Cresta Nord, ~950 m dal Lac des Pissoux. Esposizione prev. ovest e nord "
-          "in salita, sud in traversata. "
-          "Non richiede il VI a vista, ma servono lunga esperienza d'alta montagna, senso "
-          "dell'orientamento, rapidita, sicurezza di movimento su tutti i terreni COMPRESI QUELLI "
-          "FRAGILI, e buon fitness. "
-          "Tratto tecnicamente piu difficile: un rasoio orizzontale splendidamente aereo (III+). "
-          "Discesa: cresta est, sosta attrezzata, calata 25 m, fessura III, cresta in discesa (II e "
-          "pass. III) in esposizione crescente. "
-          "MATERIALE: sicurezza su ghiacciaio, corda 1x60 m (consigliata mezza usata doppia), cordini, "
-          "friend e nut da micro a medi. Lungo la via ci sono soste di calata e RARISSIMI chiodi. "
-          "APPOGGI: Refuge de Font Turbat 2170 m (+33 4 76 30 33 01), Refuge de l'Olan 2544 m in "
-          "discesa (+33 6 01 66 45 25). "
-          "MOLTO LONTANO DA AILEFROIDE: versante Valjouffrey/Valgaudemar.",
-     fonte="foto relazione (Il grande libro delle creste)"),
-dict(zona="6 Ecrins", tipo="cima", nome="Traversata della Meije (relazione)", lat=45.0000, lon=6.3100,
-     quota=3983, disl=None, partenza="Refuge du Promontoire 3082 m",
-     diff="Traversata lunga e impegnativa", aff="V", cat="Alpinismo",
-     note="NON ORA. Itinerario 'epico' reso ulteriormente delicato dal RISCALDAMENTO GLOBALE, che "
-          "impone di scegliere la combinazione perfetta tra buon innevamento per la sicurezza e "
-          "roccia pulita per l'arrampicata. "
-          "Include l'Arete du Promontoire, il Glacier Carre, il Grand Pic, la traversata dei denti "
-          "con un rasoio sul filo, un canalino ghiacciato, calate e un'insidiosa discesa finale sul "
-          "Glacier du Tabuchet. "
-          "NEL 2005 UNA FRANA si e originata dalle rocce che dominano il Glacier Carre: da allora, "
-          "quando il piano di frana emerge dalla neve, tutto il percorso tra il Couloir Duhamel e il "
-          "ghiacciaio e potenzialmente esposto a caduta sassi. Le finestre di buone condizioni sono "
-          "piu brevi perche serve anche buon innevamento sul Glacier Carre e ottimo rigelo. "
-          "Sul Glacier de la Meije: MOLTI CREPACCI, largo giro a destra. "
-          "Discesa dal Ref. de l'Aigle al fondovalle: alpinistica, poi terreno impervio con traccia "
-          "debole, attenzione ai crepacci malgrado l'apparenza bonaria.",
-     fonte="foto relazione (Il grande libro delle creste)"),
+# ===================== 3 SLOVENIA / POSOCJE =====================
+dict(zona="3 Slovenia", tipo="zona", nome="Posocje — regole, tasse e pericoli", lat=46.1800, lon=13.7300,
+     quota=0, vento="", diff="", aff="V", cat="Note generali",
+     note="TASSE: solo i piloti singoli comprano il biglietto. Giornaliero 4 euro, 3 giorni 11, "
+          "10 giorni 20, stagionale 35. Voli organizzati (tandem, scuole, gare) richiedono accordo "
+          "con il club che gestisce il decollo. "
+          "PUNTI VENDITA a Tolmin: Camp Gabrje, Kobala center, FlyZone Ciginj, Camp Siber, Bar Pri Noni. "
+          "A Kobarid: TIC Kobarid, Jazbec Idrsko, Bar Teja. "
+          "SPAZIO AEREO: solo classe G, regole VFR. NELLA VALLE DELL'ISONZO IL LIMITE E' 2900 m MSL. "
+          "Volo locale non supervisionato: serve livello 4 IPP; per l'XC serve il 5. "
+          "FREQUENZA volo libero: 147.800 MHz. Rispettare gli avvisi di arrivo degli elicotteri. "
+          "EMERGENZE: 112. Segnalare anche riserve aperte o atterraggi su albero, pure senza bisogno "
+          "di aiuto. "
+          "PARCO NAZIONALE DEL TRIGLAV: vietato volare sotto i 300 m dal terreno; decollo e atterraggio "
+          "vietati tranne che al Mangart (Bovec), a Vogel e a Vogar (Bohinj). "
+          "AEROPORTO DI BOVEC: zona di divieto. Il paracadutismo rende la zona molto pericolosa: "
+          "PRIMA DI OGNI DECOLLO MANDARE UN SMS AL +386 51 661 003. "
+          "BORA: catabatico da nord-est, puo' superare i 150 km/h. Con nuvole alte e 'belle' il decollo "
+          "puo' sembrare buono mentre la valle e' molto turbolenta. "
+          "VENTO DI VALLE: con forte termica o vento generale forte, evitare voli bassi nelle valli "
+          "strette; puo' superare i 10 m/s. Non decollare a Log pod Mangartom dopo le 10 con forte termica. "
+          "CAVI: linee elettriche, di trasporto e di carico lungo tutta la valle, soprattutto a bassa "
+          "quota. Vicino al Kanin e a ovest di Planja c'e' anche una tirolese. "
+          "Esiste un database dei cavi dell'associazione aeronautica slovena.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Kobala (Tolmin)", lat=46.1850, lon=13.7450, quota=1080,
+     vento="E, SE, SW, W", diff="2/5", aff="V", cat="Decollo ufficiale",
+     note="IL DECOLLO PIU' POPOLARE DELLA VALLE. Si arriva in auto. Club DPL Posocje. "
+          "CON VENTO FORTE IL DECOLLO E' RIPIDO E C'E' IL RISCHIO DI ESSERE TRASCINATI OLTRE IL CRINALE. "
+          "Ad aprile la strada per Kobala puo' essere ghiacciata in cima. "
+          "Atterraggi: Tolmin (ampio, valle larga, il vento di valle di solito non e' un problema), "
+          "Camp Gabrje e Camp Siber accanto ai campeggi.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Kobariski Stol", lat=46.2800, lon=13.5200, quota=1414,
+     vento="SE, S, SW", diff="1/5", aff="V", cat="Decollo ufficiale",
+     note="Prato ampio che ha ospitato molte gare XC. Club Drustvo Adrenalin. "
+          "LA STRADA E' DISSESTATA: serve un fuoristrada o il servizio navetta. "
+          "Essendo alto, permette voli locali anche in autunno con termiche deboli. "
+          "Atterraggio a Kobarid, ampio.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Livski Kuk", lat=46.2450, lon=13.5100, quota=1240,
+     vento="N, SE, S, SW", diff="Sud 3/5, Nord 5/5", aff="V", cat="Decollo ufficiale",
+     note="Auto o bus piu' 15 min a piedi. Club Drustvo Adrenalin. "
+          "NON ATTERRARE A SUD DEL DECOLLO. Attraversare verso OVEST con quota sufficiente per "
+          "raggiungere atterraggi sicuri. SE SI PERDE QUOTA, VOLARE VERSO NORD-OVEST SULLA VALLE. "
+          "Il lato nord e' 5/5 di difficolta': non e' un decollo da prendere alla leggera.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Mrzli vrh — Matajur", lat=46.1900, lon=13.5900, quota=1320,
+     vento="N, NE", diff="2/5", aff="V", cat="Decollo ufficiale",
+     note="IL DECOLLO DA VENTO DA NORD della zona. Fuoristrada piu' 5 min a piedi. "
+          "Club Drustvo Adrenalin. Valutare il meteo SIA AL DECOLLO SIA IN VALLE. "
+          "E' il versante sloveno del Matajur, che dal lato italiano sta sopra Cividale.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Ozben", lat=46.2350, lon=13.6100, quota=750,
+     vento="S, SW", diff="1/5", aff="V", cat="Decollo ufficiale",
+     note="ACCESSIBILE TUTTO L'ANNO per la bassa quota: e' il ripiego invernale. Fuoristrada. "
+          "Club Drustvo Adrenalin. Ha ospitato una Coppa del Mondo e un Campionato europeo di "
+          "atterraggio di precisione.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Mangart — Sedlo", lat=46.4350, lon=13.6500, quota=1990,
+     vento="E-W", diff="1/5", aff="V", cat="Decollo ufficiale",
+     note="Auto o bus piu' 5 min a piedi. Club JPD Kanin. Adatto ai principianti. "
+          "MA: con vento forte di valle c'e' un RISCHIO SERIO se si finisce a terra in condizioni "
+          "termiche. Atterraggio a Log pod Mangartom, valle stretta in fondo al sistema: "
+          "CON VENTO FORTE D'ESTATE E' PERICOLOSO, non decollare dopo le 10 con forte termica. "
+          "LA STRADA PER IL MANGART E' SPESSO COPERTA DI NEVE FINO A GIUGNO. "
+          "E' una delle tre eccezioni al divieto di decollo nel Parco del Triglav.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Mangart — Tunel (Prhodci)", lat=46.4300, lon=13.6400, quota=1870,
+     vento="S-SW", diff="4/5", aff="V", cat="Decollo ufficiale",
+     note="Auto o bus. Club JPD Kanin. SI USA QUANDO IL VENTO IN QUOTA E' TROPPO FORTE o quando il "
+          "sedlo non e' accessibile per la neve. SOTTO IL DECOLLO C'E' UNA STRADA. "
+          "SCONSIGLIATO DECOLLARE CON VENTO NULLO O NEGATIVO.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Kanin — Skripi", lat=46.3580, lon=13.4750, quota=1717,
+     vento="SE-SW", diff="3/5", aff="V", cat="Decollo ufficiale",
+     note="Funivia piu' 15 min a piedi. Club JPD Kanin. VIETATO DECOLLARE E ATTERRARE NELLA ZONA "
+          "DELL'AEROPORTO. Ci sono reti protettive. "
+          "AGGIORNAMENTO 1.7.2024: LA FUNIVIA NON FUNZIONA. Per il decollo 'Tee' si sale con la "
+          "funivia fino alla stazione B e poi si cammina per circa 600 m di dislivello. "
+          "Vicino al Kanin c'e' anche una TIROLESE.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="hike&fly", nome="Planja", lat=46.3450, lon=13.4600, quota=1070,
+     vento="E-W", diff="2/5", aff="V", cat="Hike & Fly",
+     note="SOLO A PIEDI, almeno 20 minuti. Club JPD Kanin. Usato soprattutto FUORI STAGIONE per voli "
+          "XC e per hike & fly. VIETATO DECOLLARE E ATTERRARE NELLA ZONA DELL'AEROPORTO. "
+          "A ovest di Planja c'e' una tirolese.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="decollo", nome="Vrse", lat=46.3300, lon=13.5500, quota=580,
+     vento="E-W", diff="4/5", aff="V", cat="Decollo ufficiale",
+     note="Nato come decollo scuola, ma OGGI E' IN PARTE INVASO DALLA VEGETAZIONE. "
+          "Lo usano i piloti esperti quando Kobala e' troppo ventosa. Auto o bus piu' 5 min a piedi. "
+          "Club DPL Posocje.",
+     fonte="paragliding-bovec.com"),
+dict(zona="3 Slovenia", tipo="atterraggio", nome="Bovec (atterraggio)", lat=46.3380, lon=13.5520, quota=440,
+     vento="", diff="", aff="V", cat="Atterraggio",
+     note="PIU' COMPLICATO degli altri: sta a est della valle, con ostacoli intorno. "
+          "Da non confondere con l'aeroporto di Bovec, che e' zona di divieto.",
+     fonte="paragliding-bovec.com"),
+
+# ===================== 4 ALPAGO / BELLUNESE =====================
+dict(zona="4 Alpago", tipo="decollo", nome="Monte Dolada", lat=46.1917, lon=12.3527, quota=1500,
+     vento="SW-S-SE", diff="4/5", aff="V", cat="Decollo ufficiale",
+     note="Decollo erboso molto bello, al Rifugio Dolada, base comune dei parapendisti della zona: "
+          "si decolla facilmente. Sopra il lago di Santa Croce. "
+          "COME HIKE & FLY: si parte dall'atterraggio del DeltaClub Monte Dolada, si attraversa Villa, "
+          "poi Pieve e Torres per strade e piste ciclabili; da Torres si prende la vecchia strada "
+          "verso Plois e poco dopo il paese il sentiero ben segnato per il Rifugio Dolada. "
+          "900 m di dislivello, 6 km, circa 1h45. Decollo S / SW.",
+     fonte="KML Delbene + flytherapy.it"),
+dict(zona="4 Alpago", tipo="decollo", nome="Nevegal", lat=46.0705, lon=12.2984, quota=1000,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Zona storica di volo sopra Belluno. Flytherapy documenta il Monte Faverghera come hike & fly. "
+          "Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="4 Alpago", tipo="decollo", nome="Col Visentin", lat=46.0535, lon=12.2822, quota=1763,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Cima panoramica tra Belluno e il Quartier del Piave. Esposizione da verificare.",
+     fonte="KML Delbene"),
+dict(zona="4 Alpago", tipo="decollo", nome="Pizzoc", lat=46.0200, lon=12.3700, quota=1565,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="Sopra il Cansiglio. Esposizione da verificare.", fonte="KML Delbene"),
+dict(zona="4 Alpago", tipo="decollo", nome="Revine", lat=46.0024, lon=12.2083, quota=900,
+     vento="SW-S-SE", diff="4/5", aff="V", cat="Decollo ufficiale",
+     note="Decollo erboso molto bello, sopra i laghi di Revine.", fonte="KML Delbene"),
+dict(zona="4 Alpago", tipo="decollo", nome="Monte Serva", lat=46.1750, lon=12.2250, quota=2130,
+     vento="", diff="", aff="K", cat="Decollo ufficiale",
+     note="La montagna di Belluno. Flytherapy la documenta come hike & fly in due versioni "
+          "(Monte Serva e Croce Monte Serva). Esposizione da verificare.", fonte="KML Delbene"),
+
+# ===================== 5 VALBELLUNA / FELTRINO =====================
+dict(zona="5 Feltrino", tipo="decollo", nome="Monte Avena — Decollo Sud", lat=46.02987, lon=11.82615,
+     quota=1417, vento="S / SE", diff="Adatto ai neo-brevettati", aff="V", cat="Decollo ufficiale",
+     note="Pascolo MOLTO AMPIO, circa 11.500 m2, senza ostacoli e leggermente inclinato verso valle. "
+          "Manica a vento e bacheca. Niente servizi igienici. "
+          "CON VENTO DA NORD IL DECOLLO E' SEMPRE VIETATO. Con vento sostenuto da est o ovest, "
+          "cambiare decollo secondo la direzione. "
+          "In genere non ha turbolenze significative perche' e' SOPRAVENTO rispetto al vento di valle, "
+          "che di solito soffia da nord-est verso sud-ovest. Ottimo per i voli mattutini. "
+          "IL TOP LANDING E' VIETATO IN ZONA DECOLLO. "
+          "Dislivello ~1067 m sull'atterraggio Boscherai. "
+          "ACCESSO: direzione Passo Croce d'Aune - Monte Avena, ~15 km da Feltre. "
+          "CI SONO POSTI AUTO MA NON SI PARCHEGGIA LUNGO LA STRADA.",
+     fonte="paradeltafeltre.it"),
+dict(zona="5 Feltrino", tipo="decollo", nome="Monte Avena — Decollo Ovest", lat=46.02961, lon=11.81738,
+     quota=1438, vento="S / SW", diff="Primavera: solo esperti", aff="V", cat="Decollo ufficiale",
+     note="Vasto prato in leggera pendenza. Manica a vento e bacheca. "
+          "CON VENTO DA NORD SEMPRE VIETATO. Con vento sostenuto da sud o ovest, cambiare decollo. "
+          "SPESSO SOTTOVENTO rispetto al vento di valle che scorre da Feltre: nelle tipiche condizioni "
+          "primaverili E' ADATTO SOLO A PILOTI ESPERTI. "
+          "VERSO SERA, DOPO LE 17, diventa piu' tranquillo: si veleggia in dinamica o si trovano "
+          "termiche di restituzione sopra la piana tra Fonzaso e Arten. "
+          "CON AEROMODELLI IN ZONA e' vietato usare e sorvolare il decollo a loro dedicato. "
+          "Dal Decollo Sud, circa 1 km su strada sterrata. Dislivello ~1088 m.",
+     fonte="paradeltafeltre.it"),
+dict(zona="5 Feltrino", tipo="decollo", nome="Monte Avena — Decollo Est", lat=46.03386, lon=11.83082,
+     quota=1351, vento="E", diff="", aff="V", cat="Decollo ufficiale",
+     note="Prato in leggera pendenza, SPAZIO PER APRIRE 5 O 6 VELE. Manica a vento. "
+          "Con vento sostenuto da sud o ovest, cambiare decollo secondo la direzione. "
+          "Sta circa 500 m prima del Decollo Sud; posti auto al Decollo Sud. Dislivello ~1084 m.",
+     fonte="paradeltafeltre.it"),
+dict(zona="5 Feltrino", tipo="atterraggio", nome="Boscherai (Pedavena)", lat=46.03145, lon=11.87945,
+     quota=350, vento="", diff="", aff="V", cat="Atterraggio ufficiale",
+     note="L'ATTERRAGGIO UFFICIALE. Rettangolo di circa 20.000 m2 senza ostacoli, nell'area sportiva "
+          "del Boscherai a Pedavena. PERMETTE ATTERRAGGI SICURI CON QUALSIASI DIREZIONE DI VENTO. "
+          "Posti auto, SERVIZI IGIENICI E DOCCIA, tre maniche a vento, bacheca. "
+          "Dal KML: campo grande e bello, su una collina piatta alta 20 m rispetto alla piana "
+          "circostante; in primavera ed estate attenzione alle bolle nelle ore centrali.",
+     fonte="paradeltafeltre.it + KML Delbene"),
+dict(zona="5 Feltrino", tipo="atterraggio", nome="Arten", lat=46.00419, lon=11.82416, quota=311,
+     vento="E / SE", diff="", aff="V", cat="Atterraggio",
+     note="30 m di larghezza per 200 m di lunghezza, orientato est-ovest, con ampie possibilita' di fuga. "
+          "Zona artigianale di Arten, posti auto, manica a vento, niente servizi. "
+          "Il vento di solito soffia da est o sud-est. NEL POMERIGGIO PUO' ESSERE MOLTO SOSTENUTO: "
+          "attenzione per i principianti. "
+          "I deltaplanisti devono verificare le condizioni di atterraggio prima di andare in volo.",
+     fonte="paradeltafeltre.it"),
 ]
 
-# --- GHIACCIAIO SI/NO per le uscite alpinistiche degli Ecrins ---
-# True  = la via normale attraversa un ghiacciaio (con crepacci scoperti a fine stagione)
-# False = si sale su roccia, neve residua o sentiero, SENZA attraversare ghiacciaio
-GHIACCIAIO = {
- "Dome de Neige des Ecrins": True,
- "Barre des Ecrins": True,
- "Roche Faurio": True,
- "Pic du Glacier d'Arsine": True,
- "Mont Pelvoux": True,
- "Aiguille Dibona": False,
- "Pointe des Cerces": False,
- "Mont Thabor": False,
- "Mont Chaberton": False,
- "Pic de Rochebrune": False,
- "Aiguillette du Lauzet": False,
- "Tete d'Aval / Tete d'Amont": False,
- "Blocchi di Ailefroide": False,
- "Falesia e vie lunghe di Ailefroide": False,
- "Roche Faurio - parete SE (relazione)": True,
- "Sirac - Cresta Nord (relazione)": False,
- "Tete de Lauranoure (relazione)": True,
- "Tete des Fetoules (relazione)": True,
- "Traversata Promontoire - Aigle (relazione)": True,
- "Arete des Cineastes (relazione)": False,
- "Traversata del Soreiller (relazione)": False,
- "Traversata dell'Olan (relazione)": False,
- "Barre des Ecrins - Cresta Ovest, normale (relazione)": True,
- "Barre des Ecrins - Cresta Nord-Est (relazione)": True,
- "Traversata della Meije (relazione)": True,
-}
-
-# --- VINCOLI DI VOLO PER SITO ---
-# settori: liste di (da_gradi, a_gradi) in cui il sito FUNZIONA (settori orari, possono passare da 360)
-# vietati: settori in cui NON si vola comunque
-# max_v / max_giallo: vento a 700 hPa in km/h
+# ---- VINCOLI DI VOLO: settori in cui il sito funziona, in gradi ----
 VINCOLI = {
- "1 Alpstein": [
-   dict(sito="Ebenalp NW", settori=[(292,360),(0,22)], vietati=[(247,292)], max_v=22, max_giallo=30,
-        nota="Con W forte: pericolo di rotore"),
-   dict(sito="Kronberg (4 decolli)", settori=[(0,360)], vietati=[], max_v=25, max_giallo=35,
-        nota="Copre tutte le direzioni: e il piano che non salta mai"),
-   dict(sito="Hoher Kasten", settori=[(247,337)], vietati=[], max_v=25, max_giallo=33,
-        nota="Decollo W al Kastensattel; c'e anche lo Starkwind e l'Est"),
-   dict(sito="Saentis (alpinistico)", settori=[(225,292)], vietati=[], max_v=13, max_giallo=18,
-        nota="SOLO W-SW DEBOLI. Atterraggio a Unterwasser, recupero dall'altro versante"),
+ "1 Friuli": [
+   dict(sito="Monte Cuarnan", settori=[(135,247)], vietati=[(315,360),(0,45)], max_v=25, max_giallo=33,
+        nota="Voli consentiti con vento da sud. Cross in quasi tutte le direzioni"),
+   dict(sito="Monte San Simeone", settori=[(135,225)], vietati=[(315,360),(0,45)], max_v=25, max_giallo=33,
+        nota="Vento da sud. Prevalentemente dinamica, termica nei mesi caldi"),
+   dict(sito="Bernadia", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
+        nota="Esposizione non documentata: verifica sul posto"),
+   dict(sito="Porzus", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
+        nota="Esposizione non documentata"),
  ],
- "2 Zurigo": [
-   dict(sito="Rigi Staffelhoehe", settori=[(270,337)], vietati=[], max_v=25, max_giallo=33,
-        nota="Funziona dalle 14 a sera"),
-   dict(sito="Rigi Scheidegg", settori=[(22,67)], vietati=[], max_v=25, max_giallo=33,
-        nota="Il decollo da bise"),
-   dict(sito="Rigi Kulm", settori=[(135,247)], vietati=[], max_v=25, max_giallo=33, nota=""),
-   dict(sito="Rotenflue", settori=[(315,360),(0,45),(135,225)], vietati=[(247,292)], max_v=25,
-        max_giallo=33, nota="Non ideale con W. Quota massima 2750 m, aerovia A9"),
-   dict(sito="Niederbauen", settori=[(0,360)], vietati=[], max_v=22, max_giallo=30,
-        nota="Il piu facile del gruppo"),
+ "3 Slovenia": [
+   dict(sito="Kobala (Tolmin)", settori=[(45,157),(202,292)], vietati=[], max_v=22, max_giallo=30,
+        nota="Con vento forte il decollo e' ripido: rischio di essere trascinati oltre il crinale"),
+   dict(sito="Kobariski Stol", settori=[(112,247)], vietati=[], max_v=25, max_giallo=35,
+        nota="Prato ampio da gara. Strada dissestata, serve fuoristrada"),
+   dict(sito="Mrzli vrh — Matajur", settori=[(315,360),(0,67)], vietati=[], max_v=22, max_giallo=30,
+        nota="IL decollo da nord della zona"),
+   dict(sito="Ozben", settori=[(157,247)], vietati=[], max_v=22, max_giallo=30,
+        nota="Basso: il ripiego di tutto l'anno"),
+   dict(sito="Livski Kuk", settori=[(315,360),(0,45),(112,247)], vietati=[], max_v=22, max_giallo=28,
+        nota="Lato nord 5/5. Non atterrare a sud del decollo"),
+   dict(sito="Mangart — Sedlo", settori=[(45,135),(225,315)], vietati=[], max_v=20, max_giallo=27,
+        nota="Rischio serio se finisci a terra in termica. Strada innevata fino a giugno"),
+   dict(sito="Kanin — Skripi", settori=[(112,247)], vietati=[], max_v=22, max_giallo=30,
+        nota="Funivia ferma dal 2024: 600 m a piedi dalla stazione B"),
  ],
- "3 Oberland": [
-   dict(sito="Schynige Platte", settori=[(180,292)], vietati=[(292,360),(0,67)], max_v=22, max_giallo=30,
-        nota="No con NW, no con bise forte, no con vento di valle a Lehn"),
-   dict(sito="Grindelwald-First", settori=[(112,247)], vietati=[], max_v=25, max_giallo=33,
-        nota="Esposto a sud: il ripiego quando la Schynige Platte non va"),
-   dict(sito="Morgenberghorn", settori=[(157,292)], vietati=[], max_v=22, max_giallo=30,
-        nota="S-SW-W. Startplatz Spitz a meta salita per chiudere prima"),
-   dict(sito="Beatenberg-Amisbuehl", settori=[(0,360)], vietati=[], max_v=22, max_giallo=30,
-        nota="Il piu semplice della zona"),
+ "4 Alpago": [
+   dict(sito="Monte Dolada", settori=[(135,247)], vietati=[], max_v=25, max_giallo=33,
+        nota="Decollo al Rifugio Dolada, facile"),
+   dict(sito="Revine", settori=[(135,247)], vietati=[], max_v=25, max_giallo=33, nota=""),
+   dict(sito="Col Visentin", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
+        nota="Esposizione non documentata"),
  ],
- "4 Annecy": [
-   dict(sito="La Forclaz", settori=[(225,337)], vietati=[], max_v=25, max_giallo=33,
-        nota="Il decollo da XC. Strada privata: navetta dall'atterraggio"),
-   dict(sito="Planfait", settori=[(270,337)], vietati=[], max_v=25, max_giallo=33,
-        nota="Ci arrivi in auto"),
-   dict(sito="Col des Fretes (H&F)", settori=[(157,247)], vietati=[], max_v=22, max_giallo=30,
-        nota="Parti dal parcheggio alto di Planfait"),
-   dict(sito="Sambuy", settori=[(337,360),(0,90)], vietati=[], max_v=22, max_giallo=30, nota="N-NE-E"),
+ "5 Feltrino": [
+   dict(sito="Monte Avena — Decollo Sud", settori=[(135,202)], vietati=[(315,360),(0,45)],
+        max_v=25, max_giallo=33, nota="Con nord SEMPRE VIETATO. Sopravento al vento di valle"),
+   dict(sito="Monte Avena — Decollo Ovest", settori=[(180,247)], vietati=[(315,360),(0,45)],
+        max_v=22, max_giallo=30, nota="Con nord SEMPRE VIETATO. Spesso sottovento: in primavera solo esperti"),
+   dict(sito="Monte Avena — Decollo Est", settori=[(45,135)], vietati=[], max_v=22, max_giallo=30,
+        nota="Spazio per 5-6 vele"),
  ],
- "5 Saint-Hilaire": [
-   dict(sito="Saint-Hilaire Nord", settori=[(0,360)], vietati=[(157,202)], max_v=25, max_giallo=33,
-        nota="Attenzione al vento da sud. TETTO 3000 m, aeroporto di Lione"),
-   dict(sito="Saint-Hilaire Est", settori=[(45,157)], vietati=[], max_v=22, max_giallo=30,
-        nota="Il decollo nascosto per quando il tappeto e affollato"),
-   dict(sito="Dent de Crolles (H&F)", settori=[(157,202),(337,360),(0,22)], vietati=[], max_v=22,
-        max_giallo=30, nota="Decollo sud o nord. Effetto di compressione sulla cima"),
- ],
- "6 Ecrins": [
-   dict(sito="Dome de Neige", settori=[(0,360)], vietati=[], max_v=13, max_giallo=18,
-        nota="Serve aria calma di primo mattino. Decollo sotto la crepaccia"),
-   dict(sito="Roche Faurio", settori=[(45,157)], vietati=[], max_v=15, max_giallo=20,
-        nota="Decollo E/SE. Porta i picchetti da neve"),
-   dict(sito="Pic du Glacier d'Arsine", settori=[(157,292)], vietati=[], max_v=15, max_giallo=20,
-        nota="Decollo W e S: complementare alla Roche Faurio"),
-   dict(sito="Col d'Izoard High", settori=[(112,247)], vietati=[], max_v=25, max_giallo=35,
-        nota="Rampa dei 300 km: a settembre piu gestibile"),
-   dict(sito="Ceillac", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
-        nota="Dinamica costante. XC difficile"),
-   dict(sito="Pointe des Cerces", settori=[(315,360),(0,22)], vietati=[], max_v=22, max_giallo=30,
-        nota="Decollo N/NW da Plan Lachat. Senza ghiacciaio"),
-   dict(sito="Col du Granon", settori=[(112,247)], vietati=[], max_v=25, max_giallo=33,
-        nota="SE-S-SW. Brezze molto forti nel pomeriggio. Chantemerle vietato 1 mag-15 lug"),
-   dict(sito="Prorel - Sommet", settori=[(0,360)], vietati=[], max_v=25, max_giallo=33,
-        nota="Tutte le orientazioni. I decolli N e NE sono tecnici"),
-   dict(sito="Prorel - Croix de la Nore", settori=[(45,157)], vietati=[], max_v=22, max_giallo=30,
-        nota="E-NE-SE. Volo tecnico vicino alla cabinovia"),
-   dict(sito="Puy Aillaud", settori=[(0,360)], vietati=[(315,360),(0,45)], max_v=25,
-        max_giallo=30,
-        nota="Tutte le direzioni con meteo debole (<30 km/h a 3000 m) TRANNE IL NORD. "
-             "Linea elettrica sulla faccia est"),
-   dict(sito="Les Vigneaux / Tete d'Aval", settori=[(135,225)], vietati=[], max_v=22, max_giallo=30,
-        nota="Sud. Restituzione dalle 19 d'estate, termico in autunno"),
-   dict(sito="Mont Thabor", settori=[(112,247)], vietati=[], max_v=20, max_giallo=27,
-        nota="SE-SW. Senza ghiacciaio"),
-   dict(sito="Mont Chaberton", settori=[(0,360)], vietati=[], max_v=22, max_giallo=30,
-        nota="Mulattiera militare, senza ghiacciaio"),
- ],
-
 }
 
-# coordinate dei capolinea delle tratte, per la mappa del viaggio
-COORD_TAPPE = {
- "Gemona del Friuli":   (46.2750, 13.1372),
- "Milano":              (45.4642,  9.1900),
- "San Gallo":           (47.4245,  9.3767),
- "Wasserauen":          (47.2835,  9.4277),
- "Jakobsbad":           (47.3167,  9.2500),
- "Unterwasser":         (47.1900,  9.3100),
- "Zurigo":              (47.3769,  8.5417),
- "Weggis (Rigi)":       (47.0333,  8.4333),
- "Wilderswil":          (46.6650,  7.8600),
- "Grindelwald":         (46.6244,  8.0413),
- "Muelenen":            (46.6400,  7.6800),
- "Annecy":              (45.8992,  6.1294),
- "Doussard":            (45.7880,  6.2200),
- "Lumbin":              (45.3020,  5.9061),
- "Saint-Hilaire":       (45.3069,  5.8881),
- "Briancon":            (44.8990,  6.6450),
- "Pre de Madame Carle": (44.9250,  6.4100),
- "Plan Lachat":         (45.0700,  6.4200),
- "Ceillac":             (44.6667,  6.7756),
- "Les Etages (Dibona)": (44.9250,  6.2500),
- "Valle Orco":          (45.4200,  7.4000),
-}
-
-# --- TRATTE: giorno, da, a, km, ore, tipo, nota ---
-# tipo: "base" = il giro principale | "locale" = spostamenti in zona | "opzionale" = deviazioni
-TAPPE = [
- dict(g="sab 12", da="Gemona del Friuli", a="San Gallo",           km=670, ore=7.0,  tipo="base",
-      nota="LA TAPPA PIU LUNGA DEL VIAGGIO, e cade sul giorno con l'impegno alle 13. "
-           "Per arrivare in orario devi partire verso le 5, oppure spezzarla partendo il giorno prima. "
-           "Percorso piu diretto via Austria: Tarvisio, Villach, Salisburgo, Monaco, Lindau. "
-           "Serve la VIGNETTA AUSTRIACA (10 giorni, ~13 euro) oltre a quella SVIZZERA (40 CHF). "
-           "In Germania le autostrade sono gratuite. "
-           "Alternativa via Italia: Udine, A4, Milano, Como, Zurigo. Chilometri simili ma piu "
-           "pedaggi e piu traffico."),
- dict(g="sab 12", da="San Gallo",         a="Wasserauen",          km=30,  ore=0.6,  tipo="locale",
-      nota="Base per Ebenalp. Passi vicino all'heliport di Trogen: divieto di volo sotto 1200 m."),
- dict(g="dom 13", da="Wasserauen",        a="Jakobsbad",           km=35,  ore=0.7,  tipo="locale",
-      nota="Se scegli il Kronberg invece del Saentis."),
- dict(g="dom 13", da="Unterwasser",       a="Wasserauen",          km=40,  ore=0.9,  tipo="opzionale",
-      nota="RECUPERO SAENTIS: atterri in Toggenburg, dall'altro versante del massiccio. "
-           "Va organizzato prima, o con una seconda auto o in treno via Nesslau e Wattwil."),
- dict(g="lun 14", da="San Gallo",         a="Zurigo",              km=85,  ore=1.0,  tipo="base",
-      nota="Impegno alle 09."),
- dict(g="lun 14", da="Zurigo",            a="Weggis (Rigi)",       km=60,  ore=0.9,  tipo="locale",
-      nota="Staffelhoehe funziona dalle 14 a sera: ci arrivi comodo dopo l'impegno del mattino."),
- dict(g="mar 15", da="Zurigo",            a="Wilderswil",          km=135, ore=2.0,  tipo="base",
-      nota="Parti alle 6:30 se vuoi salire a piedi alla Schynige Platte ed essere in cima "
-           "alle 13:30, dentro la finestra buona."),
- dict(g="mer 16", da="Wilderswil",        a="Grindelwald",         km=22,  ore=0.5,  tipo="locale",
-      nota="Per First e Faulhorn. Andata e ritorno 45 km."),
- dict(g="mer 16", da="Wilderswil",        a="Muelenen",            km=25,  ore=0.5,  tipo="opzionale",
-      nota="Per il Morgenberghorn. Si atterra a Interlaken, quindi valuta dove lasci l'auto."),
- dict(g="gio 17", da="Wilderswil",        a="Annecy",              km=250, ore=3.5,  tipo="base",
-      nota="Tolto il passaggio da Losanna. A settembre la termica ad Annecy si accende tardi: "
-           "non serve partire all'alba."),
- dict(g="gio 17", da="Annecy",            a="Doussard",            km=20,  ore=0.4,  tipo="locale",
-      nota="LORENZO: lascia l'auto all'atterraggio a sud del lago e prendi la navetta per la "
-           "Forclaz, la strada sopra e privata. A Planfait invece ci arrivi in auto."),
- dict(g="ven 18", da="Annecy",            a="Lumbin",              km=100, ore=1.4,  tipo="base",
-      nota="Parcheggi a Lumbin, navette gratuite per Saint-Hilaire per tutta la manifestazione. "
-           "Arrivare presto, soprattutto nel weekend."),
- dict(g="lun 21", da="Saint-Hilaire",     a="Briancon",            km=190, ore=3.0,  tipo="base",
-      nota="Via Grenoble e Col du Lautaret."),
- dict(g="lun 21", da="Briancon",          a="Pre de Madame Carle", km=25,  ore=0.7,  tipo="locale",
-      nota="Base per Dome, Barre, Roche Faurio e Arsine. Andata e ritorno 50 km. "
-           "Ultimo tratto stretto: fai la ricognizione il 21, non di notte la prima volta."),
- dict(g="21-23",  da="Briancon",          a="Plan Lachat",         km=30,  ore=0.6,  tipo="opzionale",
-      nota="Per la Pointe des Cerces, sulla salita al Galibier. Rientra nel budget cross."),
- dict(g="21-23",  da="Briancon",          a="Ceillac",             km=50,  ore=1.0,  tipo="opzionale",
-      nota="LORENZO: paradiso van life, decollo a 200 m dall'atterraggio con dinamica costante. "
-           "MA e nel Queyras, a sud, fuori dal giro degli Ecrins. Andata e ritorno 100 km."),
- dict(g="21-23",  da="Briancon",          a="Les Etages (Dibona)", km=110, ore=2.0,  tipo="opzionale",
-      nota="VERSANTE OPPOSTO del massiccio, lato Veneon/Isere. Andata e ritorno 220 km e 4 ore: "
-           "con tre giorni non ci stanno sia la Dibona che la Barre. Devi sceglierne una."),
- dict(g="gio 24", da="Briancon",          a="Valle Orco",          km=230, ore=3.5,  tipo="opzionale",
-      nota="Via Monginevro, Torino, Cuorgne. PARTENDO DA GEMONA LA VALLE ORCO NON E PIU UNA "
-           "DEVIAZIONE: e sulla strada di casa, e spezza in due il rientro."),
- dict(g="lun 28", da="Valle Orco",        a="Gemona del Friuli",   km=530, ore=6.0,  tipo="opzionale",
-      nota="Rientro alternativo se il 24-27 sei in Valle Orco: 230 + 530 invece di 700 in un giorno. "
-           "Via Torino, Milano, A4. SE USI QUESTO, TOGLI la tratta Briancon-Gemona."),
- dict(g="lun 28", da="Briancon",          a="Gemona del Friuli",   km=700, ore=8.0,  tipo="base",
-      nota="Via Monginevro, Torino, Milano, A4. OTTO ORE, una giornata intera di guida. "
-           "E' la seconda tappa piu lunga: valuta di spezzarla."),
-]
-
-# consumo e pedaggi: valori modificabili nell'app
-COSTI = dict(consumo=8.5, prezzo_gasolio=1.75, vignetta_chf=40, vignetta_at=13,
-             pedaggi_stimati=140,
-             nota="Vignetta svizzera 40 CHF, annuale, non esistono formule brevi. "
-                  "Vignetta austriaca ~13 euro per 10 giorni, serve solo se fai la prima tappa "
-                  "via Tarvisio-Villach-Salisburgo. In Germania le autostrade sono gratuite. "
-                  "Pedaggi stimati per le autostrade italiane e francesi, andata e ritorno: "
-                  "con partenza da Gemona la A4 pesa parecchio. "
-                  "Monginevro e Lautaret sono valichi liberi, nessun tunnel a pagamento sul giro.")
-
-# nome, zona, giorni consigliati, categoria, dislivello, ore, elementi (nome punto), descrizione
+# ---- GITE ----
 GITE = [
- dict(nome="Ebenalp da Wasserauen", zona="1 Alpstein", giorni="sab 12", cat="Cross", disl=770, ore="2h30",
-      punti=["Ebenalp a piedi","Ebenalp NW (1.1)","A1 Wasserauen (parapendio)"],
-      testo="Sali a piedi da Wasserauen via Seealpsee, decolli dal NW nella finestra 15-18 e "
-            "atterri dove hai lasciato l'auto. Con vento da ovest forte lascia perdere: rotore. "
-            "Il decollo e tardo, quindi ti si incastra bene dopo l'impegno delle 13 a San Gallo."),
- dict(nome="Kronberg, l'assicurazione", zona="1 Alpstein", giorni="dom 13", cat="Cross", disl=770, ore="2h30",
-      punti=["Kronberg a piedi","Kronberg Sud","Kronberg Ovest","Kronberg Nord"],
-      testo="Da Jakobsbad. Quattro decolli in cima coprono tutte le direzioni, quindi e il piano "
-            "che non salta mai. Atterraggio alla stazione a valle: torni all'auto a piedi. "
-            "Il Sud e l'unico decollo dell'Alpstein per vento meridionale."),
- dict(nome="Saentis per il Lisengrat", zona="1 Alpstein", giorni="dom 13", cat="Alpinismo", disl=1634, ore="5h",
-      punti=["Saentis via Rotsteinpass e Lisengrat","Saentis"],
-      testo="La traversata classica dell'Alpstein: Seealpsee, Meglisalp, Rotsteinpass, poi la cresta "
-            "attrezzata del Lisengrat. SOLO CON W-SW DEBOLI, e non si decolla dalla funivia. "
-            "Atterri a Unterwasser in Toggenburg: il recupero e dall'altro versante, va organizzato prima. "
-            "Se il vento non e quello, ripieghi sul Kronberg."),
- dict(nome="Rigi di pomeriggio", zona="2 Zurigo", giorni="lun 14", cat="Cross", disl=1115, ore="3h",
-      punti=["Rigi Staffelhoehe","Rigi Scheidegg"],
-      testo="Da Weggis a piedi, oppure con la cremagliera se l'impegno delle 09 a Zurigo si allunga. "
-            "Staffelhoehe funziona dalle 14 fino a sera. Se c'e bise forte, il decollo giusto e "
-            "Rigi Scheidegg, che e esposto NE."),
- dict(nome="Schynige Platte a piedi", zona="3 Oberland", giorni="mar 15", cat="Cross", disl=1383, ore="4h30",
-      punti=["Schynige Platte a piedi","Schynige Platte","Lehn (Interlaken)"],
-      testo="Il piu bel hike & fly del viaggio come rapporto fatica/rientro. Parti da Zurigo alle 6:30, "
-            "parcheggi a Wilderswil alle 9, sei in cima alle 13:30 dentro la finestra buona, "
-            "atterri a Lehn che e a 3 km dall'auto con treno e bus ogni pochi minuti. "
-            "NO-GO: vento di valle a Lehn, NW, o bise forte. In quel caso vai a Grindelwald-First."),
- dict(nome="Faulhorn dal First", zona="3 Oberland", giorni="mer 16", cat="Cross", disl=516, ore="2h",
-      punti=["Faulhorn","Grindelwald-First"],
-      testo="Cabinovia fino a First e due ore di sentiero. Poca fatica, ambiente enorme davanti a "
-            "Eiger, Moench e Jungfrau. Se vuoi la giornata piena, la traversata integrale "
-            "Wilderswil-Schynige Platte-Faulhorn e 2330 m su 25 km, circa 10 ore."),
- dict(nome="Morgenberghorn", zona="3 Oberland", giorni="mer 16", cat="Alpinismo", disl=1498, ore="5h",
-      punti=["Morgenberghorn (salita)","Morgenberghorn","Startplatz Spitz (Morgenberghorn)"],
-      testo="Da Muelenen, decollo S/SW/W, 1622 m di volo fino a Interlaken. "
-            "Dalla via di Aeschiried c'e lo Startplatz Spitz a meta: se in alto non va, chiudi li."),
- dict(nome="Forclaz, il giorno di cross", zona="4 Annecy", giorni="gio 17", cat="Cross", disl=0, ore="",
-      punti=["La Forclaz","Doussard","Parcheggio La Forclaz"],
-      testo="LORENZO: per partire in XC si va alla Forclaz, che e piu alta di Planfait. "
-            "Ma la strada sopra e privata: lasci l'auto all'atterraggio a sud del lago e prendi "
-            "le navette, organizzate benissimo. A settembre c'e molta meno gente che d'estate. "
-            "I cross sono facili perche basta seguire gli altri."),
- dict(nome="Col des Fretes", zona="4 Annecy", giorni="gio 17", cat="Hike & Fly", disl=400, ore="1h30",
-      punti=["Col des Fretes","Parcheggio alto Planfait / Col de Fretes"],
-      testo="LORENZO: il punto di partenza e il parcheggio alto del decollo Planfait, dove arrivi "
-            "in navetta o col bus gratuito. Quindi non sono i 1030 m dal fondovalle: solo l'ultimo "
-            "pezzo a piedi. Pendio erboso grande e bello, S-SW. "
-            "Da li a piedi raggiungi comunque tutti i decolli della zona."),
- dict(nome="Coupe Icare senza coda", zona="5 Saint-Hilaire", giorni="ven 18 - dom 20", cat="Cross", disl=0, ore="",
-      punti=["Saint-Hilaire EST (il segreto)","Lumbin","Top landing ufficio turismo"],
-      testo="Il decollo Nord il 19-20 e occupato dall'Icarnaval. L'Est e un piccolo decollo nascosto "
-            "e pulito per quando il tappeto e troppo affollato: attenzione alle vele che arrivano di lato. "
-            "NON SI SALE SOPRA I 3000 m, aeroporto di Lione. "
-            "Lascia l'auto all'atterraggio e sali con la funicolare o le navette gratuite."),
- dict(nome="Dent de Crolles dal Col du Coq", zona="5 Saint-Hilaire", giorni="sab 19 - dom 20", cat="Cross",
-      disl=650, ore="2h",
-      punti=["Dent de Crolles"],
-      testo="La via corta: 650 m dal Col du Coq invece dei 1100 da Saint-Hilaire o 1800 da Lumbin. "
-            "Decollo nel pendio sommitale, sud o nord. Attenzione a un effetto di compressione sulla cima. "
-            "E l'unico modo di volare davvero nel weekend della manifestazione."),
- dict(nome="Dome de Neige e volo", zona="6 Ecrins", giorni="mar 22", cat="Alpinismo", disl=2141, ore="6-7h",
-      punti=["Dome de Neige des Ecrins","Refuge des Ecrins","Refuge du Glacier Blanc"],
-      testo="Partenza notturna dal Pre de Madame Carle verso l'1:00-2:00 per essere in cima tra le 7 e le 8. "
-            "Il decollo si fa SOTTO LA CREPACCIA e il rischio e la neve troppo scaldata in cui sprofondi "
-            "correndo: alle 10 hai perso la finestra. Tre opzioni di volo, la piu sicura e lo scavalco "
-            "del col de Barre Noire sul Glacier Noir, per non farsi schiacciare dal catabatico. "
-            "ACCLIMATAMENTO: vieni da 300 m di Saint-Hilaire. Valuta la notte al locale invernale del "
-            "Glacier Blanc (2542 m): dimezza la giornata e ti da una notte in quota."),
- dict(nome="Roche Faurio, la versione ragionevole", zona="6 Ecrins", giorni="mar 22 - mer 23", cat="Alpinismo",
-      disl=1850, ore="5-6h",
-      punti=["Roche Faurio"],
-      testo="300 m in meno del Dome e nessuna difficolta seria, stesso ambiente. "
-            "Decollo est/sud-est, due piazzali: uno a ovest poco pendente con spazio per correre, "
-            "uno a sud grande e piatto sopra la fine del ghiacciaio. "
-            "PORTA I PICCHETTI da piantare nella neve. Volo sopra il Glacier Blanc fino al parcheggio."),
- dict(nome="Pic du Glacier d'Arsine", zona="6 Ecrins", giorni="mer 23", cat="Alpinismo", disl=1500, ore="5h",
-      punti=["Pic du Glacier d'Arsine"],
-      testo="Decollo OVEST e SUD, quindi e il complemento della Roche Faurio: con qualsiasi vento "
-            "uno dei due funziona. 1500 m dal Pre de Madame Carle."),
- dict(nome="Dibona, giornata di roccia", zona="6 Ecrins", giorni="alternativa 21-23", cat="Arrampicata",
-      disl=1150, ore="3h avvicinamento",
-      punti=["Aiguille Dibona","Refuge du Soreiller"],
-      testo="ATTENZIONE: e sul versante OPPOSTO del massiccio (Veneon, lato Isere). "
-            "Dal Pre de Madame Carle sono 110 km e due ore. Con tre giorni non ci stanno sia questa "
-            "che la Barre: devi sceglierne una. "
-            "LA VELA RESTA IN MACCHINA: la cima e una guglia, non si decolla. "
-            "Telefona al rifugio (04 76 79 08 32), le date di chiusura sono discordanti."),
- dict(nome="Pointe des Cerces", zona="6 Ecrins", giorni="21 o 23", cat="Cross", disl=1150, ore="4h",
-      punti=["Pointe des Cerces"],
-      testo="Da Plan Lachat, sulla sinistra salendo al Galibier. Rientra nel budget cross. "
-            "Decollo nord/nord-ovest su un ripiano sotto la cima, atterraggio a Plan Lachat, grandi spazi. "
-            "Col Mont Thabor (sud-est/sud-ovest) copri i regimi opposti."),
- dict(nome="Ceillac, giornata van life", zona="6 Ecrins", giorni="opzionale", cat="Cross", disl=0, ore="",
-      punti=["Ceillac","Ceillac (atterraggio)"],
-      testo="LORENZO: paradiso van life. Valle alpina con mega pianoro e paesino caratteristico. "
-            "Decollo a 200 m dall'atterraggio, con dinamica costante che ti tiene su. "
-            "Ci sono anche hike & fly alti con viste spettacolari. "
-            "CONTRO: partire in XC da li non e per niente facile, sei molto in alto e giri in valli alpine. "
-            "NOTA LOGISTICA: e 50 km a sud di Vallouise, nel Queyras. Non e sulla strada del Dome."),
+ dict(nome="Cuarnan da Gemona", zona="1 Friuli", cat="Hike & Fly", disl=1000, ore="2h30",
+      punti=["Monte Cuarnan","Atterraggio Gemona"],
+      testo="Il giro di casa. Si sale per la Strada di Foredor fino a Malga Cuarnan e poi a piedi "
+            "nel bosco di faggi fino al prato. Circa 1000 m di dislivello sulla pianura. "
+            "Si vola con vento da sud e si atterra a Gemona, dove hai lasciato l'auto. "
+            "Attenzione alle bolle nelle ore centrali in primavera ed estate."),
+ dict(nome="San Simeone da Bordano", zona="1 Friuli", cat="Cross", disl=950, ore="2h",
+      punti=["Monte San Simeone","Atterraggio Bordano"],
+      testo="Strada forestale interamente asfaltata da Bordano, quindi ci arrivi anche in auto. "
+            "Il decollo e' dinamico prima ancora che termico, quindi regge anche le giornate magre. "
+            "All'atterraggio vale il regolamento ASD: niente ground-handling nelle zone atterraggio e "
+            "ripiegamento, e non si sorvola Bordano sotto i 300 m."),
+ dict(nome="Dolada in hike & fly", zona="4 Alpago", cat="Hike & Fly", disl=900, ore="1h45",
+      punti=["Monte Dolada"],
+      testo="Si parte dall'atterraggio del DeltaClub Monte Dolada, si attraversa Villa, poi Pieve e "
+            "Torres per strade e ciclabili, da Torres la vecchia strada verso Plois e poi il sentiero "
+            "segnato per il Rifugio Dolada. 6 km, 900 m, circa un'ora e tre quarti. Decollo S/SW. "
+            "Chiudi il cerchio atterrando dove hai lasciato l'auto."),
+ dict(nome="Kobala, il classico di Tolmin", zona="3 Slovenia", cat="Cross", disl=0, ore="",
+      punti=["Kobala (Tolmin)","Posocje — regole, tasse e pericoli"],
+      testo="Il decollo piu' popolare della valle dell'Isonzo, ci si arriva in auto. "
+            "Biglietto giornaliero 4 euro, si compra al Camp Gabrje, al Kobala center, a FlyZone Ciginj, "
+            "al Camp Siber o al Bar Pri Noni. Tetto di spazio aereo a 2900 m MSL. "
+            "Con vento forte il decollo e' ripido e si rischia di essere trascinati oltre il crinale."),
+ dict(nome="Stol di Kobarid", zona="3 Slovenia", cat="Cross", disl=0, ore="",
+      punti=["Kobariski Stol","Posocje — regole, tasse e pericoli"],
+      testo="Prato ampio che ha ospitato molte gare XC, esposto SE-S-SW. "
+            "La strada e' dissestata: fuoristrada o navetta. Essendo alto regge anche in autunno, "
+            "quando le termiche si fanno deboli. Biglietto a Kobarid: TIC, Jazbec Idrsko o Bar Teja."),
+ dict(nome="Mangart, quando c'e' la neve in basso", zona="3 Slovenia", cat="Cross", disl=0, ore="",
+      punti=["Mangart — Sedlo","Mangart — Tunel (Prhodci)"],
+      testo="Il Sedlo a 1990 m e' facile e adatto anche ai principianti, ma con vento forte di valle "
+            "il rischio e' serio se finisci a terra in termica. Non decollare dopo le 10 con forte "
+            "attivita'. Se il vento in quota e' troppo o la neve chiude il sedlo, si ripiega sul Tunel "
+            "a 1870, S-SW, ma li' sotto il decollo c'e' una strada e col vento nullo meglio lasciar perdere. "
+            "La strada e' spesso innevata fino a giugno."),
+ dict(nome="Monte Avena, tre decolli per tre venti", zona="5 Feltrino", cat="Cross", disl=0, ore="",
+      punti=["Monte Avena — Decollo Sud","Monte Avena — Decollo Ovest","Monte Avena — Decollo Est",
+             "Boscherai (Pedavena)"],
+      testo="Sud per il mattino e per chi e' agli inizi, Ovest dopo le 17 quando si calma e si veleggia "
+            "sopra la piana tra Fonzaso e Arten, Est quando gira. "
+            "CON VENTO DA NORD SUD E OVEST SONO SEMPRE VIETATI. "
+            "Si atterra al Boscherai, 20.000 m2 che accettano qualsiasi direzione, con docce."),
 ]
 
-GIORNI = [
-    ("sab 12", "1 Alpstein", "Impegno a San Gallo (13:00 o 10:00). Ebenalp: finestra 15-18."),
-    ("dom 13", "1 Alpstein", "Kronberg a piedi (770 m, 4 decolli) oppure Saentis (1634 m, solo W-SW deboli)."),
-    ("lun 14", "2 Zurigo", "Impegno a Zurigo (09:00). Pomeriggio: Rigi Staffelhoehe (dalle 14) o una delle cime T2."),
-    ("mar 15", "3 Oberland", "Trasferimento Zurigo-Wilderswil (135 km, 2h). Schynige Platte a piedi o Breitlauenen."),
-    ("mer 16", "3 Oberland", "GIORNO LIBERATO (era Losanna). Cima dell'Oberland con volo di discesa."),
-    ("gio 17", "4 Annecy", "Il vero giorno di cross. Forclaz/Planfait, oppure Tournette in hike & fly."),
-    ("ven 18", "5 Saint-Hilaire", "Coupe Icare, Icare Expo 10:00-19:30. Decollo EST per volare senza coda."),
-    ("sab 19", "5 Saint-Hilaire", "Icarnaval + Icare Show. Decollo Nord occupato. Alternativa: Dent de Crolles."),
-    ("dom 20", "5 Saint-Hilaire", "Idem. Navette gratuite Saint-Hilaire-Lumbin, parcheggi a Lumbin, arrivare presto."),
-    ("lun 21", "6 Ecrins", "Trasferimento (190 km, 3h via Lautaret). Ricognizione Pre de Madame Carle. Volo a Prorel/Izoard."),
-    ("mar 22", "6 Ecrins", "Il giorno grosso. Dome de Neige (2141 m) o Roche Faurio (1850 m). Partenza notturna."),
-    ("mer 23", "6 Ecrins", "Cuscinetto meteo. Se il 22 e saltato, oggi e il giorno buono."),
-    ("gio 24", "7 Val Susa/Chisone", "Valle Orco (te la gestisci tu)."),
-    ("ven 25", "7 Val Susa/Chisone", ""),
-    ("sab 26", "7 Val Susa/Chisone", ""),
-    ("dom 27", "7 Val Susa/Chisone", ""),
-    ("lun 28", "", "Rientro. Briancon-Milano 300 km, 4h via Monginevro."),
+# gite di flytherapy.it, lato bellunese: nome, zona, link
+GITE_FLYTHERAPY = [
+ ("Monte Serva","Valbelluna","monte-serva-parapendio"), ("Montanel","Cadore","montanel"),
+ ("Monte Terne","Valbelluna","monte-terne"), ("Monte Guslon","Alpago","monte-guslon"),
+ ("Monte Talvena","Valbelluna","monte-talvena"), ("Monte Dolada","Alpago","monte-dolada"),
+ ("Monte Antelao","Cadore","monte-antelao"), ("Monte Tranego","Cadore","tranego"),
+ ("Monte Palmar","Valbelluna","monte-palmar"), ("Bivacco Spagnolli","Cadore","bivacco-spagnolli"),
+ ("Monte Grave","Valbelluna","monte-grave"), ("Casera Zervoi","Valbelluna","casera-zervoi"),
+ ("Casera Busnich","Longarone-Zoldo","casera-busnich"), ("Rifugio Scarpa","Agordino","rifugio-scarpa"),
+ ("Bivacco Toffolon","Alpago","bivacco-toffolon"), ("Cima Coldai","Longarone-Zoldo","cima-coldai"),
+ ("Monte Rite","Longarone-Zoldo","monte-ritte"), ("Col Rosson","Comelico-Sappada","col-rosson"),
+ ("Monte Porgeit","Longarone-Zoldo","monte-porgeit"),
+ ("Monte Faverghera Nevegal","Alpago / Valbelluna","monte-faverghera-nevegal"),
+ ("Croce Monte Serva","Valbelluna","croce-monte-serva"), ("Sappada 2000","Comelico-Sappada","sappada-2000"),
+ ("Casera Colon","Longarone-Zoldo","casera-colon"), ("Monte Simone","Cadore","monte-simone"),
+ ("Monte Avena","Valbelluna","monte-avena"),
 ]
 
-TRATTE = [
-    ("Milano", "San Gallo", 330, "4h"),
-    ("San Gallo", "Zurigo", 85, "1h"),
-    ("Zurigo", "Wilderswil", 135, "2h"),
-    ("Wilderswil", "Annecy", 250, "3h30"),
-    ("Annecy", "Lumbin", 100, "1h20"),
-    ("Saint-Hilaire", "Briancon", 190, "3h (Col du Lautaret)"),
-    ("Briancon", "Les Etages", 110, "2h"),
-    ("Briancon", "Milano", 300, "4h (Monginevro)"),
-]
-
-MATERIALE = [
-    ("Corda 30 m", "INSUFFICIENTE per le doppie della Dibona. Servono 50 m minimo, 60 per la Voie du Nain."),
-    ("Picchetti da neve", "Per i decolli sui ghiacciai degli Ecrins: la vela scivola."),
-    ("Vela 16", "Voli di discesa, non termica. Giornate alpinistiche = aria calma di primo mattino."),
-    ("Vela cross + pod", "Giornate cross, fascia 12-16. Soglia salita a piedi: 1200 m."),
-    ("Ramponi + piccozza", "Ecrins, e Pointe des Fretes in primavera."),
-    ("FLARM", "Consigliato nella zona dell'heliport di Trogen."),
-]
+# Le zone del colpo d'occhio regionale. Ordine da est a ovest.
+PUNTI_METEO = {
+ "Prealpi Giulie \u2014 Gemona, Cuarnan":   (46.27, 13.16),
+ "Carnia \u2014 Tolmezzo, Zoncolan":        (46.40, 13.02),
+ "Alpi Giulie \u2014 Tarvisio, Lussari":    (46.46, 13.53),
+ "Valli del Natisone \u2014 Matajur":       (46.18, 13.52),
+ "Poso\u010dje \u2014 Tolmin, Kobala":       (46.19, 13.74),
+ "Kobarid \u2014 Stol, Livek":              (46.25, 13.58),
+ "Dolomiti friulane \u2014 Piancavallo":    (46.12, 12.52),
+ "Alpago \u2014 Dolada, Cansiglio":         (46.15, 12.35),
+ "Bellunese \u2014 Nevegal, Visentin":      (46.10, 12.28),
+ "Feltrino \u2014 Monte Avena":             (46.03, 11.83),
+}
 
 FONTI = [
-    ("SHV/FSVL", "shv-fsvl.ch - siti di volo, anche in italiano", "Svizzera"),
-    ("fga.ch", "Fluggemeinschaft Alpstein, con webcam", "Alpstein"),
-    ("HFC Alpstein", "Club hike & fly, organizza l'Alpstein Crossing", "Alpstein"),
-    ("paragliding.ch/hike-and-fly", "Cime con quota, grado SAC, dislivello, tempo", "Svizzera"),
-    ("baern-gliders.ch", "Rotte hike & fly con GPX", "Oberland"),
-    ("deltaclub-interlaken.ch", "Info sito Interlaken", "Oberland"),
-    ("hikr.org", "Relazioni cime svizzere, gradi SAC", "Svizzera"),
-    ("gipfelbuch.ch", "Condizioni aggiornate, da guardare la settimana prima", "Svizzera"),
-    ("sac-cas.ch Tourenportal", "Database ufficiale CAS", "Svizzera"),
-    ("map.geo.admin.ch", "Swisstopo, overlay pendenza", "Svizzera"),
-    ("camptocamp.org", "Waypoint tipo Decollage, TUTTE le Alpi", "Francia + Svizzera"),
-    ("lespiedssurterre.blog", "Idees de sommets en rando vol: cime con orientamento decollo", "Francia"),
-    ("parapenterando.free.fr", "Database siti rando-vol", "Francia"),
-    ("infos-parapente.com", "Topo rando-vol dettagliati", "Francia"),
-    ("bivouak.net", "Savoia", "Francia"),
-    ("XContest", "Punti di decollo reali dai tracciati", "Ovunque"),
-    ("thermal.kk7.ch", "Termiche e traiettorie aggregate", "Ovunque"),
-    ("paraglidingearth.com", "Solo GPX, max 99 siti per volta dal riquadro visibile", "Ovunque"),
-    ("meteo-parapente.com", "Vento di gradiente per quota, top termico, strato limite", "Meteo"),
-    ("camminaevola.it", "SOLO http:// - la versione https e un sito dirottato", "FVG"),
+ ("vololiberofriuli.it","Cuarnan e San Simeone, regolamento atterraggio Bordano","Friuli"),
+ ("visitgemona.com","Pagina volo del comune di Gemona","Friuli"),
+ ("paragliding-bovec.com","Guida completa Posocje: 10 decolli, tasse, regole, pericoli","Slovenia"),
+ ("drustvo-adrenalin.si","Club di Kobarid: Stol, Ozben, Livski Kuk, Mrzli vrh","Slovenia"),
+ ("paraglidingmap.com","Schede siti Kobarid e Tolmin","Slovenia"),
+ ("paradeltafeltre.it","Monte Avena: tre decolli e due atterraggi con coordinate","Feltrino"),
+ ("flytherapy.it","25 schede hike & fly bellunesi con dislivello e tempi","Bellunese"),
+ ("komoot","Collection 'Hike&Fly Val Belluna, Alpago e Prealpi Venete'","Bellunese"),
+ ("fivl.it","Federazione Italiana Volo Libero, tag hike-fly","Italia"),
+ ("camptocamp.org","Waypoint tipo Decollage, copre anche Alpi Giulie e Slovenia","Tutto"),
+ ("XContest","Decolli reali estratti dai tracciati","Tutto"),
+ ("thermal.kk7.ch","Termiche e traiettorie aggregate","Tutto"),
+ ("paraglidingearth.com","Database collaborativo, export solo GPX, max 99 siti","Tutto"),
+ ("meteo-parapente.com","Vento di gradiente per quota, top termico, strato limite","Meteo"),
+ ("ARPA FVG OSMER","Previsioni e radar regionali","Meteo"),
+ ("camminaevola.it","107 relazioni di hike & fly con difficolta' di decollo, direzione del "
+  "vento, atterraggi, parcheggio, via di salita e coordinate di decollo e atterraggio",
+  "Friuli, Carnia, Dolomiti friulane, Slovenia"),
 ]
+
+NOTE_AREA = [
+ ("Friuli", "Due decolli ufficiali principali, Cuarnan e San Simeone, entrambi esposti a sud e con "
+            "circa 1000 m di dislivello sulla pianura. Il grosso del potenziale non ufficiale sta nei "
+            "25 hike & fly carnici che trovi nel KML: Clapsavon, Tinisa, Pleros, Raut, Lovinzola, "
+            "Creta di Mimoias, Amariana, Plauris, Musi. Di quelli non esiste documentazione pubblica "
+            "di esposizione: vanno ricavati dalla carta, da camptocamp o dai tracciati XContest."),
+ ("Slovenia", "La zona meglio documentata di tutte. Dieci decolli ufficiali con esposizione, "
+              "difficolta' da 1 a 5, club di riferimento e tariffe. Occhio al tetto di spazio aereo "
+              "a 2900 m, al Parco del Triglav e all'SMS obbligatorio per l'aeroporto di Bovec."),
+ ("Alpago e bellunese", "Dolada e Revine hanno esposizione nota, il resto no. "
+                        "Flytherapy copre 25 gite hike & fly con dislivello e tempi, ma solo lato "
+                        "bellunese: in Friuli non ha niente."),
+ ("Feltrino", "Il Para&Delta Club Feltre e' l'unico ad avere pubblicato tutto: tre decolli e due "
+              "atterraggi con coordinate al quinto decimale, regole e condizioni. "
+              "Il modello di come dovrebbero essere documentati tutti gli altri."),
+]
+
+# Fonti meteo locali del Friuli. Quelle con (drive) vengono dal materiale del
+# comitato sul Tagliamento che mi hai indicato.
+FONTI_METEO_FVG = [
+ ("ARPA FVG — OSMER", "Il servizio meteo regionale: previsioni, allerte, radar e dati delle "
+  "stazioni. meteo.fvg.it. Nota emersa dal materiale sul Drive: anche loro ogni tanto scivolano "
+  "nel linguaggio da clickbait — 27-29 °C descritti come 'temperature quasi estive'. "
+  "I dati restano i migliori che ci sono in regione."),
+ ("Pazzi per il Meteo Goriziano", "Pagina di Daniel Tescari (Dantex), cacciatore di tempeste, "
+  "attiva da 11 anni e vicina ai 100.000 follower su Facebook. Mappe temporalesche, radarate a "
+  "bassa quota e una mano sulle allerte. È il canale social meteo di riferimento in regione. (drive)"),
+ ("Società Meteorologica Alpino-Adriatica", "Ex Unione Meteorologica del FVG. "
+  "Convegni e divulgazione tecnica sul clima regionale. (drive)"),
+ ("Radar Protezione Civile", "radar.protezionecivile.it. 26 radar in Italia, scansione completa "
+  "ogni 5-15 minuti, ciechi nei primi 5 km e nel cono sopra l'antenna, portata 150-200 km. (drive)"),
+ ("meteo-parapente.com", "Vento di gradiente per quota, top termico, spessore dello strato "
+  "limite. È il modello tarato sul volo libero, non sul meteo generale."),
+ ("Wetterzentrale / Meteociel", "Carte sinottiche GFS ed ECMWF: geopotenziale a 500 hPa, "
+  "fronti, pressione al suolo. Per capire la configurazione, non la giornata."),
+]
+
+# Fenomeni locali del Friuli emersi dal materiale sul Drive.
+FENOMENI_FVG = [
+ ("Alte pressioni persistenti", "Il maltempo non è solo il ciclone. Nell'estate 2026 la "
+  "LUNGHEZZA delle fasi calde, più che le punte, è stata superiore al 2003 nella zona "
+  "morenica. Per il volo vuol dire inversioni tenaci e termiche che si spengono presto."),
+ ("Temporali meno numerosi ma più violenti", "Con le alte pressioni più presenti i "
+  "temporali diminuiscono di numero ma aumentano di intensità, perché c'è molta "
+  "più energia accumulata in atmosfera."),
+ ("Fasi siccitose lunghe", "Dal 2010 in poi, in regione: una pioggia da 200 mm a Lignano e poi "
+  "altri 30 giorni di sole. Il pattern si è allungato."),
+ ("Vaia, ottobre 2018", "Mediterraneo caldissimo più ingresso di aria fredda. 204 km/h di "
+  "scirocco registrati a Monte Rest, ma con l'incanalamento vallivo in Val Visdende "
+  "probabilmente di più. Il dato che conta per chi vola: IL GROSSO DELLE PRECIPITAZIONI "
+  "FU NELLE ALPI INTERNE E NON NELLE PREALPI, al contrario del solito."),
+ ("Eventi recenti da ricordare", "La grandinata di Santa Maria la Longa e Mortegliano, "
+  "il bow echo che ha divelto alberi e pali tra Carlino e Torviscosa, una supercella tornadica "
+  "uscita sul mare. Tutti in regione, tutti negli ultimi anni."),
+ ("Tempi di ritorno che si accorciano", "Eventi che sembravano secolari 'si cominciano un po' "
+  "ad avvicinare'. Le statistiche storiche valgono meno di una volta."),
+]
+
+DESCR_ATT = {
+ "cross": "Decolli e atterraggi ufficiali: ci si arriva in auto o con un impianto, c'e' un club "
+          "dietro e di solito un regolamento da rispettare.",
+ "hef": "Si sale a piedi su terreno escursionistico. Le 107 uscite di Cammina e Vola portano "
+        "difficolta' di decollo, direzione del vento, via di salita e atterraggio; sui punti che "
+        "vengono solo dal KML l'esposizione va ricavata dalla carta o dai tracciati XContest.",
+ "pa_est": "Cime alpine: terreno da alpinismo, roccia o neve residua, si vola in discesa. "
+           "La classificazione e' una proposta basata sul carattere della cima.",
+ "pa_inv": "Cime da scialpinismo: si sale con le pelli e si vola giu'. Valgono valanghe, vento "
+           "di quota e giornate corte: il semaforo guarda solo il vento.",
+}
+
+# Scala della difficolta' di decollo usata da Cammina e Vola (camminaevola.it).
+SCALA_CEV = [
+ ("1", "Spazi ampi: ci stanno piu' vele stese, gonfiaggio e corsa in sicurezza anche senza vento "
+       "e con la possibilita' di fermare il decollo. Pendenza ottimale, sufficiente anche per una "
+       "vela da montagna e non eccessiva. Terreno regolare, niente pietre acuminate, vegetazione o "
+       "intoppi dove cordini e vela possano impigliarsi, niente dirupi o ostacoli vicini. "
+       "La direzione di decollo non e' vincolata: tollera angoli ampi rispetto alla massima pendenza."),
+ ("2", "Serve buona esperienza e ottimo controllo della vela in gonfiaggio. Gli spazi bastano per "
+       "stendere la vela e per gonfiare, controllare e decollare se le condizioni aerologiche sono "
+       "adeguate. Il terreno puo' essere irregolare e richiedere attenzione nella rincorsa; pietre "
+       "acuminate, vegetazione o altri intoppi chiedono cura per non impigliare cordini e vela. "
+       "Possibili dirupi o ostacoli nelle vicinanze."),
+ ("2-", "Le difficolta' del grado 2 sono presenti solo in parte."),
+ ("2+", "Le condizioni del grado 2 si presentano in forma particolarmente severa."),
+ ("3", "Spazi angusti, appena sufficienti a stendere la vela: si decolla solo con condizioni "
+       "aerologiche perfette. Serve ottima capacita' di valutare aria e attrezzatura e controllo "
+       "perfetto in gonfiaggio, senza errori ne' esitazioni. Terreno estremamente impegnativo per "
+       "irregolarita' e pietre acuminate, dirupi o ostacoli nelle immediate vicinanze. "
+       "Ogni leggerezza qui comporta un rischio molto elevato."),
+]
+
+# Dagli "Appunti di meteorologia per il Friuli Venezia Giulia", ARPA FVG, III edizione 2010.
+METEO_FVG = [
+ ("Stau e foehn — perche' piove tanto sulle Prealpi",
+  "Sul versante sopravvento l'aria e' costretta a salire: si espande, si raffredda e da una certa "
+  "quota in su il vapore condensa, con nuvole e precipitazioni TANTO PIU' INTENSE QUANTO PIU' SI "
+  "E' VICINI ALLE MONTAGNE. Ma condensando il vapore emette calore, quindi da li' in su l'aria si "
+  "raffredda meno del normale e arriva sullo spartiacque meno fredda di quanto sarebbe. "
+  "Sul versante sottovento torna a scendere, ha perso quasi tutto il vapore, si comprime e si "
+  "riscalda: la nuvolosita' scompare subito e l'aria arriva in pianura ben piu' calda che "
+  "sull'altro versante alla stessa quota. Tempo bello, ventoso e secco: e' il foehn."),
+ ("Dove piove in Friuli",
+  "Dai trent'anni di dati del Servizio Idrografico: a causa dello stau LE PREALPI, che sono le "
+  "prime montagne a sbarrare il passo alle masse d'aria umide meridionali, ricevono le quantita' "
+  "piu' elevate di pioggia e neve. A seconda dei casi risultano favorite le Prealpi Carniche o le "
+  "Giulie. Allontanandosi dalle Prealpi le precipitazioni diminuiscono: nelle Alpi perche' sono "
+  "riparate dalle Prealpi, sulla pianura perche' lo stau si fa via via meno intenso. "
+  "Il Friuli e' fortunato: riceve piogge e nevicate con venti sia da sud-ovest (Libeccio), "
+  "sia da sud, sia da sud-est (Scirocco)."),
+ ("Bora chiara",
+  "Generata da un forte anticiclone sull'Europa nord-orientale, che spinge aria secca e "
+  "d'inverno molto fredda verso il Mediterraneo centrale. Il vento sulle Venezie e' IMPETUOSO, "
+  "MOLTO FORTE MA DISCONTINUO, A RAFFICHE. Tempo bello e secco, d'inverno freddo. "
+  "Puo' essere brutto sui versanti sopravvento di Slovenia e Croazia per effetto stau."),
+ ("Bora scura",
+  "Generata da una profonda depressione sul Tirreno, a volte sull'Adriatico, che richiama aria "
+  "dall'Europa orientale. Il vento da nord-est e' FORTE E ABBASTANZA CONTINUO, con raffiche meno "
+  "marcate della chiara. Poiche' la depressione richiama in quota aria calda e umida da sud, su "
+  "buona parte d'Italia il tempo e' brutto, ma SUL FRIULI LE PIOGGE NON SONO MOLTO INTENSE. "
+  "D'inverno e' una delle poche situazioni che portano la neve in regione."),
+ ("Dove nasce la Bora e perche' e' cosi' forte",
+  "E' particolarmente forte sulle Venezie perche' prima di arrivarci una gran massa d'aria deve "
+  "passare per una ZONA RISTRETTA FRA LE ALPI GIULIE E I DINARI, sul Carso, nel retroterra "
+  "triestino. Chiara o scura, quando c'e' Bora la pressione e' piu' alta su Austria, entroterra "
+  "sloveno e croato che sull'area padano-veneta. Il gradiente e' massimo proprio sulle Alpi "
+  "Giulie, sul Carso fra Lubiana e Trieste e sulle Dinariche. "
+  "E' comunque un VENTO DI CADUTA, DEL TIPO FOEHN: arriva sull'Adriatico piu' calda di quando e' "
+  "partita, anche di diversi gradi. Ma fra wind-chill e aria preesistente piu' calda, la "
+  "sensazione e' di freddo."),
+ ("Le brezze: il respiro della montagna",
+  "Le valli friulane sono rivolte all'incirca VERSO SUD, verso la pianura e l'Adriatico. Questo "
+  "determina sia l'incanalamento dei venti sia lo sviluppo delle brezze. "
+  "La brezza di MONTE e' notturna: i versanti in quota si raffreddano, l'aria a contatto diventa "
+  "piu' pesante e scende lungo i pendii fino al fondovalle. La brezza di VALLE e' diurna ed e' "
+  "l'inverso: i versanti si scaldano, l'aria sale lungo i pendii e richiama aria dal fondovalle. "
+  "Quando la situazione le favorisce le brezze possono diventare anche forti."),
+ ("La giornata tipo in una valle friulana",
+  "DI BUON MATTINO soffia la brezza di monte: alle alte quote cielo sereno e buona visibilita', "
+  "sul fondovalle ristagna un cuscinetto di aria fredda che genera INVERSIONE TERMICA, con "
+  "foschie o nebbie. Se l'inversione e' forte ed e' a meta' altezza nella vallata, la nebbia puo' "
+  "sollevarsi fin sotto l'inversione formando STRATOCUMULI anche compatti, che da sotto danno "
+  "l'impressione di cielo coperto.\\n\\n"
+  "A META' MATTINATA il sole scalda i versanti e poi il fondovalle: l'aria sale, prima ROMPE "
+  "L'INVERSIONE e poi comincia a risalire il fondovalle. Nuvole, foschia e nebbia si dissolvono. "
+  "La visibilita' migliora in basso e PEGGIORA IN QUOTA, perche' l'umidita' viene portata in alto.\\n\\n"
+  "VERSO META' GIORNATA e' piena brezza di valle: l'aria porta su l'umidita', si espande, si "
+  "raffredda e condensa nei CUMULI DI BEL TEMPO sopra i versanti. Lo sviluppo e' piu' facile con "
+  "atmosfera instabile, ostacolato con atmosfera stabile.\\n\\n"
+  "D'INVERNO tutto questo avviene con molta minore intensita'. A volte l'inversione, con nebbia o "
+  "nuvole, PUO' PERMANERE TUTTO IL GIORNO."),
+ ("Il temporale di calore pomeridiano",
+  "Favorito da instabilita', umidita' elevata e ASSENZA DI VENTO FORTE IN QUOTA. Uno dei cumuli "
+  "diventa sempre piu' grande, torreggiante, con molte protuberanze; la sommita' si allarga e si "
+  "appiattisce nell'INCUDINE. Se la base e' grigia e frastagliata e' facile che ci siano pioggia "
+  "o grandine. IL TEMPORALE ROMPE IL SISTEMA DEI VENTI DI BREZZA: correnti di aria fredda "
+  "arrivano fino al suolo con raffiche disordinate. Si sposta nella direzione del vento dominante "
+  "in quota. "
+  "Sulle Alpi non e' raro che PIU' TEMPORALI FORMATISI IN VALLATE VICINE SI UNISCANO nel tardo "
+  "pomeriggio, per esempio in Carnia o nelle Dolomiti, e che il gruppo poi si sposti sulla "
+  "pianura friulana."),
+ ("Di sera: come si legge il giorno dopo",
+  "Quando il temporale si allontana o si esaurisce, nella vallata non ci sono venti ben "
+  "individuabili e le nuvole vanno diminuendo; quelle che restano tendono a diventare "
+  "STRATIFORMI. SE SCOMPAIONO DEL TUTTO il tempo probabilmente non sta cambiando e restera' "
+  "bello, e l'indomani il ciclo ricomincia. SE INVECE SI ESTENDONO E SI ALLARGANO, e' possibile "
+  "che si prospetti un peggioramento."),
+ ("Il vento trasversale alla valle",
+  "Quando il vento sinottico soffia a circa 90 gradi rispetto alla valle, e' difficile che venga "
+  "incanalato. TANTO PIU' LA VALLE E' STRETTA E PROFONDA, TANTO PIU' IL VENTO ARRIVA SUL "
+  "FONDOVALLE INALTERATO. Puo' succedere che l'aria, dopo aver sorvolato la valle, venga riflessa "
+  "dal versante opposto e torni indietro sul fondovalle in verso opposto al vento dominante. "
+  "In generale si forma TURBOLENZA, che pero' dissipa foschie e nebbie e rimescola l'atmosfera. "
+  "Sul fondovalle i venti trasversali sono comunque rari."),
+]
+
+# A quali zone del dataset corrisponde ogni punto meteo, per contare i siti.
+ZONE_SITI = {
+ "Gemona / Cuarnan":        ["1 Friuli"],
+ "Tolmezzo / Carnia":       ["6 Pordenonese / Carnia ovest"],
+ "Tarvisio / Alpi Giulie":  ["2 Alpi Giulie"],
+ "Tolmin / Kobala":         ["3 Slovenia"],
+ "Kobarid / Stol":          ["3 Slovenia"],
+ "Alpago / Dolada":         ["4 Alpago"],
+ "Belluno / Nevegal":       ["4 Alpago", "10 Cadore / Dolomiti"],
+ "Feltre / Monte Avena":    ["5 Feltrino"],
+}
+
+
+# --------------------------------------------------------------------
+# ATTIVITA
+# --------------------------------------------------------------------
+# Classificazione per TIPOLOGIA DI ATTIVITA'.
+# 
+# cross  = voli di cross: decolli e atterraggi ufficiali, si arriva in auto o con impianto
+# hef    = hike & fly: si sale a piedi, terreno escursionistico
+# pa_est = paralpinismo estivo: cima alpina, terreno da alpinismo, si vola in discesa
+# pa_inv = paralpinismo invernale: scialpinismo o neve, si vola in discesa
+# 
+# Un punto puo' avere piu' attivita'. La classificazione dei due paralpinismi e' una
+# PROPOSTA basata sul carattere della cima, non su relazioni di volo verificate.
+
+ATTIVITA = {
+ "cross":  dict(eti="Voli di cross",          rgb=[214,  40,  40], ico="\U0001FA82"),
+ "hef":    dict(eti="Hike & Fly",             rgb=[255, 170,   0], ico="\U0001F97E"),
+ "pa_est": dict(eti="Paralpinismo estivo",    rgb=[ 45, 106,  79], ico="⛰️"),
+ "pa_inv": dict(eti="Paralpinismo invernale", rgb=[ 60, 145, 230], ico="❄️"),
+}
+
+# Cime alpine del nordest: terreno da alpinismo estivo.
+PARALP_ESTIVO = {
+ # Alpi Giulie
+ "montasio","jof di montasio","jof fuart","canin","monte canin","monte jama",
+ "mangart","prestreljenik","due pizzi","cima del cacciatore","monte lussari",
+ # Prealpi Giulie e Carniche orientali
+ "monte plauris","monte amariana","musi","monte cretis","monte dobis","monte brancot",
+ "monte cucco","costa cavallo","cima somp selve","postuncicco","matajur","stol",
+ # Carnia
+ "monte clapsavon","monte tinisa","monte pleros","creta di mimoias","monte lovinzola",
+ "monte tersadia","monte oberkovel","creton di culzei","monte teglara","monte taront",
+ "monte rossa e taiet","croce di micottis","casera davass","cuel di montof","rancolin",
+ "monte rua","colle dei larici","missione cormolina","bivacco brollo","passo pura",
+ # Dolomiti friulane e bellunesi
+ "monte raut","monte borga","val montanaia","forcella di giais","il portellin",
+ "cima vallon scuro","moon lander - cima postegae","bivacco spagnolli","col mat",
+ "tre cime","monte piana","monte serva","monte dolada","rit",
+}
+
+# Cime classiche da scialpinismo: si sale con le pelli e si vola giu'.
+PARALP_INVERNALE = {
+ "monte zoncolan","zoncolan","val secca","monte tersadia","monte dobis","monte cucco",
+ "monte cretis","croce di micottis","casera davass","passo pura","monte amariana",
+ "cuel di montof","rancolin","monte rua","colle dei larici","monte teglara",
+ "monte lussari","monte jama","canin","monte canin","montasio",
+ "cima somp selve","costa cavallo","monte brancot","sattelnock","golzentipp",
+ "emberger alm","helm","monte piana","tre cime","col mat","rit","sorica","vogel","gozd",
+}
+
+# Override espliciti: nome esatto -> lista attivita'
+OVERRIDE = {
+ "Monte Cuarnan": ["cross","hef"],
+ "Monte San Simeone": ["cross","hef"],
+ "Monte Dolada": ["cross","hef","pa_est"],
+ "Revine": ["cross"],
+ "Nevegal": ["cross","hef"],
+ "Col Visentin": ["cross","hef"],
+ "Pizzoc": ["cross"],
+ "Monte Serva": ["cross","hef","pa_est"],
+ "Bernadia": ["cross"], "Porzus": ["cross"], "Karcos": ["cross"],
+ "Monte Avena — Decollo Sud": ["cross"], "Monte Avena — Decollo Ovest": ["cross"],
+ "Monte Avena — Decollo Est": ["cross"],
+ "Monte Lussari": ["cross","pa_inv"],
+ "Canin": ["cross","pa_est","pa_inv"],
+ "Stol (versante italiano)": ["cross","hef","pa_est"],
+ "Mittagskogel": ["cross"],
+ "Hike & Fly Montasio": ["hef","pa_est","pa_inv"],
+ "Hike & Fly Monte Plauris": ["hef","pa_est"],
+ "Hike & Fly Monte Amariana": ["hef","pa_est","pa_inv"],
+ "Hike & Fly Musi": ["hef","pa_est"],
+ "Hike & Fly Matajur": ["hef","pa_est"],
+ # Slovenia
+ "Kobala (Tolmin)": ["cross"], "Kobariski Stol": ["cross"], "Livski Kuk": ["cross"],
+ "Mrzli vrh — Matajur": ["cross"], "Ozben": ["cross"], "Vrse": ["cross"],
+ "Mangart — Sedlo": ["cross","pa_est","pa_inv"],
+ "Mangart — Tunel (Prhodci)": ["cross","pa_inv"],
+ "Kanin — Skripi": ["cross","pa_est","pa_inv"],
+ "Planja": ["hef","pa_est"],
+}
+
+def _norm(n):
+    import unicodedata
+    n = str(n)
+    for p in ("Takeoff ","Hike & Fly ","Hike and Fly ","Landing ","Parking ","Cablecar "):
+        n = n.replace(p, "")
+    n = unicodedata.normalize("NFKD", n.lower()).encode("ascii","ignore").decode()
+    for ch in "'`’": n = n.replace(ch, " ")
+    return " ".join(n.split())
+
+def attivita_di(nome, tipo, cartella_kml=None, quota=None):
+    """Ritorna la lista di attivita' per un punto."""
+    if nome in OVERRIDE:
+        return list(OVERRIDE[nome])
+    k = _norm(nome)
+    a = []
+    # si atterra e si parcheggia qualunque sia l'attivita': valgono per tutte
+    if tipo in ("atterraggio", "parcheggio"):
+        return ["cross", "hef", "pa_est", "pa_inv"]
+    if tipo == "impianto":
+        return ["cross", "pa_inv"]
+    if tipo == "decollo": a.append("cross")
+    if tipo == "hike&fly": a.append("hef")
+    if k in PARALP_ESTIVO:    a.append("pa_est")
+    if k in PARALP_INVERNALE: a.append("pa_inv")
+    # un hike & fly molto alto e' quasi sempre anche terreno alpino
+    if tipo == "hike&fly" and quota and quota >= 2000 and "pa_est" not in a:
+        a.append("pa_est")
+    return a or ["cross"]
+
+
+# --------------------------------------------------------------------
+# MOTORE METEO
+# --------------------------------------------------------------------
+# Analisi meteo orientata al volo: instabilita', quota massima, inversioni,
+# turbolenza, gradiente termico. Dati Open-Meteo (modello ICON/ECMWF).
+import json, urllib.request, urllib.parse, math
+import pandas as pd
+
+LIVELLI = [925, 850, 800, 700, 600, 500]
+
+ORARIE = (
+    ["temperature_2m","dew_point_2m","cape","lifted_index","convective_inhibition",
+     "boundary_layer_height","freezing_level_height","cloud_cover","cloud_cover_low",
+     "cloud_cover_mid","cloud_cover_high","wind_speed_10m","wind_direction_10m",
+     "wind_gusts_10m","precipitation_probability"]
+    + [f"temperature_{l}hPa" for l in LIVELLI]
+    + [f"wind_speed_{l}hPa" for l in LIVELLI]
+    + [f"wind_direction_{l}hPa" for l in LIVELLI]
+    + [f"geopotential_height_{l}hPa" for l in LIVELLI]
+    + [f"relative_humidity_{l}hPa" for l in LIVELLI]
+    + [f"cloud_cover_{l}hPa" for l in LIVELLI]
+)
+GIORNALIERE = ["temperature_2m_max","temperature_2m_min","precipitation_sum",
+               "precipitation_probability_max","wind_speed_10m_max"]
+
+def _get(la, lo, orarie):
+    p = urllib.parse.urlencode({"latitude": la, "longitude": lo, "timezone": "auto",
+                                "forecast_days": 10, "daily": ",".join(GIORNALIERE),
+                                "hourly": ",".join(orarie)})
+    with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=25) as f:
+        return json.load(f)
+
+def scarica(la, lo):
+    """Prova i nomi moderni, ripiega su quelli vecchi se l'API li rifiuta."""
+    try:
+        return _get(la, lo, ORARIE)
+    except Exception:
+        vecchi = [v.replace("dew_point_2m","dewpoint_2m").replace("wind_speed","windspeed")
+                   .replace("wind_direction","winddirection").replace("wind_gusts","windgusts")
+                   .replace("cloud_cover","cloudcover")
+                   .replace("relative_humidity","relativehumidity") for v in ORARIE]
+        return _get(la, lo, vecchi)
+
+def _c(h, nome):
+    """Colonna, qualunque sia la convenzione di nomi."""
+    for n in (nome, nome.replace("dew_point_2m","dewpoint_2m").replace("wind_speed","windspeed")
+                        .replace("wind_direction","winddirection").replace("wind_gusts","windgusts")
+                        .replace("cloud_cover","cloudcover")
+                        .replace("relative_humidity","relativehumidity")):
+        if n in h.columns: return h[n]
+    return pd.Series([float("nan")] * len(h), index=h.index)
+
+def _vento_medio(vs, ds):
+    """Media vettoriale di vento e direzione."""
+    u = sum(-v*math.sin(math.radians(d)) for v,d in zip(vs,ds) if pd.notna(v) and pd.notna(d))
+    w = sum(-v*math.cos(math.radians(d)) for v,d in zip(vs,ds) if pd.notna(v) and pd.notna(d))
+    n = sum(1 for v,d in zip(vs,ds) if pd.notna(v) and pd.notna(d))
+    if not n: return float("nan"), float("nan")
+    u, w = u/n, w/n
+    return math.hypot(u,w), (math.degrees(math.atan2(-u,-w)) % 360)
+
+def _shear(v1,d1,v2,d2):
+    if any(pd.isna(x) for x in (v1,d1,v2,d2)): return float("nan")
+    u1,w1 = -v1*math.sin(math.radians(d1)), -v1*math.cos(math.radians(d1))
+    u2,w2 = -v2*math.sin(math.radians(d2)), -v2*math.cos(math.radians(d2))
+    return math.hypot(u2-u1, w2-w1)
+
+def analizza(la, lo):
+    """Ritorna (DataFrame per giorno, quota stazione, orario scaricamento)."""
+    from datetime import datetime
+    d = scarica(la, lo)
+    quota_staz = d.get("elevation", 0) or 0
+    h = pd.DataFrame(d["hourly"]); h["time"] = pd.to_datetime(h["time"])
+    f = h[h["time"].dt.hour.between(11, 16)].copy()
+    f["g"] = f["time"].dt.date
+    dd = pd.DataFrame(d["daily"]); dd["time"] = pd.to_datetime(dd["time"]); dd["g"] = dd["time"].dt.date
+
+    righe = []
+    for g, b in f.groupby("g"):
+        r = {"g": g}
+        r["cape"] = _c(b,"cape").mean()
+        r["cape_max"] = _c(b,"cape").max()
+        r["li"]  = _c(b,"lifted_index").mean()
+        r["cin"] = _c(b,"convective_inhibition").mean()
+        blh = _c(b,"boundary_layer_height").max()
+        r["blh"] = blh
+        r["quota_termica"] = quota_staz + blh if pd.notna(blh) else float("nan")
+        r["zero_term"] = _c(b,"freezing_level_height").mean()
+        t2, td2 = _c(b,"temperature_2m").mean(), _c(b,"dew_point_2m").mean()
+        r["spread"] = t2 - td2 if pd.notna(t2) and pd.notna(td2) else float("nan")
+        r["base_nubi"] = (max(quota_staz + 50, quota_staz + 125*(t2-td2))
+                          if pd.notna(t2) and pd.notna(td2) else float("nan"))
+        r["nuv_bassa"] = _c(b,"cloud_cover_low").mean()
+        r["nuv_tot"]   = _c(b,"cloud_cover").mean()
+        r["pioggia"]   = _c(b,"precipitation_probability").max()
+        r["raffiche"]  = _c(b,"wind_gusts_10m").max()
+        v10 = _c(b,"wind_speed_10m").mean()
+        r["v10"] = v10
+        r["raff_ratio"] = (r["raffiche"]/v10) if pd.notna(v10) and v10 > 1 else float("nan")
+
+        # profilo verticale
+        prof = []
+        for l in LIVELLI:
+            t = _c(b,f"temperature_{l}hPa").mean()
+            z = _c(b,f"geopotential_height_{l}hPa").mean()
+            v = _c(b,f"wind_speed_{l}hPa").mean()
+            dr_ = _vento_medio(_c(b,f"wind_speed_{l}hPa"), _c(b,f"wind_direction_{l}hPa"))[1]
+            rh = _c(b,f"relative_humidity_{l}hPa").mean()
+            nb = _c(b,f"cloud_cover_{l}hPa").mean()
+            prof.append(dict(hPa=l, t=t, z=z, v=v, d=dr_, rh=rh, nub=nb))
+        r["profilo"] = prof
+        P = {p["hPa"]: p for p in prof}
+        r["v700"], r["d700"] = P[700]["v"], P[700]["d"]
+        r["v850"], r["d850"] = P[850]["v"], P[850]["d"]
+        r["t850"], r["t700"] = P[850]["t"], P[700]["t"]
+
+        # gradiente termico (lapse rate) in gradi ogni 100 m
+        def lapse(a, b_):
+            pa, pb = P[a], P[b_]
+            if any(pd.isna(x) for x in (pa["t"],pb["t"],pa["z"],pb["z"])) or pb["z"]==pa["z"]:
+                return float("nan")
+            return (pa["t"]-pb["t"]) / (pb["z"]-pa["z"]) * 100
+        r["lapse_925_850"] = lapse(925, 850)
+        r["lapse_850_700"] = lapse(850, 700)
+        r["lapse_700_500"] = lapse(700, 500)
+
+        # inversioni: temperatura che sale salendo di quota
+        inv = []
+        ordinati = sorted([p for p in prof if pd.notna(p["t"]) and pd.notna(p["z"])],
+                          key=lambda p: p["z"])
+        for a_, b_ in zip(ordinati, ordinati[1:]):
+            if b_["t"] > a_["t"] + 0.2:
+                inv.append((a_["z"], b_["z"], b_["t"]-a_["t"]))
+        # inversione bassa: suolo piu' freddo del 925
+        if pd.notna(t2) and pd.notna(P[925]["t"]) and P[925]["t"] > t2 + 0.2 \
+           and pd.notna(P[925]["z"]) and P[925]["z"] > quota_staz:
+            inv.insert(0, (quota_staz, P[925]["z"], P[925]["t"]-t2))
+        r["inversioni"] = inv
+        r["tappo"] = inv[0][0] if inv else float("nan")
+
+        # strati di nubi: quota e copertura
+        strati = []
+        for p in sorted([x for x in prof if pd.notna(x["z"])], key=lambda x: x["z"]):
+            cop = p["nub"] if pd.notna(p["nub"]) else (
+                  max(0.0, (p["rh"]-70)*3.3) if pd.notna(p["rh"]) else float("nan"))
+            if pd.notna(cop) and cop >= 25:
+                strati.append(dict(z=p["z"], cop=cop, rh=p["rh"], hPa=p["hPa"]))
+        r["strati_nubi"] = strati
+        r["nuv_media"] = _c(b,"cloud_cover_mid").mean()
+        r["nuv_alta"]  = _c(b,"cloud_cover_high").mean()
+        # la base dei cumuli e' sopra o sotto il tetto delle termiche?
+        bn, qt = r["base_nubi"], r["quota_termica"]
+        r["cumuli"] = (pd.notna(bn) and pd.notna(qt) and bn <= qt + 150)
+
+        # shear = turbolenza potenziale
+        r["shear_925_700"] = _shear(P[925]["v"],P[925]["d"],P[700]["v"],P[700]["d"])
+        r["shear_850_700"] = _shear(P[850]["v"],P[850]["d"],P[700]["v"],P[700]["d"])
+        righe.append(r)
+
+    out = dd.merge(pd.DataFrame(righe), on="g", how="left")
+    return out, quota_staz, datetime.now().strftime("%d/%m %H:%M")
+
+# ---------------- interpretazioni ----------------
+def giudica_instabilita(cape, li):
+    if pd.isna(cape) and pd.isna(li): return "—", "dati mancanti"
+    c = 0 if pd.isna(cape) else cape
+    if c < 150:   lv, t = 0, "stabile"
+    elif c < 500: lv, t = 1, "instabilità debole"
+    elif c < 1200: lv, t = 2, "instabilità moderata"
+    elif c < 2000: lv, t = 3, "instabilità forte"
+    else:          lv, t = 4, "instabilità molto forte"
+    if pd.notna(li):
+        if li <= -5 and lv < 3: lv, t = 3, "instabilità forte (LI)"
+        elif li <= -2 and lv < 2: lv, t = 2, "instabilità moderata (LI)"
+    ic = ["\U0001F7E2","\U0001F7E2","\U0001F7E1","\U0001F7E0","\U0001F534"][lv]
+    return ic, t
+
+def giudica_gradiente(l):
+    if pd.isna(l): return "—", "dati mancanti"
+    if l < 0.45: return "\U0001F535", "stabile, termiche deboli o assenti"
+    if l < 0.65: return "\U0001F7E2", "gradiente modesto, termiche dolci"
+    if l < 0.80: return "\U0001F7E2", "buon gradiente, termiche efficienti"
+    if l < 0.92: return "\U0001F7E1", "gradiente forte, termiche vigorose"
+    return "\U0001F534", "quasi adiabatico secco, termiche violente"
+
+def giudica_turbolenza(shear, raff_ratio, v700):
+    pt = 0
+    if pd.notna(shear):
+        pt += 0 if shear < 15 else (1 if shear < 30 else (2 if shear < 45 else 3))
+    if pd.notna(raff_ratio):
+        pt += 0 if raff_ratio < 1.6 else (1 if raff_ratio < 2.2 else 2)
+    if pd.notna(v700) and v700 > 35: pt += 1
+    lv = min(pt, 3)
+    return (["\U0001F7E2","\U0001F7E1","\U0001F7E0","\U0001F534"][lv],
+            ["turbolenza bassa","turbolenza moderata","turbolenza marcata",
+             "turbolenza forte"][lv])
+
+def descrivi_inversioni(inv, quota_staz):
+    if not inv: return "\U0001F7E2", "nessuna inversione nel profilo"
+    base, cima, dt = inv[0]
+    rel = base - quota_staz
+    if rel < 300:
+        return "\U0001F534", (f"inversione al suolo, tappo a {base:.0f} m "
+                              f"(+{dt:.1f}°C fino a {cima:.0f} m)")
+    if rel < 1200:
+        return "\U0001F7E0", (f"inversione bassa, tappo a {base:.0f} m "
+                              f"(+{dt:.1f}°C fino a {cima:.0f} m)")
+    return "\U0001F7E1", f"inversione in quota a {base:.0f} m (+{dt:.1f}°C)"
+
+
+def giudica_nuvole(nuv_bassa, nuv_media, nuv_alta, base, quota_term, cumuli):
+    """Lettura operativa della copertura: cosa vuol dire per chi vola."""
+    nb = 0 if pd.isna(nuv_bassa) else nuv_bassa
+    nm = 0 if pd.isna(nuv_media) else nuv_media
+    na = 0 if pd.isna(nuv_alta) else nuv_alta
+    frasi, ic = [], "\U0001F7E2"
+    if nb >= 70:
+        ic = "\U0001F534"
+        frasi.append(f"nubi basse al {nb:.0f}%: sole schermato, termiche spente")
+    elif nb >= 35:
+        ic = "\U0001F7E1"
+        frasi.append(f"nubi basse al {nb:.0f}%: termiche a intermittenza")
+    elif nb > 10:
+        frasi.append(f"poche nubi basse ({nb:.0f}%)")
+    if nm >= 50:
+        if ic == "\U0001F7E2": ic = "\U0001F7E1"
+        frasi.append(f"strato medio al {nm:.0f}%: scalda meno, attenzione al peggioramento")
+    if na >= 50:
+        frasi.append(f"velature al {na:.0f}%: riducono l'irraggiamento ma lasciano volare")
+    if cumuli:
+        frasi.append(f"cumuli attesi, base intorno a {base:.0f} m")
+    elif pd.notna(base) and pd.notna(quota_term) and base > quota_term + 150:
+        frasi.append("aria troppo secca per i cumuli: termiche blu, niente riferimenti visivi")
+    if not frasi:
+        frasi.append("cielo sereno o quasi")
+    return ic, " \u00b7 ".join(frasi)
+
+
+# ---------------- punteggi per attivita' ----------------
+def _p(v, buono, limite):
+    """100 se <= buono, 0 se >= limite, lineare in mezzo."""
+    if pd.isna(v): return 55.0
+    if v <= buono: return 100.0
+    if v >= limite: return 0.0
+    return 100.0 * (limite - v) / (limite - buono)
+
+def _combina(s):
+    """Il fattore peggiore pesa piu' della media: una sola cosa storta basta a
+    rovinare la giornata, e fare la media la nasconderebbe."""
+    return 0.6 * min(s.values()) + 0.4 * (sum(s.values()) / len(s))
+
+def punteggi(r):
+    """Per ogni attivita': (voto 0-100, motivo in una riga)."""
+    v700 = r.get("v700"); cape = r.get("cape"); li = r.get("li")
+    lapse = r.get("lapse_850_700"); nb = r.get("nuv_bassa"); pio = r.get("pioggia")
+    shear = r.get("shear_925_700"); zt = r.get("zero_term"); qt = r.get("quota_termica")
+    out = {}
+
+    def comune(lim_vento):
+        s = {}
+        s["vento"] = _p(v700, lim_vento * 0.6, lim_vento * 1.7)
+        s["pioggia"] = _p(pio, 10, 70)
+        s["nubi"] = _p(nb, 25, 85)
+        s["turb"] = _p(shear, 15, 55)
+        return s
+
+    # CROSS: vuole termiche efficienti, vento gestibile, niente temporali
+    s = comune(25)
+    s["grad"] = 100.0 if pd.isna(lapse) else (
+        100.0 if 0.62 <= lapse <= 0.90 else (65.0 if 0.5 <= lapse < 0.62 else
+        (55.0 if 0.90 < lapse <= 0.96 else 25.0)))
+    s["inst"] = 100.0 if pd.isna(cape) else (
+        55.0 if cape < 150 else (100.0 if cape < 700 else
+        (70.0 if cape < 1200 else (35.0 if cape < 2000 else 10.0))))
+    out["cross"] = (_combina(s), _motivo("cross", min(s, key=s.get), s, r))
+
+    # HIKE & FLY: tollera meno vento, non gli serve la termica forte
+    s = comune(20)
+    s["grad"] = 100.0 if pd.isna(lapse) else (100.0 if lapse <= 0.92 else 45.0)
+    s["inst"] = 100.0 if pd.isna(cape) else (100.0 if cape < 900 else
+                (55.0 if cape < 1600 else 15.0))
+    out["hef"] = (_combina(s), _motivo("hef", min(s, key=s.get), s, r))
+
+    # PARALPINISMO ESTIVO: aria calma, niente temporali, zero termico alto
+    s = comune(16)
+    s["inst"] = 100.0 if pd.isna(cape) else (100.0 if cape < 300 else
+                (55.0 if cape < 800 else 10.0))
+    s["zero"] = 100.0 if pd.isna(zt) else (100.0 if zt >= 3200 else
+                (70.0 if zt >= 2600 else 40.0))
+    out["pa_est"] = (_combina(s), _motivo("pa_est", min(s, key=s.get), s, r))
+
+    # PARALPINISMO INVERNALE: aria calma, poca neve nuova, zero termico basso
+    s = comune(16)
+    s["inst"] = 100.0 if pd.isna(cape) else (100.0 if cape < 300 else 40.0)
+    s["zero"] = 100.0 if pd.isna(zt) else (100.0 if zt <= 2200 else
+                (65.0 if zt <= 2900 else 35.0))
+    out["pa_inv"] = (_combina(s), _motivo("pa_inv", min(s, key=s.get), s, r))
+    return out
+
+def _motivo(att, peggio, s, r):
+    if s[peggio] >= 80:
+        if att in ("cross","hef"):
+            g = r.get("lapse_850_700")
+            if pd.notna(g) and g >= 0.62: return "termiche efficienti e vento gestibile"
+            return "condizioni tranquille, termiche dolci"
+        return "aria calma, giornata pulita"
+    testi = {
+     "vento": lambda: f"vento a 700 hPa {r['v700']:.0f} km/h",
+     "pioggia": lambda: f"pioggia al {r['pioggia']:.0f}%",
+     "nubi": lambda: f"nubi basse al {r['nuv_bassa']:.0f}%",
+     "turb": lambda: f"shear {r['shear_925_700']:.0f} km/h, aria mossa",
+     "grad": lambda: (f"gradiente {r['lapse_850_700']:.2f}, aria stabile"
+                      if pd.notna(r.get('lapse_850_700')) and r['lapse_850_700'] < 0.6
+                      else f"gradiente {r['lapse_850_700']:.2f}, termiche dure"),
+     "inst": lambda: f"CAPE {r['cape']:.0f}, rischio sviluppi",
+     "zero": lambda: f"zero termico {r['zero_term']:.0f} m",
+    }
+    try: return testi[peggio]()
+    except Exception: return "condizioni marginali"
+
+def voto_icona(v):
+    if pd.isna(v): return "—"
+    if v >= 78: return "\U0001F7E2"
+    if v >= 62: return "\U0001F7E1"
+    if v >= 45: return "\U0001F7E0"
+    return "\U0001F534"
+
+
+# ---------------- punteggio per attivita' ----------------
+def _fascia(x, soglie):
+    """Ritorna 0..len(soglie) in base a dove cade x."""
+    if pd.isna(x): return 0
+    n = 0
+    for s in soglie:
+        if x >= s: n += 1
+    return n
+
+def punteggio(r, att):
+    """0-100 e una frase. Ogni attivita' vuole cose diverse dal tempo."""
+    v700 = r.get("v700"); cape = r.get("cape"); grad = r.get("lapse_850_700")
+    qt = r.get("quota_termica"); nb = r.get("nuv_bassa"); pio = r.get("pioggia")
+    zt = r.get("zero_term"); raf = r.get("raffiche"); cum = r.get("cumuli")
+    p, note = 50, []
+
+    pio_ = 0 if pd.isna(pio) else pio
+    if pio_ >= 60: p -= 40; note.append("pioggia probabile")
+    elif pio_ >= 30: p -= 18; note.append("qualche rovescio")
+
+    nb_ = 0 if pd.isna(nb) else nb
+    v_ = 0 if pd.isna(v700) else v700
+
+    if att in ("cross", "hef"):
+        # vento: ne serve poco ma non zero
+        if v_ <= 12: p += 12
+        elif v_ <= 22: p += 18
+        elif v_ <= 30: p += 2; note.append("vento sostenuto")
+        elif v_ <= 40: p -= 22; note.append("vento forte in quota")
+        else: p -= 40; note.append("troppo vento")
+        # gradiente
+        if pd.notna(grad):
+            if grad >= 0.80: p += 18; note.append("gradiente ottimo")
+            elif grad >= 0.65: p += 14; note.append("buon gradiente")
+            elif grad >= 0.50: p += 5
+            else: p -= 14; note.append("aria stabile")
+        # quota di lavoro
+        if pd.notna(qt):
+            if qt >= 2500: p += 14; note.append("termiche alte")
+            elif qt >= 1800: p += 9
+            elif qt >= 1200: p += 3
+            else: p -= 10; note.append("tetto basso")
+        if nb_ >= 70: p -= 22; note.append("coperto basso")
+        elif nb_ >= 40: p -= 8
+        if cum: p += 6; note.append("cumuli segnalatori")
+        c_ = 0 if pd.isna(cape) else cape
+        if c_ >= 1500: p -= 18; note.append("rischio sovrasviluppi")
+        elif c_ >= 800: p -= 6
+        if att == "hef":
+            p += 6   # perdona condizioni piu' magre: tanto si sale a piedi
+            if pd.notna(raf) and raf >= 45: p -= 14; note.append("raffiche al suolo")
+    else:
+        # paralpinismo: conta salire in sicurezza e volare giu' in aria calma
+        if v_ <= 12: p += 24; note.append("aria calma")
+        elif v_ <= 20: p += 12
+        elif v_ <= 28: p -= 8; note.append("vento in quota")
+        else: p -= 35; note.append("troppo vento in cresta")
+        c_ = 0 if pd.isna(cape) else cape
+        if c_ >= 800: p -= 25; note.append("instabilità: temporali")
+        elif c_ >= 400: p -= 10
+        if nb_ >= 60: p -= 18; note.append("visibilità scarsa")
+        elif nb_ <= 20: p += 10; note.append("cielo pulito")
+        if pd.notna(raf) and raf >= 50: p -= 12
+        if att == "pa_est":
+            if pd.notna(zt):
+                if zt >= 3200: p += 8
+                elif zt <= 2000: p -= 8; note.append("zero termico basso")
+        else:  # pa_inv
+            if pd.notna(zt):
+                if zt <= 1800: p += 10; note.append("neve fredda")
+                elif zt >= 2800: p -= 12; note.append("zero termico alto, neve molle")
+            if pd.notna(grad) and grad >= 0.85:
+                p -= 6; note.append("rischio instabilità del manto")
+    p = max(0, min(100, p))
+    return p, (", ".join(note[:3]) if note else "condizioni ordinarie")
+
+def colore_punteggio(p):
+    if p >= 72: return "\U0001F7E2"
+    if p >= 55: return "\U0001F7E1"
+    if p >= 38: return "\U0001F7E0"
+    return "\U0001F534"
 
 # ======================================================================
 # APP
 # ======================================================================
+import json, math, os
+import pandas as pd
+import streamlit as st
+import pydeck as pdk
+import sys as _sys
+M = _sys.modules[__name__]   # il motore meteo e' definito qui sopra
 
-st.set_page_config(page_title="Viaggio set 2026", page_icon="🪂", layout="centered")
+st.set_page_config(page_title="Nordest — volo", page_icon="\U0001FA82", layout="centered")
 BASE = os.path.dirname(os.path.abspath(__file__))
+
+st.markdown("""<style>
+.block-container{padding-top:1.4rem;padding-bottom:3rem;max-width:860px}
+h1,h2,h3{letter-spacing:-.02em}
+div[data-testid="stMetricValue"]{font-size:1.35rem;font-weight:650}
+div[data-testid="stMetricLabel"] p{font-size:.72rem;opacity:.72;text-transform:uppercase;
+  letter-spacing:.06em}
+.card{border:1px solid rgba(128,128,128,.25);border-radius:14px;padding:.9rem 1.05rem;
+  margin:.45rem 0;background:rgba(128,128,128,.045)}
+.card.g{border-left:4px solid #22a046}.card.y{border-left:4px solid #e0a500}
+.card.o{border-left:4px solid #e2741c}.card.r{border-left:4px solid #cc2b2b}
+.card.b{border-left:4px solid #3c91e6}.card.n{border-left:4px solid #8a8a8a}
+.card h4{margin:0 0 .3rem 0;font-size:1rem;font-weight:650}
+.card .sub{font-size:.82rem;opacity:.75;line-height:1.45}
+.chip{display:inline-block;padding:.12rem .55rem;border-radius:999px;font-size:.72rem;
+  border:1px solid rgba(128,128,128,.35);margin:.1rem .25rem .1rem 0;white-space:nowrap}
+.kv{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;
+  border-bottom:1px dashed rgba(128,128,128,.22);font-size:.87rem}
+.kv:last-child{border-bottom:none}
+.kv .k{opacity:.7}.kv .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.kv.lunga{display:block}
+.kv.lunga .k{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em}
+.kv.lunga .v{display:block;text-align:left;font-weight:450;line-height:1.5;margin-top:.15rem}
+.bar{height:7px;border-radius:4px;background:rgba(128,128,128,.2);overflow:hidden}
+.bar>i{display:block;height:100%}
+.stTabs [data-baseweb="tab"]{font-size:.95rem;font-weight:600}
+</style>""", unsafe_allow_html=True)
 
 @st.cache_data
 def carica():
-    with open(os.path.join(BASE, "siti.json"), encoding="utf-8") as f:
-        return pd.DataFrame(json.load(f))
+    return pd.DataFrame(json.load(open(os.path.join(BASE, "siti_ne.json"), encoding="utf-8")))
 
 df = carica()
+PRIORITA = ["pa_inv", "pa_est", "hef", "cross"]
+ORDINE = ["1 Friuli","2 Alpi Giulie","6 Pordenonese / Carnia ovest","3 Slovenia",
+          "4 Alpago","5 Feltrino","10 Cadore / Dolomiti","11 Dolomiti / Agordino",
+          "8 Austria / Carinzia","9 Slovenia centrale / Austria est",
+          "7 Veneto (Bassano/Marostica)"]
+CAMPI = ["nome","note","vento","difficolta","partenza","categoria","fonte","zona"]
+VIN_FLAT = {v["sito"]: v for vs in VINCOLI.values() for v in vs}
+CL = {"\U0001F7E2":"g","\U0001F7E1":"y","\U0001F7E0":"o","\U0001F534":"r",
+      "\U0001F535":"b","⚪":"n","—":"n","·":"n"}
 
-# Gli stessi numeri RGB vanno sulla mappa E nella legenda: non possono divergere.
-STILI = {
-    "decollo":     dict(rgb=[230,  57,  70], eti="Decollo ufficiale"),
-    "hike&fly":    dict(rgb=[255, 183,   3], eti="Hike & Fly"),
-    "atterraggio": dict(rgb=[ 42, 157, 143], eti="Atterraggio"),
-    "cima":        dict(rgb=[ 38,  70,  83], eti="Cima"),
-    "rifugio":     dict(rgb=[231, 111,  81], eti="Rifugio"),
-    "parcheggio":  dict(rgb=[168, 162, 158], eti="Parcheggio"),
-    "impianto":    dict(rgb=[157,  78, 221], eti="Impianto"),
-    "zona":        dict(rgb=[  0,   0,   0], eti="Zona / regola"),
-    "logistica":   dict(rgb=[  0, 119, 255], eti="Logistica"),
-}
-GRIGIO = [136, 136, 136]
-CAMPI_TESTO = ["nome", "note", "vento", "difficolta", "partenza", "categoria", "fonte", "zona"]
+def rgb(a):  return ATTIVITA.get(a, {}).get("rgb", [136,136,136])
+def hexa(a): return "#%02x%02x%02x" % tuple(rgb(a))
+def eti(a):  return ATTIVITA.get(a, {}).get("eti", a)
+def ico(a):  return ATTIVITA.get(a, {}).get("ico", "\U0001F4CD")
 
-def rgb(t):  return STILI.get(t, {}).get("rgb", GRIGIO)
-def hexa(t): return "#%02x%02x%02x" % tuple(rgb(t))
-def eti(t):  return STILI.get(t, {}).get("eti", t)
+def att_prim(l, am=None):
+    for a in PRIORITA:
+        if a in l and (am is None or a in am): return a
+    return l[0] if l else "cross"
 
-def dist_km(la1, lo1, la2, lo2):
-    return math.hypot((la1 - la2) * 111,
-                      (lo1 - lo2) * 111 * math.cos(math.radians((la1 + la2) / 2)))
+def dist_km(a,b,c,d):
+    return math.hypot((a-c)*111, (b-d)*111*math.cos(math.radians((a+c)/2)))
 
-def val(r, c):
+def val(r,c):
     v = r[c] if c in r.index else None
-    return "" if v is None or (isinstance(v, float) and pd.isna(v)) else v
-
-def riassunto(r):
-    p = []
-    if val(r, "quota"): p.append(f"{int(r['quota'])} m")
-    if val(r, "vento"): p.append(f"🧭 {r['vento']}")
-    if val(r, "disl"):  p.append(f"↗ {int(r['disl'])} m")
-    if val(r, "difficolta"): p.append(str(r["difficolta"])[:34])
-    return " · ".join(p)
-
-def pallino(t):
-    return (f"<span style='display:inline-block;width:11px;height:11px;border-radius:50%;"
-            f"background:{hexa(t)};border:1px solid #bbb;margin-right:6px'></span>")
-
-def scheda(r):
-    st.markdown(pallino(r["tipo"]) + f"<b>{r['nome']}</b> <small>· {eti(r['tipo'])}</small>",
-                unsafe_allow_html=True)
-    riga = riassunto(r)
-    if riga: st.markdown(f"**{riga}**")
-    if val(r, "partenza"):  st.markdown(f"**Partenza:** {r['partenza']}")
-    if val(r, "categoria"): st.caption(r["categoria"])
-    if val(r, "note"):      st.write(r["note"])
-    aff = {"V": "✅ verificato", "L": "🧑 da un pilota che c'è stato",
-           "K": "🟡 solo KML", "?": "❓ da verificare"}.get(val(r, "aff"), "")
-    st.caption(f"{aff} — fonte: {val(r,'fonte')}  ·  `{r['lat']:.5f}, {r['lon']:.5f}`")
-    st.markdown(
-        f"[Google Maps](https://www.google.com/maps/search/?api=1&query={r['lat']},{r['lon']}) · "
-        f"[Organic Maps](om://map?v=1&ll={r['lat']},{r['lon']}&n={r['nome']}) · "
-        f"[meteo-parapente](https://meteo-parapente.com/#/{r['lat']},{r['lon']},11)")
-
-PUNTI_METEO = {
-    "Gemona del Friuli": (46.28, 13.14),
-    "Appenzell / Alpstein": (47.28, 9.35),
-    "Rigi / Svizzera centrale": (47.05, 8.48),
-    "Interlaken / Oberland": (46.69, 7.86),
-    "Annecy": (45.90, 6.13),
-    "Saint-Hilaire": (45.31, 5.89),
-    "Briançon / Écrins": (44.90, 6.45),
-}
-
-@st.cache_data(ttl=900, show_spinner=False)
-def meteo(la, lo):
-    import urllib.request, urllib.parse
-    p = urllib.parse.urlencode({
-        "latitude": la, "longitude": lo, "timezone": "auto", "forecast_days": 16,
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,"
-                 "precipitation_probability_max,windspeed_10m_max",
-        "hourly": "windspeed_700hPa,winddirection_700hPa,freezing_level_height,cloudcover",
-    })
-    from datetime import datetime
-    with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=20) as f:
-        d = json.load(f)
-    d["_scaricato"] = datetime.now().strftime("%d/%m %H:%M")
-    return d
+    return "" if v is None or (isinstance(v,float) and pd.isna(v)) else v
 
 def cardinale(v):
-    pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-           "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
-    return pts[int((v % 360) / 22.5 + 0.5) % 16] if pd.notna(v) else "—"
+    p = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
+    return p[int((v % 360)/22.5 + 0.5) % 16] if pd.notna(v) else "—"
 
-def in_settore(deg, settori):
-    if pd.isna(deg):
-        return False
+def card(titolo, sotto="", stato="n"):
+    st.markdown(f"<div class='card {stato}'><h4>{titolo}</h4>"
+                + (f"<div class='sub'>{sotto}</div>" if sotto else "") + "</div>",
+                unsafe_allow_html=True)
+
+def kv(righe):
+    def riga(k, v):
+        # i valori lunghi vanno a capo sotto l'etichetta, se no la colonna si strozza
+        cl = "kv lunga" if len(str(v)) > 44 else "kv"
+        return f"<div class='{cl}'><span class='k'>{k}</span><span class='v'>{v}</span></div>"
+    st.markdown("<div class='card'>" + "".join(riga(k, v) for k, v in righe) + "</div>",
+                unsafe_allow_html=True)
+
+def barra(perc, colore="#3c91e6"):
+    p = 0 if pd.isna(perc) else max(0, min(100, perc))
+    return f"<div class='bar'><i style='width:{p:.0f}%;background:{colore}'></i></div>"
+
+def in_settore(deg, s):
+    if pd.isna(deg): return False
     d = deg % 360
-    for a, b in settori:
-        if a <= b and a <= d <= b:
-            return True
-        if a > b and (d >= a or d <= b):
-            return True
+    for a,b in s:
+        if a <= b and a <= d <= b: return True
+        if a > b and (d >= a or d <= b): return True
     return False
 
 def giudizio(v, deg, s):
-    """🟢 si vola · 🟡 al limite · 🔴 no. Ritorna (icona, motivo)."""
-    if pd.isna(v):
-        return "·", "dati mancanti"
-    if in_settore(deg, s["vietati"]):
-        return "🔴", "direzione vietata"
-    if not in_settore(deg, s["settori"]):
-        return "🔴", "fuori settore"
-    if v <= s["max_v"]:
-        return "🟢", f"{v:.0f} km/h, in settore"
-    if v <= s["max_giallo"]:
-        return "🟡", f"{v:.0f} km/h, al limite"
-    return "🔴", f"{v:.0f} km/h, troppo vento"
+    if pd.isna(v): return "·", "dati mancanti"
+    if in_settore(deg, s["vietati"]):     return "\U0001F534", "direzione vietata"
+    if not in_settore(deg, s["settori"]): return "\U0001F534", "fuori settore"
+    if v <= s["max_v"]:      return "\U0001F7E2", f"{v:.0f} km/h, in settore"
+    if v <= s["max_giallo"]: return "\U0001F7E1", f"{v:.0f} km/h, al limite"
+    return "\U0001F534", f"{v:.0f} km/h, troppo vento"
+
+@st.cache_data(ttl=900, show_spinner="Scarico il meteo…")
+def analisi(la, lo):
+    return M.analizza(la, lo)
+
+def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420):
+    m = b.dropna(subset=["lat","lon"]).copy()
+    if not len(m):
+        st.info("Nessun punto con questi filtri."); return
+    if verdetti is not None:
+        COL = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,170,20],
+               "\U0001F534":[200,45,45],"⚪":[150,150,150]}
+        m["_e"] = [verdetti.get(n,"⚪") for n in m["nome"]]
+        m["col"] = [COL.get(v,[150,150,150]) for v in m["_e"]]
+        m["etichetta"] = m["_e"]
+    else:
+        m["_a"] = [att_prim(a if isinstance(a,list) else [], ammesse) for a in m["att"]]
+        m["col"] = [rgb(a) for a in m["_a"]]
+        m["etichetta"] = [eti(a) for a in m["_a"]]
+    m["rad"] = [460 if t=="decollo" else (380 if t=="hike&fly" else 240) for t in m["tipo"]]
+    m["sotto"] = [(f"{int(r['quota'])} m · " if val(r,'quota') else "")
+                  + (str(r["vento"]) if val(r,"vento") else r["tipo"]) for _, r in m.iterrows()]
+    st.pydeck_chart(pdk.Deck(
+        layers=[pdk.Layer("ScatterplotLayer",
+                data=m[["lat","lon","col","rad","nome","etichetta","sotto"]],
+                get_position=["lon","lat"], get_fill_color="col", get_radius="rad",
+                radius_min_pixels=5, radius_max_pixels=18, pickable=True, auto_highlight=True,
+                stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1)],
+        map_style=None,
+        initial_view_state=pdk.ViewState(latitude=float(m["lat"].mean()),
+                                         longitude=float(m["lon"].mean()), zoom=zoom)),
+        height=h)
+
+def scheda_sito(r, verdetto=None, motivo=None):
+    a = r["att"] if isinstance(r["att"], list) else []
+    chips = "".join(f"<span class='chip'>{ico(x)} {eti(x)}</span>" for x in a)
+    aff = {"V":"✅ verificato","K":"\U0001F7E1 solo KML","C":"\U0001F4D7 relazione Cammina e Vola",
+           "?":"❓ da verificare"}.get(val(r,"aff"), "")
+    if verdetto: st.markdown(f"**{verdetto} {motivo or ''}**")
+    st.markdown(chips, unsafe_allow_html=True)
+    righe = []
+    if val(r,"quota"):      righe.append(("Quota", f"{int(r['quota'])} m"))
+    if val(r,"vento"):      righe.append(("Esposizione", str(r["vento"])))
+    if val(r,"difficolta"):
+        d_ = str(r["difficolta"])
+        righe.append(("Difficoltà decollo", d_[4:]) if d_.startswith("H&F ")
+                     else ("Valutazione sito", d_))
+    if val(r,"disl"):       righe.append(("Dislivello", f"{int(r['disl'])} m"))
+    if val(r,"partenza"):   righe.append(("Via di salita", str(r["partenza"])))
+    righe.append(("Zona", r["zona"]))
+    righe.append(("Affidabilità", aff))
+    if "dist" in r.index and pd.notna(r["dist"]): righe.append(("Distanza", f"{r['dist']:.0f} km"))
+    kv(righe)
+    if val(r,"note"): st.write(r["note"])
+    st.caption(f"Fonte: {val(r,'fonte')}  ·  `{r['lat']:.5f}, {r['lon']:.5f}`")
+    link = [f"[Maps](https://www.google.com/maps/search/?api=1&query={r['lat']},{r['lon']})",
+            f"[Organic Maps](om://map?v=1&ll={r['lat']},{r['lon']}&n={r['nome']})",
+            f"[meteo-parapente](https://meteo-parapente.com/#/{r['lat']},{r['lon']},11)"]
+    if "url" in r.index and val(r, "url"):
+        link.append(f"[relazione](https://{str(r['url']).lstrip('/')})")
+    st.markdown(" · ".join(link))
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.markdown("### Filtri")
-    zone = sorted(df["zona"].unique())
-    z_sel = st.multiselect("Zona", zone, default=zone)
-    tipi = sorted(df["tipo"].unique())
-    dflt = [t for t in ["decollo", "hike&fly", "cima", "atterraggio", "zona", "rifugio", "logistica"]
-            if t in tipi]
-    t_sel = st.multiselect("Tipo", tipi, default=dflt, format_func=eti)
-    solo_note = st.checkbox("Solo punti con note vere", value=True)
-    st.markdown("---")
-    disl_max = st.slider("Dislivello massimo a piedi (m)", 400, 2600, 2400, 100)
-    st.caption("Cross ≤1200 · Alpinismo ≤2400")
-    st.markdown("---")
-    pos = st.text_input("La tua posizione — lat, lon", placeholder="46.65, 8.27")
+    zone_d = [z for z in ORDINE if z in set(df["zona"])]
+    z_sel = st.multiselect("Zona", zone_d,
+                           default=[z for z in zone_d if not z.startswith(("7 ","8 ","9 ","11 "))])
+    aff_sel = st.multiselect("Affidabilità", ["V","C","K","?"], default=["V","C","K","?"],
+                             format_func=lambda a: {"V":"✅ verificato",
+                                                    "C":"\U0001F4D7 Cammina e Vola",
+                                                    "K":"\U0001F7E1 solo KML",
+                                                    "?":"❓ da verificare"}[a])
+    serv = st.checkbox("Mostra parcheggi e impianti", value=False)
+    pos = st.text_input("La tua posizione — lat, lon", placeholder="46.27, 13.14")
 
-sel = df[df["zona"].isin(z_sel) & df["tipo"].isin(t_sel)].copy()
-if solo_note:
-    sel = sel[(sel["origine"] == "curato") | (sel["note"].astype(str).str.len() > 20)]
-
-qui = None
+base = df[df["zona"].isin(z_sel) & df["aff"].isin(aff_sel)].copy()
+if not serv: base = base[~base["tipo"].isin(["parcheggio","impianto"])]
 if pos.strip():
     try:
-        a, b = [float(x) for x in pos.replace(";", ",").split(",")[:2]]
-        qui = (a, b)
-        if len(sel):
-            sel["dist"] = [dist_km(a, b, la, lo) for la, lo in zip(sel["lat"], sel["lon"])]
-            sel = sel.sort_values("dist")
+        a_, b_ = [float(x) for x in pos.replace(";",",").split(",")[:2]]
+        base["dist"] = [dist_km(a_,b_,la,lo) for la,lo in zip(base["lat"], base["lon"])]
+        base = base.sort_values("dist")
     except Exception:
-        st.sidebar.error("Formato: 46.65, 8.27")
-sel = sel.reset_index(drop=True)
+        st.sidebar.error("Formato: 46.27, 13.14")
+base = base.reset_index(drop=True)
 
-# Niente st.tabs: su telefono 8 schede finiscono in una barra che scorre
-# in orizzontale e quelle oltre la seconda non si vedono. Menu esplicito.
-SEZIONI = ["🏔️ Delfinato / Ailefroide", "🗺️ Mappa", "📋 Elenco", "🥾 Gite",
-           "📅 Giorni", "🚗 Viaggio", "🌤️ Meteo", "🔧 Info"]
-sezione = st.selectbox("Sezione", SEZIONI, index=0, key="sez_nav")
-st.caption("Viaggio 12-28 settembre 2026 · Gemona → Alpstein → Oberland → Annecy → "
-           "Coupe Icare → Écrins → Gemona")
-st.divider()
+def solo(a):
+    return base[[a in (x if isinstance(x,list) else []) for x in base["att"]]]
 
-# ---------------------------------------------------------------- mappa
-if sezione == "🗺️ Mappa":
-    st.caption(f"{len(sel)} punti — tocca un punto per aprirne la scheda")
-    m = sel.dropna(subset=["lat", "lon"]).copy()
-    if len(m):
-        m["col"] = [rgb(t) for t in m["tipo"]]
-        m["rad"] = [{"cima": 420, "decollo": 380, "hike&fly": 380,
-                     "zona": 460}.get(t, 240) for t in m["tipo"]]
-        m["etichetta"] = [eti(t) for t in m["tipo"]]
-        m["sotto"] = [riassunto(r) or "—" for _, r in m.iterrows()]
+st.markdown("## \U0001FA82 Nordest")
+st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
 
-        livelli = [pdk.Layer(
-            "ScatterplotLayer", data=m[["lat", "lon", "col", "rad", "nome", "etichetta", "sotto"]],
-            get_position=["lon", "lat"], get_fill_color="col", get_radius="rad",
-            radius_min_pixels=6, radius_max_pixels=20, pickable=True, auto_highlight=True,
-            stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1)]
-        if qui:
-            livelli.append(pdk.Layer(
-                "ScatterplotLayer",
-                data=pd.DataFrame([{"lat": qui[0], "lon": qui[1]}]),
-                get_position=["lon", "lat"], get_fill_color=[0, 119, 255],
-                get_radius=700, radius_min_pixels=9, pickable=False))
+T_METEO, T_SITI, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Siti di volo",
+                                   "\U0001F527  Info"])
 
-        ev = st.pydeck_chart(
-            pdk.Deck(layers=livelli, map_style=None,
-                     initial_view_state=pdk.ViewState(
-                         latitude=float(m["lat"].mean()), longitude=float(m["lon"].mean()),
-                         zoom=5 if len(z_sel) > 2 else 9),
-                     tooltip={"html": "<b>{nome}</b><br/>{etichetta}<br/>{sotto}"}),
-            on_select="rerun", selection_mode="single-object", key="mappa")
+# ======================================================= METEO
+with T_METEO:
+    # ---------------- panoramica regionale ----------------
+    @st.cache_data(ttl=900, show_spinner="Guardo tutta la regione\u2026")
+    def panoramica():
+        from concurrent.futures import ThreadPoolExecutor
+        def uno(kv_):
+            nome, (a_, b_) = kv_
+            try:
+                return nome, M.analizza(a_, b_)
+            except Exception:
+                return nome, None
+        out = {}
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            for nome, res in ex.map(uno, list(PUNTI_METEO.items())):
+                if res: out[nome] = res
+        return out
 
-        scelto = None
-        try:
-            for _, lista in (ev.selection.get("objects") or {}).items():
-                if lista:
-                    scelto = lista[0]
-                    break
-        except Exception:
-            pass
-        st.divider()
-        if scelto and scelto.get("nome"):
-            r = m[m["nome"] == scelto["nome"]]
-            if len(r):
-                scheda(r.iloc[0])
-        else:
-            st.caption("Nessun punto selezionato. Tocca un pallino sulla mappa.")
+    st.markdown("### Colpo d'occhio sulla regione")
+    pano = panoramica()
+    if not pano:
+        st.warning("Non riesco a raggiungere Open-Meteo adesso: la panoramica resta vuota.")
+        giorni_comuni = []
     else:
-        st.info("Nessun punto con questi filtri.")
+        giorni_comuni = sorted(set.intersection(*[set(t_["g"]) for t_, _, _ in pano.values()]))
 
-    st.divider()
-    st.markdown("**Legenda**")
-    presenti = [t for t in STILI if t in set(sel["tipo"])] or list(STILI)
-    cols = st.columns(3)
-    for i, t in enumerate(presenti):
-        cols[i % 3].markdown(pallino(t) + f"<small>{eti(t)}</small>", unsafe_allow_html=True)
+    if giorni_comuni:
+        gsel = st.select_slider(
+            "Giorno", giorni_comuni, value=giorni_comuni[0],
+            format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="gpano")
 
-# ---------------------------------------------------------------- elenco
-if sezione == "📋 Elenco":
-    q = st.text_input("Cerca", placeholder="lorenzo, crepaccia, rotore, navetta, cavi, doppia...")
-    vis = sel
-    if q and len(vis):
-        ql = q.lower()
-        vis = vis[[any(ql in str(r[c]).lower() for c in CAMPI_TESTO if c in vis.columns)
-                   for _, r in vis.iterrows()]]
-    if len(vis):
-        vis = vis[vis["disl"].isna() | (vis["disl"] <= disl_max)]
-    st.caption(f"{len(vis)} risultati")
-    for zona in sorted(vis["zona"].unique()):
-        st.markdown(f"#### {zona}")
-        for _, r in vis[vis["zona"] == zona].iterrows():
-            coda = riassunto(r)
-            if "dist" in r.index and pd.notna(r["dist"]):
-                coda = (coda + " · " if coda else "") + f"{r['dist']:.0f} km"
-            with st.expander(f"{r['nome']}" + (f"  ·  {coda}" if coda else "")):
-                scheda(r)
+        righe = []
+        for nome, (t_, qs_, qd_) in pano.items():
+            sub = t_[t_["g"] == gsel]
+            if not len(sub): continue
+            rr = sub.iloc[0]
+            d_ = {"zona": nome, "r": rr, "quota": qs_}
+            for a_ in ATTIVITA:
+                d_[a_] = M.punteggio(rr, a_)
+            righe.append(d_)
 
+        # --- le zone migliori, attivita' per attivita'
+        st.markdown("#### Dove conviene andare")
+        cc = st.columns(2)
+        for i, (a_, cfg) in enumerate(ATTIVITA.items()):
+            ord_ = sorted(righe, key=lambda x: -x[a_][0])
+            if not ord_: continue
+            top = ord_[0]
+            p_, why = top[a_]
+            ic_ = M.colore_punteggio(p_)
+            secondi = ", ".join(x["zona"].split("\u2014")[0].strip() for x in ord_[1:3])
+            with cc[i % 2]:
+                card(f"{cfg['ico']} {cfg['eti']}",
+                     f"<b>{ic_} {top['zona']}</b> \u2014 {p_}/100<br>"
+                     f"<span style='opacity:.8'>{why}</span><br>"
+                     f"<span style='font-size:.78rem;opacity:.65'>poi: {secondi}</span>",
+                     CL.get(ic_, "n"))
 
-# ---------------------------------------------------------------- Delfinato
-def sottozona(la, lo):
-    if lo < 6.32:                                   return "Oisans / Vénéon"
-    if 6.32 <= lo < 6.58 and la >= 45.00:           return "Cerces / Galibier / Thabor"
-    if 6.32 <= lo < 6.55 and 44.78 <= la < 45.00:   return "Vallouise / Écrins"
-    if 6.55 <= lo < 6.78 and 44.82 <= la < 45.05:   return "Briançon / Serre-Chevalier"
-    if lo >= 6.78 and la >= 44.85:                  return "Lato italiano"
-    if 6.60 <= lo < 7.05 and 44.55 <= la < 44.85:   return "Queyras / Izoard"
-    if lo < 6.72 and la < 44.78:                    return "Guillestrois / Embrunais"
-    return "Altro"
+        # --- tabella di tutte le zone
+        att_p = st.segmented_control(
+            "Ordina per", list(ATTIVITA), default="cross",
+            format_func=lambda a: f"{ico(a)} {eti(a)}", key="pano_att") or "cross"
+        st.markdown(f"#### Tutte le zone \u2014 {eti(att_p)}")
+        for x in sorted(righe, key=lambda z: -z[att_p][0]):
+            rr, p_, why = x["r"], x[att_p][0], x[att_p][1]
+            ic_ = M.colore_punteggio(p_)
+            v_ = (f"{rr['v700']:.0f} km/h {cardinale(rr['d700'])}"
+                  if pd.notna(rr["v700"]) else "\u2014")
+            qt_ = f"{rr['quota_termica']:.0f} m" if pd.notna(rr["quota_termica"]) else "\u2014"
+            nb_ = f"{rr['nuv_bassa']:.0f}%" if pd.notna(rr["nuv_bassa"]) else "\u2014"
+            pi_ = f"{rr['pioggia']:.0f}%" if pd.notna(rr["pioggia"]) else "\u2014"
+            st.markdown(
+                f"<div class='card {CL.get(ic_,'n')}'>"
+                f"<h4>{ic_} {x['zona']} <span style='float:right;opacity:.6'>{p_}/100</span></h4>"
+                f"<div class='sub'>{why}</div>"
+                f"<div class='kv'><span class='k'>Vento 700 hPa</span><span class='v'>{v_}</span></div>"
+                f"<div class='kv'><span class='k'>Tetto termiche</span><span class='v'>{qt_}</span></div>"
+                f"<div class='kv'><span class='k'>Nubi basse</span><span class='v'>{nb_}</span></div>"
+                f"<div class='kv'><span class='k'>Pioggia</span><span class='v'>{pi_}</span></div>"
+                f"</div>", unsafe_allow_html=True)
 
-ORDINE_SZ = ["Vallouise / Écrins", "Briançon / Serre-Chevalier", "Queyras / Izoard",
-             "Cerces / Galibier / Thabor", "Oisans / Vénéon", "Guillestrois / Embrunais",
-             "Lato italiano", "Altro"]
-
-if sezione == "🏔️ Delfinato / Ailefroide":
-    st.markdown("### Delfinato — Écrins, Ailefroide, Briançonnais")
-    st.caption("Base: campeggio di Ailefroide, 1500 m. Decolli ufficiali, hike & fly, "
-               "uscite alpinistiche con filtro ghiacciaio, blocchi e falesia, "
-               "semaforo meteo in diretta.")
-
-    D = df[df["zona"] == "6 Ecrins"].copy()
-    D["sz"] = [sottozona(a, b) for a, b in zip(D["lat"], D["lon"])]
-    # dedup: un punto KML e' lo stesso di uno curato se e' vicino OPPURE se ha lo stesso nome
-    import unicodedata
-
-    def chiave(n):
-        n = str(n)
-        for sp in ("\u00a0", "\u2007", "\u202f", "\u2009", "\t"):
-            n = n.replace(sp, " ")
-        n = n.lower()
-        for p in ("takeoff ", "hike & fly ", "landing ", "parking ", "cablecar "):
-            n = n.replace(p, "")
-        n = unicodedata.normalize("NFKD", n).encode("ascii", "ignore").decode()
-        for ch in "'`’-/()":
-            n = n.replace(ch, " ")
-        n = n.replace(" du ", " de ").replace(" der ", " de ").replace(" d ", " de ")
-        return " ".join(n.split())
-
-    D["_k"] = [chiave(n) for n in D["nome"]]
-    # punteggio: curato con esposizione > curato > kml. A parita, la nota piu lunga.
-    D["_p"] = [(2 if (r["origine"] == "curato" and str(r["vento"] or "")) else
-                1 if r["origine"] == "curato" else 0) * 100000 + len(str(r["note"] or ""))
-               for _, r in D.iterrows()]
-    D = (D.sort_values("_p", ascending=False)
-           .drop_duplicates(subset=["_k", "tipo"], keep="first"))
-    # e poi anche i quasi-sovrapposti (stesso tipo entro ~400 m)
-    curati_xy = [(r["lat"], r["lon"], r["tipo"])
-                 for _, r in D[D["origine"] == "curato"].iterrows()]
-    D = D[[r["origine"] == "curato" or
-           not any(t == r["tipo"] and abs(la - r["lat"]) < 0.004 and abs(lo - r["lon"]) < 0.005
-                   for la, lo, t in curati_xy)
-           for _, r in D.iterrows()]]
-
-    # ---- meteo della zona, collegato a tutto il resto della scheda ----
-    VIN_E = {v["sito"]: v for v in VINCOLI.get("6 Ecrins", [])}
-
-    def vincolo_per(nome):
-        n = chiave(nome)
-        for k, v in VIN_E.items():
-            if chiave(k) == n or chiave(k) in n or n in chiave(k):
-                return v
-        return None
-
-    meteo_ok, vsel, dsel, ztsel, quando_m = False, None, None, None, None
-    try:
-        dme = meteo(*PUNTI_METEO["Briançon / Écrins"])
-        hme = pd.DataFrame(dme["hourly"]); hme["time"] = pd.to_datetime(hme["time"])
-        hfa = hme[hme["time"].dt.hour.between(12, 16)].copy(); hfa["g"] = hfa["time"].dt.date
-        agm = hfa.groupby("g").agg(v=("windspeed_700hPa", "mean"),
-                                   dr=("winddirection_700hPa", "mean"),
-                                   zt=("freezing_level_height", "mean")).reset_index().head(12)
-        quando_m = dme.get("_scaricato")
-        gg = list(agm["g"])
-        gsel_d = st.select_slider("Giorno (meteo live)", gg, value=gg[0],
-                                  format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"),
-                                  key="dlf_g")
-        rg = agm[agm["g"] == gsel_d].iloc[0]
-        vsel, dsel, ztsel = rg["v"], rg["dr"], rg["zt"]
-        meteo_ok = True
-        q1, q2, q3 = st.columns(3)
-        q1.metric("Vento 700 hPa", f"{vsel:.0f} km/h")
-        q2.metric("Direzione", cardinale(dsel))
-        q3.metric("Zero termico", f"{ztsel:.0f} m")
-        if ztsel < 3200:
-            st.warning(f"Zero termico a {ztsel:.0f} m: possibile neve fresca sui ghiacciai, "
-                       "che sopra i crepacci aperti di fine stagione è la combinazione peggiore.")
-    except Exception:
-        st.caption("Meteo non raggiungibile: i semafori restano spenti.")
-
-    def badge(nome):
-        if not meteo_ok:
-            return ""
-        v = vincolo_per(nome)
-        if not v:
-            return "⚪"
-        return giudizio(vsel, dsel, v)[0]
-
-    st.divider()
-    c1, c2 = st.columns(2)
-    sz_disp = [z for z in ORDINE_SZ if z in set(D["sz"])]
-    sz_def = [z for z in sz_disp if z not in ("Lato italiano", "Altro")]
-    sz_sel = c1.multiselect("Sotto-zona", sz_disp, default=sz_def, key="dlf_sz")
-    solo_v = c2.checkbox("Solo con esposizione nota", value=False, key="dlf_v")
-    no_gh = st.checkbox("Uscite alpinistiche: solo SENZA attraversamento di ghiacciaio",
-                        value=True, key="dlf_gh")
-
-    D = D[D["sz"].isin(sz_sel)]
-    dec = D[D["tipo"] == "decollo"].copy()
-    hef = D[D["tipo"] == "hike&fly"].copy()
-    if solo_v:
-        dec = dec[dec["vento"].astype(str).str.len() > 0]
-        hef = hef[hef["vento"].astype(str).str.len() > 0]
-
-    cime = D[D["tipo"] == "cima"].copy()
-    cime["gh"] = [GHIACCIAIO.get(n, None) for n in cime["nome"]]
-    if no_gh:
-        cime = cime[cime["gh"] != True]
-
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Decolli cross", len(dec))
-    m2.metric("Hike & Fly", len(hef))
-    m3.metric("Uscite alpin.", len(cime))
-    m4.metric("Atterraggi", len(D[D["tipo"] == "atterraggio"]))
-
-    # ---- mappa a tre categorie ----
-    CAT = {
-        "Decollo ufficiale (cross)": dict(rgb=[214, 40, 40], righe=dec),
-        "Hike & Fly potenziale":     dict(rgb=[255, 183, 3], righe=hef),
-        "Uscita alpinistica":        dict(rgb=[45, 106, 79], righe=cime),
-    }
-    pezzi = []
-    for et, cfg in CAT.items():
-        b = cfg["righe"].copy()
-        if not len(b):
-            continue
-        b["cat3"] = et
-        b["col3"] = [cfg["rgb"]] * len(b)
-        b["rad3"] = 420 if et != "Hike & Fly potenziale" else 360
-        pezzi.append(b)
-    if pezzi:
-        M3 = pd.concat(pezzi, ignore_index=True)
-        M3["sem"] = [badge(n) for n in M3["nome"]]
-        M3["sotto"] = [f"{(riassunto(r) or '—')}" for _, r in M3.iterrows()]
+        # --- mappa regionale
+        st.markdown("#### La regione a colpo d'occhio")
+        COLP = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,180,20],
+                "\U0001F7E0":[226,116,28],"\U0001F534":[200,45,45]}
+        mp = pd.DataFrame([{
+            "nome": x["zona"], "lat": PUNTI_METEO[x["zona"]][0],
+            "lon": PUNTI_METEO[x["zona"]][1], "p": x[att_p][0],
+            "col": COLP[M.colore_punteggio(x[att_p][0])],
+            "rad": 3000 + x[att_p][0]*90} for x in righe])
         st.pydeck_chart(pdk.Deck(
-            layers=[pdk.Layer("ScatterplotLayer",
-                              data=M3[["lat", "lon", "col3", "rad3", "nome", "cat3", "sotto", "sem"]],
-                              get_position=["lon", "lat"], get_fill_color="col3", get_radius="rad3",
-                              radius_min_pixels=7, radius_max_pixels=20, pickable=True,
-                              auto_highlight=True, stroked=True, get_line_color=[255, 255, 255],
-                              line_width_min_pixels=1)],
+            layers=[
+                pdk.Layer("ScatterplotLayer", data=mp, get_position=["lon","lat"],
+                          get_fill_color="col", get_radius="rad", opacity=0.55,
+                          radius_min_pixels=14, radius_max_pixels=54, pickable=True,
+                          stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1),
+                pdk.Layer("TextLayer", data=mp, get_position=["lon","lat"], get_text="p",
+                          get_size=13, get_color=[20,20,20], size_units="'pixels'")],
             map_style=None,
-            initial_view_state=pdk.ViewState(latitude=float(M3["lat"].mean()),
-                                             longitude=float(M3["lon"].mean()), zoom=8.4),
-            tooltip={"html": "<b>{nome}</b><br/>{cat3}<br/>{sotto}<br/>{sem}"}))
-        lc = st.columns(3)
-        for i, (et, cfg) in enumerate(CAT.items()):
-            r_, g_, b_ = cfg["rgb"]
-            lc[i].markdown(
-                f"<span style='display:inline-block;width:12px;height:12px;border-radius:50%;"
-                f"background:rgb({r_},{g_},{b_});border:1px solid #fff;margin-right:6px'></span>"
-                f"<small>{et}</small>", unsafe_allow_html=True)
+            initial_view_state=pdk.ViewState(latitude=46.2, longitude=13.0, zoom=7.4),
+            tooltip={"html": "<b>{nome}</b><br/>{p}/100"}), height=420)
+        st.caption("Il punteggio pesa vento in quota, gradiente, tetto delle termiche, nuvole "
+                   "basse, instabilit\u00e0 e pioggia, con criteri diversi per ogni attivit\u00e0: "
+                   "il cross vuole gradiente e quota, il paralpinismo vuole aria calma e "
+                   "cielo pulito.")
 
     st.divider()
-    st.markdown("#### 🪂 Decolli ufficiali — per il cross")
-    st.caption("Siti censiti da club e scuole. Il semaforo usa il meteo del giorno scelto sopra.")
-    for sz in [z for z in ORDINE_SZ if z in set(dec["sz"])]:
-        st.markdown(f"**{sz}**")
-        for _, r in dec[dec["sz"] == sz].sort_values("nome").iterrows():
-            v = val(r, "vento") or "esposizione da verificare"
-            q = f" · {int(r['quota'])} m" if val(r, "quota") else ""
-            with st.expander(f"{badge(r['nome'])} {r['nome']} — 🧭 {v}{q}"):
-                vk = vincolo_per(r["nome"])
-                if meteo_ok and vk:
-                    ic, why = giudizio(vsel, dsel, vk)
-                    st.markdown(f"{ic} **oggi selezionato:** {why}"
-                                + (f". {vk['nota']}" if vk["nota"] else ""))
-                scheda(r)
-    if not len(dec):
-        st.info("Nessun decollo con questi filtri.")
-
-    st.divider()
-    st.markdown("#### 🥾 Hike & Fly — decolli potenziali")
-    st.caption("Quasi tutti vengono dal KML senza note: il punto c'è, l'esposizione va ricavata "
-               "dalla carta o da camptocamp prima di andarci.")
-    for sz in [z for z in ORDINE_SZ if z in set(hef["sz"])]:
-        st.markdown(f"**{sz}**")
-        for _, r in hef[hef["sz"] == sz].sort_values("nome").iterrows():
-            v = val(r, "vento") or "esposizione da verificare"
-            with st.expander(f"{badge(r['nome'])} {r['nome']} — 🧭 {v}"):
-                scheda(r)
-    if not len(hef):
-        st.info("Nessun hike & fly con questi filtri.")
-
-    st.divider()
-    st.markdown("#### ⛰️ Uscite alpinistiche")
-    if no_gh:
-        esclusi = [n for n, g in GHIACCIAIO.items() if g]
-        st.caption("Filtrate: restano solo quelle che **non attraversano ghiacciaio**. "
-                   "Escluse per ora: " + ", ".join(esclusi) + ".")
-    for _, r in cime.sort_values("quota", ascending=False).iterrows():
-        gh = r["gh"]
-        tag = "🧊 ghiacciaio" if gh is True else ("🪨 senza ghiacciaio" if gh is False else "")
-        with st.expander(f"{badge(r['nome'])} {r['nome']} — "
-                         f"{int(r['quota']) if val(r,'quota') else '?'} m"
-                         + (f" · ↗ {int(r['disl'])} m" if val(r, "disl") else "")
-                         + (f" · {tag}" if tag else "")):
-            vk = vincolo_per(r["nome"])
-            if meteo_ok and vk:
-                ic, why = giudizio(vsel, dsel, vk)
-                st.markdown(f"{ic} **decollo dalla cima, giorno scelto:** {why}")
-            if meteo_ok and ztsel is not None:
-                st.caption(f"Zero termico {ztsel:.0f} m")
-            scheda(r)
-    if not len(cime):
-        st.info("Nessuna uscita con questi filtri.")
-
-    st.divider()
-    st.markdown("#### 🏠 Rifugi, atterraggi e regole")
-    for _, r in D[D["tipo"].isin(["rifugio", "atterraggio", "zona", "logistica"])].iterrows():
-        with st.expander(f"{eti(r['tipo'])} — {r['nome']}"):
-            scheda(r)
-
-    st.divider()
-    st.markdown("#### 🏕️ Base: Ailefroide (1500 m)")
-    AIL = (44.8990, 6.4030)
-    st.caption("Distanze in linea d'aria dal campeggio. I tempi a piedi, dove indicati, "
-               "vengono dalla guida.")
-    base = D[D["tipo"].isin(["rifugio", "cima", "decollo", "hike&fly"])].copy()
-    base["dAil"] = [dist_km(AIL[0], AIL[1], a, b) for a, b in zip(base["lat"], base["lon"])]
-    vicini = base[base["dAil"] <= 15].sort_values("dAil")
-    st.dataframe(pd.DataFrame({
-        "": [{"rifugio": "🏠", "cima": "⛰️", "decollo": "🪂",
-              "hike&fly": "🥾"}.get(t, "") for t in vicini["tipo"]],
-        "Cosa": vicini["nome"],
-        "km": [f"{d:.0f}" for d in vicini["dAil"]],
-        "Quota": [f"{int(q)} m" if pd.notna(q) and q else "—" for q in vicini["quota"]],
-    }), hide_index=True)
-    st.caption("A piedi dal paese: **Refuge du Sélé** 939 m / 3 h · "
-               "**Refuge du Pelvoux** 1178 m / 3h30. "
-               "In auto 6 km al **Pré de Madame Carle**, da cui Glacier Blanc 668 m / 2 h e "
-               "Refuge des Écrins 1301 m / 4 h.")
-
-    st.divider()
-    st.markdown("#### 🧗 Blocchi e falesia")
-    for nome in ["Blocchi di Ailefroide", "Falesia e vie lunghe di Ailefroide"]:
-        riga = df[df["nome"] == nome]
-        if len(riga):
-            r = riga.iloc[0]
-            with st.expander(f"{r['nome']} — {val(r,'difficolta')}", expanded=False):
-                scheda(r)
-    st.caption("Con i ghiacciai fuori condizione, questa è la parte del programma che regge "
-               "qualsiasi meteo: il bloc si fa anche con vento forte.")
-
-    st.divider()
-    st.markdown("#### 🥾 Gite della zona")
-    for g in [g for g in GITE if g["zona"] == "6 Ecrins"]:
-        meta = [g["cat"]]
-        if g["disl"]: meta.append(f"↗ {g['disl']} m")
-        if g["ore"]:  meta.append(g["ore"])
-        with st.expander(f"{g['nome']}  ·  {g['giorni']}"):
-            st.caption(" · ".join(meta))
-            st.write(g["testo"])
-            for p in g["punti"]:
-                riga = df[df["nome"] == p]
-                if len(riga):
-                    r = riga.iloc[0]
-                    st.markdown(pallino(r["tipo"]) +
-                                f"**{r['nome']}** <small>{eti(r['tipo'])}</small> — {riassunto(r)}",
-                                unsafe_allow_html=True)
-
-# ---------------------------------------------------------------- gite
-if sezione == "🥾 Gite":
-    cats = sorted({g["cat"] for g in GITE})
-    cat = st.multiselect("Categoria", cats, default=cats)
-    gz = [g for g in GITE if g["cat"] in cat and g["zona"] in z_sel
-          and (not g["disl"] or g["disl"] <= disl_max)]
-    st.caption(f"{len(gz)} gite")
-    for g in gz:
-        meta = [g["zona"], g["cat"]]
-        if g["disl"]: meta.append(f"↗ {g['disl']} m")
-        if g["ore"]:  meta.append(g["ore"])
-        with st.expander(f"{g['nome']}  ·  {g['giorni']}"):
-            st.caption(" · ".join(meta))
-            st.write(g["testo"])
-            st.markdown("**Punti collegati**")
-            for p in g["punti"]:
-                riga = df[df["nome"] == p]
-                if len(riga):
-                    r = riga.iloc[0]
-                    st.markdown(
-                        pallino(r["tipo"]) +
-                        f"**{r['nome']}** <small>{eti(r['tipo'])}</small> — {riassunto(r)} "
-                        f"<a href='https://www.google.com/maps/search/?api=1"
-                        f"&query={r['lat']},{r['lon']}'>↗</a>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"• {p}")
-
-# ---------------------------------------------------------------- giorni
-if sezione == "📅 Giorni":
-    for giorno, zona, nota in GIORNI:
-        st.markdown(f"**{giorno}** — {zona if zona else '—'}")
-        if nota: st.caption(nota)
-        gg = [g["nome"] for g in GITE if giorno in g["giorni"]]
-        if gg:
-            st.markdown(" ".join(f"🥾 {x}  " for x in gg))
-    st.markdown("---")
-    st.caption("Gli spostamenti sono nel tab Viaggio.")
-
-# ---------------------------------------------------------------- viaggio
-if sezione == "🚗 Viaggio":
-    tipi_t = ["base", "locale", "opzionale"]
-    nomi_t = {"base": "Giro principale", "locale": "Spostamenti in zona",
-              "opzionale": "Deviazioni possibili"}
-    scelti = st.multiselect("Cosa conteggiare", tipi_t, default=["base", "locale"],
-                            format_func=lambda x: nomi_t[x])
-    ar = st.checkbox("Conta gli spostamenti in zona andata e ritorno", value=True)
-
-    def km_eff(t):
-        return t["km"] * 2 if (ar and t["tipo"] == "locale") else t["km"]
-
-    att = [t for t in TAPPE if t["tipo"] in scelti]
-    tot_km = sum(km_eff(t) for t in att)
-    tot_ore = sum(t["ore"] * (2 if (ar and t["tipo"] == "locale") else 1) for t in att)
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Chilometri", f"{tot_km:,.0f}".replace(",", "."))
-    c2.metric("Ore di guida", f"{tot_ore:.1f}")
-    c3.metric("Tappe", len(att))
-
-    st.markdown("---")
-    st.markdown("#### Mappa degli spostamenti")
-
-    COL_T = {"base": [200, 30, 45], "locale": [42, 157, 143], "opzionale": [245, 158, 11]}
-    seg = []
-    for t in att:
-        a, b = COORD_TAPPE.get(t["da"]), COORD_TAPPE.get(t["a"])
-        if not a or not b:
-            continue
-        seg.append(dict(da=t["da"], a_=t["a"], tipo=t["tipo"], g=t["g"], km=km_eff(t),
-                        lat1=a[0], lon1=a[1], lat2=b[0], lon2=b[1],
-                        col=COL_T[t["tipo"]],
-                        larg={"base": 5, "locale": 3, "opzionale": 2}[t["tipo"]],
-                        eti=f"{t['da']} → {t['a']}"))
-    if seg:
-        S = pd.DataFrame(seg)
-        nodi = {}
-        for t in att:
-            for k in (t["da"], t["a"]):
-                c = COORD_TAPPE.get(k)
-                if c:
-                    nodi.setdefault(k, dict(nome=k, lat=c[0], lon=c[1], base=False))
-                    if t["tipo"] == "base":
-                        nodi[k]["base"] = True
-        N = pd.DataFrame(nodi.values())
-        N["col"] = [[200, 30, 45] if b else [90, 90, 90] for b in N["base"]]
-        N["rad"] = [7000 if b else 3500 for b in N["base"]]
-
-        livelli_v = []
-        dritte = S[S["tipo"] != "opzionale"]
-        if len(dritte):
-            livelli_v.append(pdk.Layer(
-                "LineLayer", data=dritte,
-                get_source_position=["lon1", "lat1"], get_target_position=["lon2", "lat2"],
-                get_color="col", get_width="larg", width_min_pixels=2,
-                pickable=True, auto_highlight=True))
-        archi = S[S["tipo"] == "opzionale"]
-        if len(archi):
-            livelli_v.append(pdk.Layer(
-                "ArcLayer", data=archi,
-                get_source_position=["lon1", "lat1"], get_target_position=["lon2", "lat2"],
-                get_source_color=[245, 158, 11], get_target_color=[245, 158, 11],
-                get_width=2, get_height=0.35, pickable=True, auto_highlight=True))
-        livelli_v.append(pdk.Layer(
-            "ScatterplotLayer", data=N,
-            get_position=["lon", "lat"], get_fill_color="col", get_radius="rad",
-            radius_min_pixels=5, radius_max_pixels=14, pickable=True,
-            stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1))
-        livelli_v.append(pdk.Layer(
-            "TextLayer", data=N, get_position=["lon", "lat"], get_text="nome",
-            get_size=12, get_color=[40, 40, 40], get_alignment_baseline="'top'",
-            get_pixel_offset=[0, 10], size_units="'pixels'"))
-
-        st.pydeck_chart(pdk.Deck(
-            layers=livelli_v, map_style=None,
-            initial_view_state=pdk.ViewState(
-                latitude=float(N["lat"].mean()), longitude=float(N["lon"].mean()), zoom=5.6),
-            tooltip={"html": "<b>{eti}</b><br/>{g} · {km} km"}))
-
-        lg = st.columns(3)
-        for i, (k, v) in enumerate(COL_T.items()):
-            if k in scelti:
-                lg[i % 3].markdown(
-                    f"<span style='display:inline-block;width:22px;height:4px;"
-                    f"background:rgb({v[0]},{v[1]},{v[2]});vertical-align:middle;"
-                    f"margin-right:6px'></span><small>{nomi_t[k]}</small>",
-                    unsafe_allow_html=True)
-        st.caption("Le deviazioni sono disegnate ad arco. Le linee sono in linea d'aria, "
-                   "i chilometri in tabella sono quelli reali su strada.")
-    else:
-        st.info("Seleziona almeno una categoria di spostamenti.")
-
-    st.markdown("---")
-    st.markdown("#### Costo indicativo")
-    k1, k2 = st.columns(2)
-    cons = k1.number_input("Consumo l/100 km", 4.0, 20.0, float(COSTI["consumo"]), 0.5)
-    prezzo = k2.number_input("€/litro", 1.0, 3.0, float(COSTI["prezzo_gasolio"]), 0.05)
-    carb = tot_km / 100 * cons * prezzo
-    vign = COSTI["vignetta_chf"] * 1.05 + COSTI.get("vignetta_at", 0)
-    ped = COSTI["pedaggi_stimati"]
-    d1, d2, d3, d4 = st.columns(4)
-    d1.metric("Carburante", f"{carb:.0f} €")
-    d2.metric("Vignette", f"{vign:.0f} €")
-    d3.metric("Pedaggi", f"{ped:.0f} €")
-    d4.metric("Totale", f"{carb + vign + ped:.0f} €")
-    st.caption(COSTI["nota"])
-
-    st.markdown("---")
-    st.markdown("#### Tappe")
-    tab = pd.DataFrame([{
-        "Giorno": t["g"], "Da": t["da"], "A": t["a"],
-        "km": km_eff(t),
-        "ore": round(t["ore"] * (2 if (ar and t["tipo"] == "locale") else 1), 1),
-        "Tipo": nomi_t[t["tipo"]],
-    } for t in att])
-    st.dataframe(tab, hide_index=True)
-
-    st.markdown("#### Note per tappa")
-    for t in att:
-        if t["nota"]:
-            with st.expander(f"{t['g']} · {t['da']} → {t['a']}  ·  {km_eff(t)} km"):
-                st.write(t["nota"])
-                st.markdown(
-                    "[Percorso su Google Maps](https://www.google.com/maps/dir/?api=1"
-                    f"&origin={t['da'].replace(' ', '+')}"
-                    f"&destination={t['a'].replace(' ', '+')})")
-
-    st.markdown("---")
-    st.markdown("#### Chilometri accumulati")
-    base_ord = [t for t in TAPPE if t["tipo"] == "base"]
-    cum, acc = [], 0
-    for t in base_ord:
-        acc += t["km"]
-        cum.append({"tappa": t["a"], "km": acc})
-    st.line_chart(pd.DataFrame(cum).set_index("tappa"))
-    st.caption(f"Solo il giro principale: {sum(t['km'] for t in base_ord)} km. "
-               "Gli spostamenti in zona e le deviazioni si aggiungono a questi.")
-
-    st.markdown("---")
-    st.markdown("#### Se aggiungi una deviazione")
-    for t in TAPPE:
-        if t["tipo"] == "opzionale":
-            st.markdown(f"**{t['da']} → {t['a']}** — {t['km']} km sola andata, "
-                        f"{t['km']*2} km a/r, ~{t['ore']*2:.1f} h totali")
-    st.caption("La Dibona da sola costa 220 km e 4 ore di guida: con tre giorni negli Écrins "
-               "esclude la Barre.")
-
-# ---------------------------------------------------------------- meteo
-if sezione == "🌤️ Meteo":
-    st.caption("Il vento a 700 hPa (~3000 m) è il gradiente che decide se voli. "
-               "Lo zero termico serve per i ghiacciai. Medie della fascia 12-16.")
-    ca, cb = st.columns([3, 1])
-    ca.caption("I dati si riscaricano da soli ogni 15 minuti e a ogni apertura dell'app.")
-    if cb.button("🔄 Aggiorna ora", use_container_width=True):
-        meteo.clear()
-        st.rerun()
-
-    modo = st.radio("Vista", ["Semaforo", "Windy", "Una località, 16 giorni",
-                              "Confronto fra tutte, un giorno"],
+    st.markdown("### Approfondimento su una localit\u00e0")
+    modo = st.radio("Riferimento", ["Zona", "Da un sito", "Coordinate"],
                     horizontal=True, label_visibility="collapsed")
-
-    if modo == "Semaforo":
-        st.caption("Ogni decollo confrontato con le sue regole di vento, sul vento a 700 hPa "
-                   "della fascia 12-16. Si aggiorna da solo.")
-        zone_v = st.multiselect("Zone", list(VINCOLI), default=[z for z in VINCOLI if z in z_sel]
-                                or list(VINCOLI), key="sem_z")
-        MAPPA_Z = {
-            "1 Alpstein": "Appenzell / Alpstein", "2 Zurigo": "Rigi / Svizzera centrale",
-            "3 Oberland": "Interlaken / Oberland", "4 Annecy": "Annecy",
-            "5 Saint-Hilaire": "Saint-Hilaire", "6 Ecrins": "Briançon / Écrins",
-        }
-        try:
-            quando = None
-            for z in zone_v:
-                pm = MAPPA_Z.get(z)
-                if not pm or pm not in PUNTI_METEO:
-                    continue
-                a, b = PUNTI_METEO[pm]
-                d = meteo(a, b)
-                quando = d.get("_scaricato", quando)
-                hh = pd.DataFrame(d["hourly"]); hh["time"] = pd.to_datetime(hh["time"])
-                h = hh[hh["time"].dt.hour.between(12, 16)].copy(); h["g"] = h["time"].dt.date
-                ag = h.groupby("g").agg(v=("windspeed_700hPa", "mean"),
-                                        dr=("winddirection_700hPa", "mean")).reset_index()
-                ag = ag.head(10)
-                st.markdown(f"##### {z}")
-                colonne = {"Decollo": [s2["sito"] for s2 in VINCOLI[z]]}
-                for _, riga in ag.iterrows():
-                    et = pd.Timestamp(riga["g"]).strftime("%a %d")
-                    colonne[et] = [giudizio(riga["v"], riga["dr"], s2)[0] for s2 in VINCOLI[z]]
-                st.dataframe(pd.DataFrame(colonne), hide_index=True)
-                og = ag.iloc[0]
-                with st.expander(f"Perché — {pd.Timestamp(og['g']).strftime('%a %d/%m')}, "
-                                 f"{og['v']:.0f} km/h da {cardinale(og['dr'])}"):
-                    for s2 in VINCOLI[z]:
-                        ic, why = giudizio(og["v"], og["dr"], s2)
-                        st.markdown(f"{ic} **{s2['sito']}** — {why}"
-                                    + (f". {s2['nota']}" if s2["nota"] else ""))
-            if quando:
-                st.caption(f"Ultimo scaricamento: {quando}")
-            st.caption("🟢 si vola · 🟡 al limite · 🔴 no. "
-                       "Il semaforo guarda solo il gradiente in quota: la brezza locale, "
-                       "l'inversione e lo stato del terreno li devi vedere tu sul posto.")
-        except Exception as e:
-            st.warning("Non riesco a raggiungere Open-Meteo adesso.")
-            st.caption(f"({type(e).__name__}) Serve connessione internet.")
-        st.stop()
-
-    if modo == "Windy":
-        import streamlit.components.v1 as components
-        LIVELLI = {
-            "Superficie (10 m)": "surface",
-            "850 hPa (~1500 m)": "850h",
-            "700 hPa (~3000 m)": "700h",
-            "600 hPa (~4200 m)": "600h",
-            "500 hPa (~5500 m)": "500h",
-        }
-        STRATI = {
-            "Vento": "wind", "Raffiche": "gust", "Nuvole": "clouds", "Pioggia": "rain",
-            "Temperatura": "temp", "CAPE (instabilità)": "cape",
-            "Neve fresca": "snowAccu", "Isoterma zero": "deg0",
-        }
+    if modo == "Zona":
+        luogo = st.selectbox("Zona di riferimento", list(PUNTI_METEO))
+        la, lo = PUNTI_METEO[luogo]
+    elif modo == "Da un sito":
+        dec = base[base["tipo"].isin(["decollo","hike&fly"])].sort_values("nome")
+        nomi = list(dec["nome"])
+        if nomi:
+            scelto = st.selectbox("Decollo", nomi)
+            rr = dec[dec["nome"]==scelto].iloc[0]
+            la, lo, luogo = rr["lat"], rr["lon"], scelto
+        else:
+            luogo = list(PUNTI_METEO)[0]; la, lo = PUNTI_METEO[luogo]
+    else:
         c1, c2 = st.columns(2)
-        luogo = c1.selectbox("Centro mappa", list(PUNTI_METEO), key="windy_loc")
-        strato = c2.selectbox("Strato", list(STRATI), key="windy_ov")
-        liv = st.select_slider("Quota", list(LIVELLI), value="700 hPa (~3000 m)")
-        wla, wlo = PUNTI_METEO[luogo]
-        url = (f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}"
-               f"&detailLat={wla}&detailLon={wlo}&zoom=8"
-               f"&level={LIVELLI[liv]}&overlay={STRATI[strato]}"
-               "&product=ecmwf&menu=&message=true&marker=true&calendar=now"
-               "&pressure=&type=map&location=coordinates&detail=true"
-               "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1")
-        components.iframe(url, height=520, scrolling=False)
-        st.caption("Modello ECMWF. Il livello **700 hPa** è il gradiente che decide la giornata; "
-                   "**isoterma zero** e **neve fresca** servono per i ghiacciai degli Écrins.")
-        st.markdown(
-            f"[Apri a schermo intero su windy.com](https://www.windy.com/{wla}/{wlo}"
-            f"?{STRATI[strato]},{wla},{wlo},8) · "
-            f"[meteo-parapente](https://meteo-parapente.com/#/{wla},{wlo},11)")
-        with st.expander("I vincoli di vento sito per sito"):
-            st.markdown("- **Ebenalp** — con W forte: pericolo di rotore")
-            st.markdown("- **Kronberg** — nessuno: 4 decolli coprono tutte le direzioni")
-            st.markdown("- **Säntis** — solo W-SW **deboli**, e non si parte dalla funivia")
-            st.markdown("- **Rigi Staffelhöhe** — dalle 14 a sera; con bise vai a Rigi Scheidegg (NE)")
-            st.markdown("- **Rotenflue** — non ideale con W; quota massima 2750 m (aerovia A9)")
-            st.markdown("- **Schynige Platte** — no con vento di valle a Lehn, no con NW, "
-                        "no con bise forte")
-            st.markdown("- **Saint-Hilaire** — attenzione al vento da sud; **tetto 3000 m** "
-                        "(aeroporto di Lione)")
-            st.markdown("- **Dôme / Roche Faurio** — si decolla presto: la neve troppo scaldata "
-                        "fa sprofondare mentre corri")
-        st.stop()
+        la = c1.number_input("Latitudine", 44.5, 47.5, 46.27, 0.01, format="%.4f")
+        lo = c2.number_input("Longitudine", 10.5, 16.0, 13.16, 0.01, format="%.4f")
+        luogo = f"{la:.3f}, {lo:.3f}"
+    cga, cgb = st.columns([3,1])
+    if cgb.button("\U0001F504 Aggiorna", use_container_width=True):
+        analisi.clear(); panoramica.clear(); st.rerun()
 
-    if modo.startswith("Confronto"):
-        try:
-            righe = []
-            for nome, (a, b) in PUNTI_METEO.items():
-                d = meteo(a, b)
-                dd = pd.DataFrame(d["daily"]); dd["time"] = pd.to_datetime(dd["time"])
-                hh = pd.DataFrame(d["hourly"]); hh["time"] = pd.to_datetime(hh["time"])
-                h = hh[hh["time"].dt.hour.between(12, 16)].copy(); h["g"] = h["time"].dt.date
-                ag = h.groupby("g").agg(v700=("windspeed_700hPa", "mean"),
-                                        d700=("winddirection_700hPa", "mean"),
-                                        zt=("freezing_level_height", "mean")).reset_index()
-                dd["g"] = dd["time"].dt.date
-                for _, x in dd.merge(ag, on="g", how="left").iterrows():
-                    righe.append(dict(Localita=nome, g=x["g"],
-                                      tmax=x["temperature_2m_max"],
-                                      pioggia=x["precipitation_probability_max"],
-                                      v700=x["v700"], d700=x["d700"], zt=x["zt"]))
-            R = pd.DataFrame(righe)
-            giorni_d = sorted(R["g"].unique())
-            gsel = st.select_slider("Giorno", giorni_d, value=giorni_d[0],
-                                    format_func=lambda d: d.strftime("%a %d/%m"))
-            q = R[R["g"] == gsel].copy()
-            st.dataframe(pd.DataFrame({
-                "Località": q["Localita"],
-                "Max": [f"{v:.0f}°" for v in q["tmax"]],
-                "Pioggia": [f"{v:.0f}%" for v in q["pioggia"].fillna(0)],
-                "Vento 700hPa": [f"{v:.0f} km/h {cardinale(x)}" if pd.notna(v) else "—"
-                                 for v, x in zip(q["v700"], q["d700"])],
-                "Zero term.": [f"{z:.0f} m" if pd.notna(z) else "—" for z in q["zt"]],
-            }), hide_index=True)
-            st.caption("Il gradiente piu debole e quasi sempre la localita dove si vola meglio.")
-        except Exception as e:
-            st.warning("Non riesco a raggiungere Open-Meteo adesso.")
-            st.caption(f"({type(e).__name__}) Serve connessione internet.")
-        st.stop()
-
-    scelta = st.selectbox("Località", list(PUNTI_METEO))
-    la, lo = PUNTI_METEO[scelta]
     try:
-        d = meteo(la, lo)
-        dd = pd.DataFrame(d["daily"]); dd["time"] = pd.to_datetime(dd["time"])
-        hh = pd.DataFrame(d["hourly"]); hh["time"] = pd.to_datetime(hh["time"])
-        h = hh[hh["time"].dt.hour.between(12, 16)].copy()
-        h["g"] = h["time"].dt.date
-        agg = h.groupby("g").agg(v700=("windspeed_700hPa", "mean"),
-                                 d700=("winddirection_700hPa", "mean"),
-                                 zt=("freezing_level_height", "mean"),
-                                 nuv=("cloudcover", "mean")).reset_index()
-        dd["g"] = dd["time"].dt.date
-        t = dd.merge(agg, on="g", how="left")
+        t, qstaz, quando = analisi(float(la), float(lo))
+        gg = list(t["g"])
+        dflt = gsel if giorni_comuni and gsel in gg else gg[0]
+        g = cga.select_slider("Giorno", gg, value=dflt,
+                              format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="mg")
+        r = t[t["g"]==g].iloc[0]
 
-        st.dataframe(pd.DataFrame({
-            "Giorno": t["time"].dt.strftime("%a %d/%m"),
-            "Min/Max": [f"{a:.0f}/{b:.0f}°" for a, b in
-                        zip(t["temperature_2m_min"], t["temperature_2m_max"])],
-            "Pioggia": [f"{p:.0f}% · {s:.0f}mm" for p, s in
-                        zip(t["precipitation_probability_max"].fillna(0),
-                            t["precipitation_sum"].fillna(0))],
-            "Vento 700hPa": [f"{v:.0f} km/h {cardinale(x)}" if pd.notna(v) else "—"
-                             for v, x in zip(t["v700"], t["d700"])],
-            "Zero term.": [f"{z:.0f} m" if pd.notna(z) else "—" for z in t["zt"]],
-            "Nuvole": [f"{n:.0f}%" if pd.notna(n) else "—" for n in t["nuv"]],
-        }), hide_index=True)
+        st.markdown(f"### {luogo} — {pd.Timestamp(g).strftime('%A %d/%m')}")
+        i_ic,i_tx = M.giudica_instabilita(r["cape"], r["li"])
+        g_ic,g_tx = M.giudica_gradiente(r["lapse_850_700"])
+        tb_ic,tb_tx = M.giudica_turbolenza(r["shear_925_700"], r["raff_ratio"], r["v700"])
+        in_ic,in_tx = M.descrivi_inversioni(r["inversioni"], qstaz)
+        nu_ic,nu_tx = M.giudica_nuvole(r["nuv_bassa"], r["nuv_media"], r["nuv_alta"],
+                                       r["base_nubi"], r["quota_termica"], r["cumuli"])
+        for ic_, tx_, tit in [(i_ic,i_tx,"Instabilità"), (g_ic,g_tx,"Gradiente termico"),
+                              (in_ic,in_tx,"Inversioni"), (tb_ic,tb_tx,"Turbolenza"),
+                              (nu_ic,nu_tx,"Copertura nuvolosa")]:
+            card(f"{ic_} {tit}", tx_, CL.get(ic_,"n"))
 
-        g = t[["time", "v700"]].dropna().set_index("time")
-        if len(g):
-            g.columns = ["vento 700 hPa km/h"]
-            st.line_chart(g)
-            st.caption("Sopra i 25-30 km/h a 700 hPa i decolli esposti diventano difficili. "
-                   f"Ultimo scaricamento: {d.get('_scaricato','—')}")
-        with st.expander("I vincoli di vento sito per sito"):
-            st.markdown("- **Ebenalp** — con W forte: pericolo di rotore")
-            st.markdown("- **Kronberg** — nessuno: 4 decolli coprono tutte le direzioni")
-            st.markdown("- **Säntis** — solo W-SW **deboli**, e non si parte dalla funivia")
-            st.markdown("- **Rigi Staffelhöhe** — dalle 14 a sera; con bise vai a Rigi Scheidegg (NE)")
-            st.markdown("- **Rotenflue** — non ideale con W; quota massima 2750 m (aerovia A9)")
-            st.markdown("- **Schynige Platte** — no con vento di valle a Lehn, no con NW, "
-                        "no con bise forte")
-            st.markdown("- **Saint-Hilaire** — attenzione al vento da sud; **tetto 3000 m** "
-                        "(aeroporto di Lione)")
-            st.markdown("- **Dôme / Roche Faurio** — si decolla presto: la neve troppo scaldata "
-                        "fa sprofondare mentre corri")
+        st.markdown("#### Quote di lavoro")
+        q1,q2,q3,q4 = st.columns(4)
+        q1.metric("Tetto termiche",
+                  f"{r['quota_termica']:.0f}" if pd.notna(r["quota_termica"]) else "—")
+        q2.metric("Base cumuli",
+                  f"{r['base_nubi']:.0f}" if pd.notna(r["base_nubi"]) else "—")
+        q3.metric("Zero termico",
+                  f"{r['zero_term']:.0f}" if pd.notna(r["zero_term"]) else "—")
+        q4.metric("Stazione", f"{qstaz:.0f}")
+        st.caption("Metri sul livello del mare. Il tetto delle termiche è la cima dello "
+                   "strato rimescolato; la base dei cumuli viene dallo spread temperatura/rugiada.")
+
+        st.markdown("#### Copertura nuvolosa")
+        n1,n2,n3 = st.columns(3)
+        for col, et, vv, cc in [(n1,"Basse < 2 km",r["nuv_bassa"],"#cc2b2b"),
+                                (n2,"Medie 2-7 km",r["nuv_media"],"#e0a500"),
+                                (n3,"Alte > 7 km",r["nuv_alta"],"#3c91e6")]:
+            col.markdown(f"<div class='card'><h4>{vv:.0f}%</h4>"
+                         f"<div class='sub'>{et}</div>{barra(vv, cc)}</div>"
+                         if pd.notna(vv) else f"<div class='card'><h4>—</h4>"
+                         f"<div class='sub'>{et}</div></div>", unsafe_allow_html=True)
+        strati = r["strati_nubi"]
+        if strati:
+            st.markdown("**Strati individuati nel profilo**")
+            kv([(f"{s['z']:.0f} m ({int(s['hPa'])} hPa)",
+                 f"{s['cop']:.0f}% · UR {s['rh']:.0f}%" if pd.notna(s["rh"])
+                 else f"{s['cop']:.0f}%") for s in strati])
+        else:
+            st.caption("Nessuno strato significativo nel profilo verticale.")
+        if r["cumuli"]:
+            st.success(f"Cumuli attesi con base intorno a {r['base_nubi']:.0f} m: "
+                       "hai riferimenti visivi per trovare le termiche.")
+        elif pd.notna(r["base_nubi"]) and pd.notna(r["quota_termica"]) \
+             and r["base_nubi"] > r["quota_termica"] + 150:
+            st.info("Aria secca: termiche blu, nessun cumulo a segnalarle.")
+
+        with st.expander("Gradiente termico, strato per strato"):
+            for k, et in [("lapse_925_850","925→850 hPa, il basso"),
+                          ("lapse_850_700","850→700 hPa, il medio"),
+                          ("lapse_700_500","700→500 hPa, l'alto")]:
+                ic_, tx_ = M.giudica_gradiente(r[k])
+                v_ = f"{r[k]:.2f} °C/100 m" if pd.notna(r[k]) else "—"
+                card(f"{ic_} {et} — {v_}", tx_, CL.get(ic_,"n"))
+            st.caption("0,98 °C/100 m è l'adiabatica secca: più ci si avvicina, "
+                       "più le termiche sono forti. Sotto 0,45 l'aria è stabile.")
+
+        with st.expander("Profilo verticale e inversioni"):
+            prof = pd.DataFrame(r["profilo"]); prof = prof[prof["z"].notna()]
+            if len(prof):
+                kv([(f"{int(p.hPa)} hPa — {p.z:.0f} m",
+                     (f"{p.t:.1f}°" if pd.notna(p.t) else "—") + "  ·  "
+                     + (f"{p.v:.0f} km/h {cardinale(p.d)}" if pd.notna(p.v) else "—")
+                     + (f"  ·  UR {p.rh:.0f}%" if pd.notna(p.rh) else ""))
+                    for p in prof.itertuples()])
+                ch = prof[["z","t"]].dropna().set_index("z").sort_index()
+                if len(ch):
+                    ch.columns = ["temperatura °C"]; st.line_chart(ch, height=200)
+                    st.caption("Dove la linea torna a salire andando verso quote maggiori, "
+                               "c'è un'inversione.")
+            if r["inversioni"]:
+                for b2, c2_, dt in r["inversioni"]:
+                    st.markdown(f"• inversione da **{b2:.0f} m** a **{c2_:.0f} m**, "
+                                f"+{dt:.1f} °C")
+
+        with st.expander("Instabilità, vento e numeri"):
+            kv([("CAPE medio", f"{r['cape']:.0f} J/kg" if pd.notna(r["cape"]) else "—"),
+                ("CAPE massimo", f"{r['cape_max']:.0f} J/kg" if pd.notna(r["cape_max"]) else "—"),
+                ("Lifted index", f"{r['li']:.1f}" if pd.notna(r["li"]) else "—"),
+                ("CIN", f"{r['cin']:.0f} J/kg" if pd.notna(r["cin"]) else "—"),
+                ("Vento 700 hPa", f"{r['v700']:.0f} km/h {cardinale(r['d700'])}"
+                 if pd.notna(r["v700"]) else "—"),
+                ("Vento 850 hPa", f"{r['v850']:.0f} km/h {cardinale(r['d850'])}"
+                 if pd.notna(r["v850"]) else "—"),
+                ("Shear 925→700", f"{r['shear_925_700']:.0f} km/h"
+                 if pd.notna(r["shear_925_700"]) else "—"),
+                ("Raffiche al suolo", f"{r['raffiche']:.0f} km/h"
+                 if pd.notna(r["raffiche"]) else "—"),
+                ("Pioggia", f"{r['pioggia']:.0f}%" if pd.notna(r["pioggia"]) else "—")])
+
+        with st.expander("Andamento sui prossimi giorni"):
+            s_ = t[["time","quota_termica","base_nubi"]].dropna(subset=["time"]).set_index("time")
+            st.line_chart(s_.rename(columns={"quota_termica":"tetto termiche m",
+                                             "base_nubi":"base cumuli m"}), height=210)
+            s2 = t[["time","cape","v700"]].dropna(subset=["time"]).set_index("time")
+            st.line_chart(s2.rename(columns={"cape":"CAPE J/kg","v700":"vento 700 hPa km/h"}),
+                          height=210)
+        st.caption(f"Medie della fascia 11-16. Ultimo scaricamento: {quando}.")
+
+        # ---- mappa dei siti volabili
+        st.divider()
+        st.markdown("#### Siti volabili con questo meteo")
+        v, d = r["v700"], r["d700"]
+        att_f = st.segmented_control("Attività", list(ATTIVITA), default="cross",
+                                     format_func=lambda a: f"{ico(a)} {eti(a)}", key="sv_a") or "cross"
+        B = solo(att_f); B = B[B["tipo"].isin(["decollo","hike&fly"])]
+        verdetti, motivi = {}, {}
+        for _, x in B.iterrows():
+            vk = VIN_FLAT.get(x["nome"])
+            if vk:
+                ic2, why = giudizio(v, d, vk)
+                verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"])
+            else:
+                verdetti[x["nome"]] = "⚪"
+        cnt = {k: sum(1 for z in verdetti.values() if z==k)
+               for k in ["\U0001F7E2","\U0001F7E1","\U0001F534","⚪"]}
+        s1,s2_,s3,s4 = st.columns(4)
+        s1.metric("\U0001F7E2 Si vola", cnt["\U0001F7E2"])
+        s2_.metric("\U0001F7E1 Al limite", cnt["\U0001F7E1"])
+        s3.metric("\U0001F534 No", cnt["\U0001F534"])
+        s4.metric("⚪ Ignoto", cnt["⚪"])
+        mappa(B, zoom=7.8, verdetti=verdetti, h=430)
+        for stato, tit in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
+                           ("\U0001F534","Da escludere")]:
+            bl = B[[verdetti.get(n)==stato for n in B["nome"]]]
+            if not len(bl): continue
+            with st.expander(f"{stato} {tit} — {len(bl)}"):
+                for _, x in bl.sort_values("nome").iterrows():
+                    w = motivi.get(x["nome"])
+                    st.markdown(f"**{x['nome']}** — {w[0] if w else ''}")
+                    if w and w[1]: st.caption(w[1])
+        st.caption("Il semaforo guarda solo il gradiente a 700 hPa contro l'esposizione del "
+                   "decollo. Brezza di valle, inversione locale e stato del terreno li vedi tu.")
     except Exception as e:
         st.warning("Non riesco a raggiungere Open-Meteo adesso.")
-        st.caption(f"({type(e).__name__}) Serve connessione internet. Su Streamlit Cloud funziona.")
-    st.markdown(
-        f"[meteo-parapente su {scelta}](https://meteo-parapente.com/#/{la},{lo},11) · "
-        "[MeteoSwiss](https://www.meteoswiss.admin.ch) · "
-        "[Météo-France montagne](https://meteofrance.com/meteo-montagne) · "
-        "[gipfelbuch.ch](https://www.gipfelbuch.ch)")
+        st.caption(f"({type(e).__name__}) Serve connessione internet.")
 
-# ---------------------------------------------------------------- info
-if sezione == "🔧 Info":
-    st.markdown("#### Materiale")
-    for k, v in MATERIALE:
-        st.markdown(f"**{k}** — {v}")
-    st.markdown("---")
+    st.divider()
+    st.markdown("#### Carte e mappe")
+    import streamlit.components.v1 as components
+    LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
+           "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
+    STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
+           "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
+           "Isoterma zero":"deg0"}
+    cw1, cw2 = st.columns(2)
+    strato = cw1.selectbox("Strato", list(STR), key="w_ov")
+    livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
+    components.iframe(
+        f"https://embed.windy.com/embed2.html?lat={float(la)}&lon={float(lo)}"
+        f"&detailLat={float(la)}&detailLon={float(lo)}&zoom=7&level={LIV[livw]}"
+        f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
+        "&pressure=true&type=map&location=coordinates&detail=true"
+        "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
+    st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
+                "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
+                "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
+                "· [Radar Protezione Civile](https://radar.protezionecivile.it/) "
+                f"· [meteo-parapente](https://meteo-parapente.com/#/{float(la)},{float(lo)},11)")
+
+    st.divider()
+    st.markdown("#### Come funziona il tempo in Friuli")
+    st.caption("Dagli *Appunti di meteorologia per il Friuli Venezia Giulia*, ARPA FVG.")
+    for n_, d_ in METEO_FVG:
+        with st.expander(n_):
+            st.write(d_)
+    st.markdown("#### Fonti locali")
+    for n_, d_ in FONTI_METEO_FVG:
+        st.markdown(f"**{n_}** — {d_}")
+
+# ======================================================= SITI
+with T_SITI:
+    att = st.segmented_control("Attività", list(ATTIVITA), default="cross",
+                               format_func=lambda a: f"{ico(a)} {eti(a)}", key="att") or "cross"
+    B = solo(att)
+    st.markdown(f"### {ico(att)} {eti(att)}")
+    st.caption(DESCR_ATT[att])
+    dec = B[B["tipo"].isin(["decollo","hike&fly"])]
+    att_l = B[B["tipo"]=="atterraggio"]
+    altro = B[B["tipo"].isin(["zona","parcheggio","impianto"])]
+    n_esp = int((dec["vento"].astype(str).str.len() > 0).sum())
+    n_gr  = int(dec["difficolta"].astype(str).str.startswith("H&F ").sum())
+    st.markdown("".join(f"<span class='chip'>{t}</span>" for t in (
+        f"\U0001FA82 {len(dec)} decolli", f"\U0001F3AF {len(att_l)} atterraggi",
+        f"\U0001F9ED {n_esp} con esposizione",
+        *( [f"\U0001F4D0 {n_gr} con difficoltà"] if n_gr else [] ))),
+        unsafe_allow_html=True)
+    mappa(B, zoom=8.1, ammesse={att}, h=430)
+    q = st.text_input("Cerca", key=f"q_{att}",
+                      placeholder="bora, cavi, vietato, navetta, biglietto…")
+    gradi_pres = [g for g in ("1","2-","2","2+","3")
+                  if (dec["difficolta"].astype(str) == "H&F " + g).any()]
+    if gradi_pres:
+        scelti = st.multiselect("Difficoltà di decollo (scala Cammina e Vola)", gradi_pres,
+                                key=f"g_{att}", placeholder="tutti i gradi",
+                                help="Vuoto = tutti, compresi i punti senza valutazione")
+        if scelti:
+            dec = dec[dec["difficolta"].astype(str).isin(["H&F " + g for g in scelti])]
+        with st.expander("Cosa vogliono dire i gradi"):
+            for g, testo in SCALA_CEV:
+                st.markdown(f"**Grado {g}** — {testo}")
+            st.caption("Scala di camminaevola.it. Riguarda il decollo, non la salita.")
+    def filtra(b):
+        if not q or not len(b): return b
+        ql = q.lower()
+        return b[[any(ql in str(x[c]).lower() for c in CAMPI if c in b.columns)
+                  for _, x in b.iterrows()]]
+    dec, att_l, altro = filtra(dec), filtra(att_l), filtra(altro)
+
+    st.markdown(f"#### \U0001FA82 Decolli — {len(dec)}")
+    if not len(dec): st.info("Nessun decollo con questi filtri.")
+    for z in [z for z in ORDINE if z in set(dec["zona"])]:
+        st.markdown(f"*{z}*")
+        for _, r in dec[dec["zona"]==z].sort_values("nome").iterrows():
+            e_ = val(r,"vento") or "esposizione da verificare"
+            qt = f" · {int(r['quota'])} m" if val(r,"quota") else ""
+            d_ = str(val(r,"difficolta") or "")
+            gr = f" · dec. {d_[4:]}" if d_.startswith("H&F ") else ""
+            with st.expander(f"{r['nome']} — \U0001F9ED {e_}{qt}{gr}"):
+                scheda_sito(r)
+    if len(att_l):
+        st.markdown(f"#### \U0001F3AF Atterraggi — {len(att_l)}")
+        for z in [z for z in ORDINE if z in set(att_l["zona"])]:
+            st.markdown(f"*{z}*")
+            for _, r in att_l[att_l["zona"]==z].sort_values("nome").iterrows():
+                with st.expander(r["nome"]):
+                    scheda_sito(r)
+    if len(altro):
+        st.markdown(f"#### ⚠️ Regole e servizi — {len(altro)}")
+        for _, r in altro.sort_values("nome").iterrows():
+            with st.expander(r["nome"]):
+                scheda_sito(r)
+
+# ======================================================= INFO
+with T_INFO:
+    st.markdown("#### Le quattro attività")
+    for a, cfg in ATTIVITA.items():
+        b = solo(a)
+        card(f"{cfg['ico']} {cfg['eti']} — {len(b)} punti",
+             f"{len(b[b['tipo'].isin(['decollo','hike&fly'])])} decolli · "
+             f"{len(b[b['tipo']=='atterraggio'])} atterraggi<br>{DESCR_ATT[a]}")
+    st.caption("Un punto può valere per più attività. Cross e hike & fly vengono "
+               "dalle cartelle del KML e dalle fonti dei club. I due alpinismi sono una "
+               "PROPOSTA basata sul carattere della cima: vanno confermati.")
+    st.divider()
+    st.markdown("#### Com'è messa ogni zona")
+    for k, v in NOTE_AREA:
+        with st.expander(k): st.write(v)
+    st.divider()
+    st.markdown("#### Gite curate")
+    for g in GITE:
+        with st.expander(f"{g['nome']} · {g['zona']}"):
+            st.caption(" · ".join([g["cat"]] + ([f"↗ {g['disl']} m"] if g["disl"] else [])
+                                       + ([g["ore"]] if g["ore"] else [])))
+            st.write(g["testo"])
+    st.markdown("#### Flytherapy — 25 gite bellunesi")
+    st.markdown("  ·  ".join(
+        f"[{n}](https://www.flytherapy.it/portfolio_page/{s}/)" for n, _, s in GITE_FLYTHERAPY))
+    st.divider()
     st.markdown("#### Fonti")
-    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte", "Cosa dà", "Area"]), hide_index=True)
-    st.markdown("---")
+    st.dataframe(pd.DataFrame(FONTI, columns=["Fonte","Cosa dà","Area"]), hide_index=True)
+    st.divider()
     st.markdown("#### Affidabilità")
-    st.markdown("✅ **verificato** con fonte scritta — pannelli SHV/FGA, paraglidingearth, "
-                "FFCAM, camptocamp, blog di relazioni")
-    st.markdown("🧑 **da un pilota che c'è stato** — racconto diretto, non pubblicato da nessuna parte")
-    st.markdown("🟡 **solo KML** — nella mappa di Lorenzo Delbene ma senza note dell'autore")
-    st.markdown("❓ **da verificare** prima di andarci")
-    st.caption("Condizioni di ghiacciaio e decolli non ufficiali vanno sempre confermati sul posto.")
+    card("✅ Verificato", "fonte scritta: club, federazioni, guide locali, ARPA FVG", "g")
+    card("\U0001F4D7 Relazione Cammina e Vola",
+         "uscita raccontata da chi l'ha fatta, con difficoltà di decollo, vento, "
+         "via di salita e coordinate", "b")
+    card("\U0001F7E1 Solo KML", "nella mappa di Lorenzo Delbene ma senza note dell'autore", "y")
+    card("❓ Da verificare", "prima di andarci", "n")
+    st.divider()
+    st.markdown("#### Difficoltà di decollo")
+    st.caption(f"Scala di camminaevola.it, applicata a "
+               f"{int(df['difficolta'].astype(str).str.startswith('H&F ').sum())} decolli. "
+               "Valuta lo spazio, la pendenza e il terreno del decollo, non la salita.")
+    for g, testo in SCALA_CEV:
+        card(f"Grado {g}", testo, "g" if g == "1" else "y" if g.startswith("2") else "r")
