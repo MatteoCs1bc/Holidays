@@ -1177,6 +1177,37 @@ ORDINE = ["1 Friuli","2 Alpi Giulie","6 Pordenonese / Carnia ovest","3 Slovenia"
           "7 Veneto (Bassano/Marostica)"]
 CAMPI = ["nome","note","vento","difficolta","partenza","categoria","fonte","zona"]
 VIN_FLAT = {v["sito"]: v for vs in VINCOLI.values() for v in vs}
+
+# Per i decolli senza scheda vincoli scritta a mano, i settori si ricavano
+# dall'esposizione: quella dichiarata dalla fonte (campo "vento") oppure, se manca,
+# quella stimata dal pendio sul modello del terreno (campo "vento_stimato").
+_DIR = {"N": 0, "NNE": 22.5, "NE": 45, "ENE": 67.5, "E": 90, "ESE": 112.5, "SE": 135,
+        "SSE": 157.5, "S": 180, "SSW": 202.5, "SSO": 202.5, "SW": 225, "SO": 225,
+        "WSW": 247.5, "OSO": 247.5, "W": 270, "O": 270, "WNW": 292.5, "ONO": 292.5,
+        "NW": 315, "NO": 315, "NNW": 337.5, "NNO": 337.5}
+
+def settori_da_testo(s, ampiezza=30):
+    import re as _re
+    gradi = [_DIR[x] for x in _re.split(r"[^A-Z]+", str(s or "").upper()) if x in _DIR]
+    if not gradi: return None
+    if len(set(gradi)) >= 7: return [(0, 360)]
+    out = []
+    for g in gradi:
+        a, b = (g - ampiezza) % 360, (g + ampiezza) % 360
+        out += [(a, b)] if a < b else [(a, 360), (0, b)]
+    return out
+
+for _, _r in df[df["tipo"].isin(["decollo", "hike&fly"])].iterrows():
+    if _r["nome"] in VIN_FLAT: continue
+    _v = _r.get("vento") if isinstance(_r.get("vento"), str) else ""
+    _st = _r.get("vento_stimato") if isinstance(_r.get("vento_stimato"), str) else ""
+    _s = settori_da_testo(_v) if _v else settori_da_testo(_st, 35) if _st else None
+    if not _s: continue
+    VIN_FLAT[_r["nome"]] = dict(
+        sito=_r["nome"], settori=_s, vietati=[], max_v=22 if _v else 20,
+        max_giallo=30 if _v else 26, auto=True, stimata=not _v,
+        nota=(f"Esposizione {_v} (dalla fonte). Settori automatici: da verificare." if _v else
+              f"Esposizione STIMATA dal pendio: {_st}. Da verificare sul posto."))
 CL = {"\U0001F7E2":"g","\U0001F7E1":"y","\U0001F7E0":"o","\U0001F534":"r",
       "\U0001F535":"b","⚪":"n","—":"n","·":"n"}
 
@@ -1255,7 +1286,9 @@ def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420, key=None, spiega=None):
         m["etichetta"] = [eti(a) for a in m["_a"]]
     m["rad"] = [460 if t=="decollo" else (380 if t=="hike&fly" else 240) for t in m["tipo"]]
     m["sotto"] = [(f"{int(r['quota'])} m · " if val(r,'quota') else "")
-                  + (str(r["vento"]) if val(r,"vento") else r["tipo"]) for _, r in m.iterrows()]
+                  + (str(r["vento"]) if val(r,"vento") else
+                     (f"{r['vento_stimato']} (stimata)" if val(r,"vento_stimato") else r["tipo"]))
+                  for _, r in m.iterrows()]
     m["salita"] = ["\U0001F97E via di salita descritta" if val(r,"partenza") else ""
                    for _, r in m.iterrows()]
     deck = pdk.Deck(
@@ -1284,7 +1317,8 @@ def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420, key=None, spiega=None):
     with st.expander("ℹ️ Come leggere la mappa"):
         if verdetti is not None:
             st.markdown("Ogni punto è un decollo. 🟢 si vola con il vento previsto, "
-                        "🟡 al limite, 🔴 vento sbagliato per quel decollo, ⚪ esposizione "
+                        "🟡 al limite (o esposizione solo stimata dal pendio), 🔴 vento "
+                        "sbagliato per quel decollo, ⚪ esposizione "
                         "non nota. Passa sopra un punto per nome, quota ed esposizione.")
         else:
             st.markdown("Colore = attività principale del punto. Punti grandi = decolli, "
@@ -1309,6 +1343,7 @@ def scheda_sito(r, verdetto=None, motivo=None):
     righe = []
     if val(r,"quota"):      righe.append(("Quota", f"{int(r['quota'])} m"))
     if val(r,"vento"):      righe.append(("Esposizione", str(r["vento"])))
+    elif val(r,"vento_stimato"): righe.append(("Esposizione (stimata dal pendio)", str(r["vento_stimato"])))
     if val(r,"difficolta"):
         d_ = str(r["difficolta"])
         righe.append(("Difficoltà decollo", d_[4:]) if d_.startswith("H&F ")
@@ -1363,6 +1398,7 @@ def vie_di_salita(B, cliccato, att):
     if val(r,"quota"): righe.append(("Quota decollo", f"{int(r['quota'])} m"))
     if val(r,"disl"):  righe.append(("Dislivello a piedi", f"{int(r['disl'])} m"))
     if val(r,"vento"): righe.append(("Esposizione", str(r["vento"])))
+    elif val(r,"vento_stimato"): righe.append(("Esposizione (stimata dal pendio)", str(r["vento_stimato"])))
     if val(r,"difficolta"):
         d_ = str(r["difficolta"])
         righe.append(("Difficoltà decollo", d_[4:] if d_.startswith("H&F ") else d_))
@@ -1385,7 +1421,11 @@ def vie_di_salita(B, cliccato, att):
                      "b")
         except Exception:
             st.caption(f"Zona neve: {zv['nome']} (dati non disponibili ora).")
-    st.markdown(f"[Termiche e skyways su kk7]({montagna.link_kk7(float(r['lat']), float(r['lon']), 13)})")
+    st.markdown(f"[Termiche e skyways su kk7]({montagna.link_kk7(float(r['lat']), float(r['lon']), 13)})"
+                f" · [Decollo su burnair](https://map.burnair.cloud/#14/{float(r['lat']):.4f}/{float(r['lon']):.4f})")
+    if not val(r, "vento") and isinstance(r.get("vento_stimato"), str) and r.get("vento_stimato"):
+        st.caption(f"Esposizione stimata dal pendio: {r['vento_stimato']} "
+                   f"(pendenza ~{r.get('pendenza', '?')}°). Da verificare.")
     with st.expander("Scheda completa del decollo"):
         scheda_sito(r)
 
@@ -1521,6 +1561,8 @@ with T_METEO:
                 zn = min(vz, key=lambda n: dist_km(float(x["lat"]), float(x["lon"]),
                                                     *PUNTI_METEO[n]))
                 ic2, why = giudizio(vz[zn][0], vz[zn][1], vk)
+                if vk.get("stimata") and ic2 == "\U0001F7E2":
+                    ic2, why = "\U0001F7E1", why + " — esposizione solo stimata dal pendio"
                 verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"], zn)
             else:
                 verdetti[x["nome"]] = "⚪"

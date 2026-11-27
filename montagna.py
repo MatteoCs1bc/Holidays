@@ -724,6 +724,9 @@ def scheda_rotte(card, kv, df_siti=None):
                     "nome). **Segnaposto**: decolli; cliccali per nome ed esposizione. "
                     "In alto a destra scegli fondo e strati. Se uno strato kk7 non compare, "
                     "aprilo su kk7 con i pulsanti delle zone (lì ci sono i filtri per mese e ora).")
+    st.link_button("Apri burnair Map (decolli, atterraggi, spazi aerei, NOTAM)",
+                   "https://map.burnair.cloud/#10/46.3325/13.1165", width="stretch")
+    st.caption("burnair non consente di copiare i suoi dati: qui c'è solo il collegamento.")
     cols = st.columns(4)
     for i, z in enumerate(ZONE):
         cols[i % 4].link_button(z["nome"].replace("Carnia — ", ""), link_kk7(z["lat"], z["lon"]),
