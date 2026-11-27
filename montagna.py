@@ -9,6 +9,8 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
+import pydeck as pdk
+import os, csv, io
 
 HOST_APP = "holidays-fmd923jzymr5fncrthpnrl.streamlit.app"   # ?src= chiesto da kk7
 INIZIO_MESE, INIZIO_GIORNO = 11, 1                          # stagione dal 1 novembre
@@ -260,6 +262,9 @@ def scheda_neve(card, kv):
                "indicative: neve 72 h ≥ 30 cm, pioggia su neve, vento 700 hPa ≥ 40 km/h "
                "con neve fresca, zero termico 300 m sopra la quota, notti serene ≤ −8 °C.")
 
+    # --- mappa con scelta del parametro
+    mappa_neve(righe, tab, oggi)
+
     # --- dettaglio
     st.divider()
     nomi = [z["nome"] for z in ZONE]
@@ -304,10 +309,232 @@ def scheda_neve(card, kv):
         sfera = "\U0001F52E " if fut else ""
         card(sfera + f"{r['data']:%a %d/%m}" + (" · previsione" if fut else ""), sotto, liv)
     st.caption("I giorni senza eventi più vecchi di 2 settimane sono nascosti.")
+    oss_z = [o for o in leggi_osservazioni() if o.get("zona") == z["nome"]]
+    if oss_z:
+        st.markdown(f"**\U0001F463 Osservazioni sul campo — {len(oss_z)}**")
+        for o in sorted(oss_z, key=lambda o: o.get("data", ""), reverse=True)[:10]:
+            card(f"\U0001F463 {o.get('data','')} · {o.get('quota','')} m · {o.get('esposizione','')}",
+                 riassunto_oss(o), "b")
     with st.expander("Tabella completa della zona"):
         st.dataframe(d.drop(columns=["eventi", "q"]), hide_index=True)
         st.download_button("Scarica CSV", d.drop(columns=["eventi"]).to_csv(index=False),
                            file_name=f"neve_{z['id']}_{oggi}.csv")
+
+    st.divider()
+    sezione_osservazioni(card)
+
+
+
+# ------------------------------------------------------------------ MAPPA NEVE
+PARAM_NEVE = {
+    # etichetta: (colonna della tabella riassuntiva, soglie crescenti, unità, spiegazione)
+    "Stato del manto": ("Stato", None, "",
+        "Sintesi delle segnalazioni automatiche negli ultimi 3 giorni e nei prossimi 2: "
+        "🔴 attenzione alta (≥ 50 cm in 72 h), 🟠 marcato (molta neve fresca, pioggia su neve, "
+        "vento forte con neve trasportabile, rialzo termico brusco), 🟡 da seguire, 🟢 tranquillo."),
+    "Neve fresca 72 h": ("Fresca 72h cm", [1, 10, 30, 50], "cm",
+        "Somma della neve caduta negli ultimi 3 giorni alla quota della zona. Più è alta, più "
+        "il manto è carico e instabile nei primi giorni."),
+    "Neve fresca 7 giorni": ("Fresca 7 gg cm", [1, 15, 40, 80], "cm",
+        "Neve caduta nell'ultima settimana."),
+    "Neve fresca stagione": ("Fresca stagione cm", [10, 50, 120, 250], "cm",
+        "Totale della neve fresca dal 1° novembre (somma, non altezza al suolo)."),
+    "Neve al suolo (modello)": ("Neve al suolo (mod.) cm", [5, 30, 80, 150], "cm",
+        "Altezza del manto secondo il modello, nella sua cella: indicativa, in valle e sui "
+        "versanti al sole può essere molto diversa."),
+    "Pioggia 7 giorni": ("Pioggia 7 gg mm", [1, 10, 30, 60], "mm",
+        "Pioggia alla quota della zona nell'ultima settimana: su neve la bagna e poi, se gela, "
+        "fa crosta."),
+    "Zero termico oggi": ("Zero term. oggi m", [1000, 1500, 2000, 2800], "m",
+        "Quota massima dello zero termico oggi. Se è sopra la quota della zona la neve "
+        "fonde in superficie."),
+    "Vento 700 hPa oggi": ("_v700", [20, 40, 60, 80], "km/h",
+        "Vento massimo a circa 3000 m. Sopra 40 km/h con neve fresca si formano accumuli "
+        "sui versanti sottovento (opposti alla direzione indicata)."),
+    "Neve prevista 7 giorni": ("Neve prossimi 7 gg cm", [1, 10, 30, 60], "cm",
+        "Neve prevista dal modello nei prossimi 7 giorni."),
+}
+SCALA = [[200, 200, 200], [160, 205, 240], [60, 145, 230], [225, 170, 20], [226, 116, 28],
+         [200, 45, 45]]
+COL_STATO = {"r": [200, 45, 45], "o": [226, 116, 28], "y": [225, 180, 20], "g": [34, 160, 70]}
+
+
+def _classe(v, soglie):
+    if v is None or pd.isna(v): return 0
+    return 1 + sum(v >= s for s in soglie)
+
+
+def mappa_neve(righe, tab, oggi):
+    st.markdown("#### \U0001F5FA️ Mappa delle zone")
+    par = st.selectbox("Parametro da vedere sulla mappa", list(PARAM_NEVE), key="neve_par")
+    col, soglie, um, spieg = PARAM_NEVE[par]
+    oss = leggi_osservazioni()
+    pts = []
+    for z, rr in zip(ZONE, righe):
+        d = tab[z["id"]]
+        o = d[d["data"] == oggi]
+        o = o.iloc[0] if len(o) else d.iloc[-1]
+        if col == "Stato":
+            liv = stato_zona(d, oggi); colr = COL_STATO[liv]; testo = ""
+        elif col == "_v700":
+            v = _n(o["v700_max"]); colr = SCALA[_classe(v, soglie)]
+            testo = f"{v:.0f}"
+        else:
+            v = rr[col]; colr = SCALA[_classe(v, soglie)]; testo = f"{v:.0f}"
+        n_oss = sum(1 for x in oss if x.get("zona") == z["nome"])
+        pts.append(dict(nome=z["nome"], lat=z["lat"], lon=z["lon"], col=colr, testo=testo,
+                        quota=z["q"], stato=rr["Stato"], hn72=rr["Fresca 72h cm"],
+                        suolo=rr["Neve al suolo (mod.) cm"], zt=rr["Zero term. oggi m"],
+                        vento=rr["Vento 700 oggi"], pioggia=rr["Pioggia 7 gg mm"],
+                        prev=rr["Neve prossimi 7 gg cm"],
+                        oss=(f"\U0001F463 {n_oss} osservazioni" if n_oss else "")))
+    m = pd.DataFrame(pts)
+    deck = pdk.Deck(
+        layers=[pdk.Layer("ScatterplotLayer", id="zone", data=m, get_position=["lon", "lat"],
+                          get_fill_color="col", get_radius=2600, opacity=0.8,
+                          radius_min_pixels=12, radius_max_pixels=30, pickable=True,
+                          stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1),
+                pdk.Layer("TextLayer", data=m, get_position=["lon", "lat"], get_text="testo",
+                          get_size=12, get_color=[15, 15, 15], size_units="'pixels'")],
+        map_style=None,
+        initial_view_state=pdk.ViewState(latitude=46.40, longitude=13.05, zoom=8.2),
+        tooltip={"html": "<b>{nome}</b> · {quota} m<br/>{stato}<br/>neve fresca 72 h: {hn72} cm"
+                         "<br/>neve al suolo (mod.): {suolo} cm<br/>zero termico oggi: {zt} m"
+                         "<br/>vento 700 hPa: {vento} km/h<br/>pioggia 7 gg: {pioggia} mm"
+                         "<br/>neve prevista 7 gg: {prev} cm<br/>{oss}",
+                 "style": {"fontSize": "12px"}})
+    ev = st.pydeck_chart(deck, height=460, on_select="rerun", selection_mode="single-object",
+                         key="neve_mappa")
+    try:
+        ogg = ev.selection["objects"].get("zone") or []
+        if ogg and st.session_state.get("neve_ultimo") != ogg[0]["nome"]:
+            st.session_state["neve_zona"] = ogg[0]["nome"]
+            st.session_state["neve_ultimo"] = ogg[0]["nome"]
+    except Exception:
+        pass
+    with st.expander("ℹ️ Come leggere la mappa"):
+        st.markdown(f"**{par}** — {spieg}")
+        if soglie:
+            classi = [f"< {soglie[0]}"] + [f"{a}–{b}" for a, b in zip(soglie, soglie[1:])] \
+                     + [f"≥ {soglie[-1]}"]
+            st.markdown("  ".join(
+                f"<span class='chip' style='background:rgb({c[0]},{c[1]},{c[2]});color:#111'>"
+                f"{k} {um}</span>" for k, c in zip(classi, SCALA[1:])), unsafe_allow_html=True)
+        st.markdown("Il numero nel cerchio è il valore del parametro. Passa sopra una zona per "
+                    "vedere tutti i valori; **clicca** per aprirne il dettaglio qui sotto.")
+
+
+# ------------------------------------------------------------------ OSSERVAZIONI
+# Archivio: se nei secrets di Streamlit c'è OSSERVAZIONI_URL (web app di Google Apps Script
+# collegata al foglio "Neve FVG — osservazioni"), le osservazioni vanno lì e si rileggono da
+# lì. Altrimenti restano in osservazioni.json sul server, che si azzera a ogni riavvio.
+FILE_OSS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "osservazioni.json")
+CAMPI_OSS = ["data", "zona", "luogo", "quota", "esposizione", "neve_suolo", "superficie",
+             "segnali", "attivita", "note", "autore", "inserita"]
+SUPERFICIE = ["polverosa", "ventata / lastroni", "crosta portante", "crosta non portante",
+              "bagnata / marcia", "primaverile (firn)", "brina di superficie", "ghiaccio",
+              "poca neve, sassi"]
+SEGNALI = ["valanghe spontanee recenti", "whumpf / assestamenti", "fessurazioni",
+           "accumuli da vento", "cornici", "neve fresca > 30 cm", "pioggia su neve",
+           "forte rialzo termico"]
+
+
+OSSERVAZIONI_URL = ""   # indirizzo della web app Apps Script del foglio osservazioni
+
+
+def _url_oss():
+    try:
+        return st.secrets.get("OSSERVAZIONI_URL", "") or OSSERVAZIONI_URL
+    except Exception:
+        return OSSERVAZIONI_URL
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def _leggi_remoto(url):
+    return _json(url + ("&" if "?" in url else "?") + "azione=leggi", timeout=20)
+
+
+def leggi_osservazioni():
+    url = _url_oss()
+    if url:
+        try:
+            r = _leggi_remoto(url)
+            return r if isinstance(r, list) else r.get("righe", [])
+        except Exception:
+            pass
+    try:
+        return json.load(open(FILE_OSS, encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def salva_osservazione(o):
+    url = _url_oss()
+    if url:
+        req = urllib.request.Request(url, data=json.dumps(o).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as f:
+            f.read()
+        _leggi_remoto.clear()
+        return "foglio"
+    tutte = leggi_osservazioni(); tutte.append(o)
+    json.dump(tutte, open(FILE_OSS, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    return "locale"
+
+
+def riassunto_oss(o):
+    pezzi = []
+    if o.get("luogo"): pezzi.append(f"<b>{o['luogo']}</b>")
+    if o.get("neve_suolo") not in (None, ""): pezzi.append(f"neve al suolo {o['neve_suolo']} cm")
+    if o.get("superficie"): pezzi.append(f"superficie: {o['superficie']}")
+    if o.get("segnali"): pezzi.append(f"⚠️ {o['segnali']}")
+    if o.get("attivita"): pezzi.append(f"attività: {o['attivita']}")
+    if o.get("note"): pezzi.append(str(o["note"]))
+    if o.get("autore"): pezzi.append(f"<i>— {o['autore']}</i>")
+    return "<br>".join(pezzi)
+
+
+def sezione_osservazioni(card):
+    st.markdown("#### \U0001F463 Osservazioni sul campo")
+    st.caption("Sei stato in una zona? Scrivi cosa hai trovato: servono a correggere quello "
+               "che dice il modello. Compaiono nel dettaglio della zona e sulla mappa.")
+    if not _url_oss():
+        st.info("Archivio provvisorio: le osservazioni restano sul server finché l'app non "
+                "viene riavviata. Per tenerle per sempre va collegato il foglio Google "
+                "(OSSERVAZIONI_URL nei secrets). Intanto puoi scaricarle qui sotto.", icon="ℹ️")
+    with st.form("oss_form", clear_on_submit=True):
+        c1, c2 = st.columns(2)
+        zona = c1.selectbox("Zona", [z["nome"] for z in ZONE])
+        data = c2.date_input("Giorno", value=date.today(), format="DD/MM/YYYY")
+        luogo = st.text_input("Dove di preciso", placeholder="es. canale nord dello Zuc dal Bôr")
+        c1, c2, c3 = st.columns(3)
+        quota = c1.number_input("Quota (m)", 0, 3000, 1600, 50)
+        espo = c2.selectbox("Esposizione", ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "varie"])
+        suolo = c3.number_input("Neve al suolo (cm)", 0, 600, 0, 5)
+        sup = st.multiselect("Neve in superficie", SUPERFICIE)
+        seg = st.multiselect("Segnali di pericolo", SEGNALI)
+        att = st.text_input("Cosa facevi", placeholder="scialpinismo, ciaspole, hike & fly…")
+        note = st.text_area("Note", placeholder="strati, test fatti, valanghe viste, vento…")
+        autore = st.text_input("Nome (facoltativo)")
+        ok = st.form_submit_button("Salva osservazione", type="primary")
+    if ok:
+        o = dict(data=data.isoformat(), zona=zona, luogo=luogo, quota=int(quota),
+                 esposizione=espo, neve_suolo=int(suolo), superficie=", ".join(sup),
+                 segnali=", ".join(seg), attivita=att, note=note, autore=autore,
+                 inserita=datetime.now().isoformat(timespec="minutes"))
+        try:
+            dove = salva_osservazione(o)
+            st.success("Salvata nel foglio Google." if dove == "foglio"
+                       else "Salvata (archivio provvisorio sul server).")
+        except Exception as e:
+            st.error(f"Non sono riuscito a salvarla ({e}). Riprova.")
+    tutte = leggi_osservazioni()
+    if tutte:
+        df = pd.DataFrame(tutte)
+        df = df[[c for c in CAMPI_OSS if c in df.columns]].sort_values("data", ascending=False)
+        st.dataframe(df, hide_index=True, width="stretch")
+        st.download_button("Scarica le osservazioni (CSV)", df.to_csv(index=False),
+                           file_name="osservazioni_neve.csv")
 
 
 # ------------------------------------------------------------------ ROTTE
@@ -469,8 +696,14 @@ def scheda_rotte(card, kv, df_siti=None):
                 for r in x.itertuples()]
     mappa_kk7({k: KK7_STRATI[k] for k in sel},
               [r for r in ROTTE if r["nome"] in rot], siti)
-    st.caption("Se uno strato non compare, il nome del tile non è quello giusto: si apre "
-               "la mappa completa su kk7 con i pulsanti qui sotto (filtri per mese e ora).")
+    with st.expander("ℹ️ Come leggere la mappa"):
+        st.markdown("**Skyways** (linee colorate di kk7): dove sono passati davvero i voli "
+                    "registrati; più la linea è intensa, più piloti ci sono passati. "
+                    "**Termiche**: punti dove si sale spesso. **Linee spesse colorate**: le "
+                    "ipotesi di rotta qui sotto, con i punti di passaggio (passa sopra per il "
+                    "nome). **Segnaposto**: decolli; cliccali per nome ed esposizione. "
+                    "In alto a destra scegli fondo e strati. Se uno strato kk7 non compare, "
+                    "aprilo su kk7 con i pulsanti delle zone (lì ci sono i filtri per mese e ora).")
     cols = st.columns(4)
     for i, z in enumerate(ZONE):
         cols[i % 4].link_button(z["nome"].replace("Carnia — ", ""), link_kk7(z["lat"], z["lon"]),

@@ -4,7 +4,8 @@
 "desc": "★ Hernández-Aguayo, Cristelli, Benzaquen (2026), «From Flight Logs to Atmospheric Science: Paragliders as Convection Sensors…», arXiv 2608.00241. 110 mila voli francesi incrociati con ERA5: lo strato limite è il primo predittore delle termiche",
 "url": "https://arxiv.org/pdf/2608.00241",
 "scaricato": true,
-"file": "METEO-FVG_HernandezAguayo2026_paragliders-convection.pdf"
+"file": "METEO-FVG_HernandezAguayo2026_paragliders-convection.pdf",
+"pdf": "https://arxiv.org/pdf/2608.00241"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
@@ -16,35 +17,40 @@
 "desc": "Sigrist (2006), «Use of Topographic Elevation Models to Identify Thermal Hotspots in Alpine Areas», Technical Soaring. Mappe di irraggiamento (TherMap) confrontate con le tracce di volo; buon accordo nelle Alpi",
 "url": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/view/186",
 "scaricato": true,
-"file": "METEO-FVG_Sigrist2006_thermal-hotspots_TechSoaring.pdf"
+"file": "METEO-FVG_Sigrist2006_thermal-hotspots_TechSoaring.pdf",
+"pdf": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/download/186/171"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
 "desc": "Vraciu, Antonescu, Visoiu, «Thermal Convection Forecast using a Theoretical Model Calibrated with Statistical Data from Soaring Flights» (preprint). Previsione della velocità delle termiche tarata sui voli",
 "url": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub",
 "scaricato": true,
-"file": "METEO-FVG_Vraciu_thermal-forecast-preprint.pdf"
+"file": "METEO-FVG_Vraciu_thermal-forecast-preprint.pdf",
+"pdf": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
 "desc": "EGU 2018-10409, «The determination of the Atmospheric Boundary Layer structure used in sailplane flights». Dati IGC di alianti confrontati con la rianalisi ERA-Interim",
 "url": "https://meetingorganizer.copernicus.org/EGU2018/EGU2018-10409.pdf",
 "scaricato": true,
-"file": "METEO-FVG_EGU2018-10409_ABL-sailplane.pdf"
+"file": "METEO-FVG_EGU2018-10409_ABL-sailplane.pdf",
+"pdf": "https://meetingorganizer.copernicus.org/EGU2018/EGU2018-10409.pdf"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
 "desc": "Predelli e Niederhagen, «Humidity, the Dominating Force of Thermal Updrafts» (oltre 90 ore di misure da aliante): l'umidità conta quanto la temperatura",
 "url": "https://arxiv.org/pdf/2110.09573",
 "scaricato": true,
-"file": "METEO-FVG_Predelli_humidity-thermals.pdf"
+"file": "METEO-FVG_Predelli_humidity-thermals.pdf",
+"pdf": "https://arxiv.org/pdf/2110.09573"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
 "desc": "Predelli (2024), «On the horizontal movement of thermal updrafts…», Technical Soaring: le termiche restano verticali anche con vento",
 "url": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/view/2327",
 "scaricato": true,
-"file": "METEO-FVG_Predelli2024_thermals-wind_TechSoaring.pdf"
+"file": "METEO-FVG_Predelli2024_thermals-wind_TechSoaring.pdf",
+"pdf": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/download/2327/2227"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
@@ -67,21 +73,24 @@
 "desc": "★ Zardi e Whiteman (2013), «Diurnal Mountain Wind Systems», capitolo del libro Mountain Weather Research and Forecasting (Springer). Il testo di riferimento su brezze di pendio, di valle e monte-pianura e sulle transizioni del mattino e della sera. Zardi è il relatore del Sem04 già in cartella",
 "url": "https://home.chpc.utah.edu/~whiteman/homepage/articles/ZardiWhiteman_2012.pdf",
 "scaricato": true,
-"file": "METEO-FVG_ZardiWhiteman_DiurnalMountainWinds.pdf"
+"file": "METEO-FVG_ZardiWhiteman_DiurnalMountainWinds.pdf",
+"pdf": "https://home.chpc.utah.edu/~whiteman/homepage/articles/ZardiWhiteman_2012.pdf"
 },
 {
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
 "desc": "★ Serafin, Zardi, Rotach et al. (2018), «Exchange Processes in the Atmospheric Boundary Layer Over Mountainous Terrain», Atmosphere 9(3) (open access). Review su brezze, strato convettivo e strati stabili in quota",
 "url": "https://www.mdpi.com/2073-4433/9/3/102",
 "scaricato": true,
-"file": "METEO-FVG_Atmosphere2018_Serafin_ABL-mountains.pdf"
+"file": "METEO-FVG_Atmosphere2018_Serafin_ABL-mountains.pdf",
+"pdf": "https://www.mdpi.com/2073-4433/9/3/102/pdf"
 },
 {
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
 "desc": "Laiti, Zardi et al. (2014), Ora del Garda da misure con motoaliante, ACP. L'esempio più vicino a noi di brezza lago-valle misurata in volo",
 "url": "https://acp.copernicus.org/articles/14/9771/2014/",
 "scaricato": true,
-"file": "METEO-FVG_ACP2014_Laiti_OraGarda.pdf"
+"file": "METEO-FVG_ACP2014_Laiti_OraGarda.pdf",
+"pdf": "https://acp.copernicus.org/articles/14/9771/2014/acp-14-9771-2014.pdf"
 },
 {
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
@@ -107,7 +116,8 @@
 "desc": "Saigger e Gohm (2022), föhn nella Valle dell'Inn (progetto PIANO): ingresso del föhn associato a onda di gravità e rotore persistente, Weather Clim. Dyn",
 "url": "https://wcd.copernicus.org/articles/3/279/2022/",
 "scaricato": true,
-"file": "METEO-FVG_WCD2022_Saigger_foehn-Inn.pdf"
+"file": "METEO-FVG_WCD2022_Saigger_foehn-Inn.pdf",
+"pdf": "https://wcd.copernicus.org/articles/3/279/2022/wcd-3-279-2022.pdf"
 },
 {
 "sez": "C. Föhn, onde e rotori (sicurezza)",
@@ -120,7 +130,8 @@
 "desc": "DHV-Magazin, articolo di Volker Schwaniz sul föhn: quando il vento da sud è föhn, e i limiti della previsione (in tedesco)",
 "url": "https://www.dhv.de/media/jahre/2024/07_wetter/Wetterwissen/DHVmagazin_Artikel/F%C3%B6hn/8_2013_180_foehn.pdf",
 "scaricato": true,
-"file": "METEO-FVG_DHV_Schwaniz_Foehn.pdf"
+"file": "METEO-FVG_DHV_Schwaniz_Foehn.pdf",
+"pdf": "https://www.dhv.de/media/jahre/2024/07_wetter/Wetterwissen/DHVmagazin_Artikel/F%C3%B6hn/8_2013_180_foehn.pdf"
 },
 {
 "sez": "C. Föhn, onde e rotori (sicurezza)",
@@ -138,21 +149,24 @@
 "desc": "Giaiotti, Pucillo, Stel (OSMER), «Ground wind convergence as deep convection trigger», ECSS 2007",
 "url": "https://www.essl.org/ECSS/2007/abs/06-Forecasts/1178176255.pucillo-1-sec06.oral.pdf",
 "scaricato": true,
-"file": "METEO-FVG_ECSS2007_Pucillo_convergenza.pdf"
+"file": "METEO-FVG_ECSS2007_Pucillo_convergenza.pdf",
+"pdf": "https://www.essl.org/ECSS/2007/abs/06-Forecasts/1178176255.pucillo-1-sec06.oral.pdf"
 },
 {
 "sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
 "desc": "Giaiotti et al., «Breeze transients as triggers…», EMS 2010: inizio e inversione delle brezze creano microconvergenze sui pendii",
 "url": "https://meetingorganizer.copernicus.org/EMS2010/EMS2010-755.pdf",
 "scaricato": true,
-"file": "METEO-FVG_EMS2010-755_Giaiotti_breeze-transients.pdf"
+"file": "METEO-FVG_EMS2010-755_Giaiotti_breeze-transients.pdf",
+"pdf": "https://meetingorganizer.copernicus.org/EMS2010/EMS2010-755.pdf"
 },
 {
 "sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
 "desc": "Poljak et al. (2014), brezza e temporali nell'Adriatico nord-orientale, Ann. Geophys",
 "url": "https://angeo.copernicus.org/articles/32/401/2014/angeo-32-401-2014.pdf",
 "scaricato": true,
-"file": "METEO-FVG_ANGEO2014_Poljak_brezza-Adriatico.pdf"
+"file": "METEO-FVG_ANGEO2014_Poljak_brezza-Adriatico.pdf",
+"pdf": "https://angeo.copernicus.org/articles/32/401/2014/angeo-32-401-2014.pdf"
 },
 {
 "sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
@@ -180,7 +194,8 @@
 "desc": "OSTIV Meteorological Panel: un panel che collega ricerca e sport dell'aria, con newsletter mensile da dicembre 2026 (iscrizione a met@ostiv.org); tra i fondatori T. Lezuo di XC Therm. https://ostiv.org/sections/scientific-section/meteorological-panel.html — poster ICAM 2025 con l'elenco degli strumenti:",
 "url": "https://ostiv.org/files/ostiv-docs/met/OSTIV_MET_Panel_scientific_poster_ICAM_2025.pdf",
 "scaricato": true,
-"file": "METEO-FVG_OSTIV_MET_poster_ICAM2025.pdf"
+"file": "METEO-FVG_OSTIV_MET_poster_ICAM2025.pdf",
+"pdf": "https://ostiv.org/files/ostiv-docs/met/OSTIV_MET_Panel_scientific_poster_ICAM_2025.pdf"
 },
 {
 "sez": "E. Documenti tecnici e manuali",
@@ -209,7 +224,8 @@
 "desc": "Allen (2006, NASA Dryden), «Updraft Model for Development of Autonomous Soaring UAVs»: il modello standard della termica (w* e zi)",
 "url": "https://ntrs.nasa.gov/citations/20060004052",
 "scaricato": true,
-"file": "METEO-FVG_NASA2006_Allen_updraft-model.pdf"
+"file": "METEO-FVG_NASA2006_Allen_updraft-model.pdf",
+"pdf": "https://ntrs.nasa.gov/api/citations/20060004052/downloads/20060004052.pdf"
 },
 {
 "sez": "E. Documenti tecnici e manuali",
@@ -221,14 +237,16 @@
 "desc": "★ AINEVA, «Meteorologia alpina» (Micheletti, OSMER, con Marigo e Pelosini), manuale in italiano: brezze, inversioni, tipi di tempo sulle Alpi",
 "url": "https://aineva.it/wp-content/uploads/2015/11/Manuale_meteo.pdf",
 "scaricato": true,
-"file": "METEO-FVG_AINEVA_Manuale_meteorologia_alpina.pdf"
+"file": "METEO-FVG_AINEVA_Manuale_meteorologia_alpina.pdf",
+"pdf": "https://aineva.it/wp-content/uploads/2015/11/Manuale_meteo.pdf"
 },
 {
 "sez": "E. Documenti tecnici e manuali",
 "desc": "S. Nordio (OSMER), «Appunti di meteorologia alpina», programma del corso: configurazioni stagionali e rischio meteo in montagna",
 "url": "https://www.turismofvg.it/proxyvfs.axd/null/r333201?ext=.pdf",
 "scaricato": true,
-"file": "METEO-FVG_Nordio_Appunti_meteorologia_alpina.pdf"
+"file": "METEO-FVG_Nordio_Appunti_meteorologia_alpina.pdf",
+"pdf": "https://www.turismofvg.it/proxyvfs.axd/null/r333201?ext=.pdf"
 },
 {
 "sez": "E. Documenti tecnici e manuali",
@@ -281,7 +299,8 @@
 "desc": "Marco Virgilio: archivio di articoli su ilMeteo.net; con Colucci e Stel ha fondato «Meteorologica», la rivista dell'Unione Meteorologica del FVG. https://www.ilmeteo.net/autore/marco-virgilio/ —",
 "url": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-525-3.pdf",
 "scaricato": true,
-"file": "METEO-FVG_EMS2009-525_Virgilio.pdf"
+"file": "METEO-FVG_EMS2009-525_Virgilio.pdf",
+"pdf": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-525-3.pdf"
 },
 {
 "sez": "G. Strumenti basati sui dati di volo",
@@ -293,21 +312,24 @@
 "desc": "ARPA FVG-OSMER, report «meteo.fvg — riepilogo» annuali:",
 "url": "https://www.snpambiente.it/wp-content/uploads/2022/03/meteo.fvg_2021-riepilogo_it.pdf",
 "scaricato": true,
-"file": "METEO-FVG_ARPA-FVG_meteo.fvg_2021_riepilogo.pdf"
+"file": "METEO-FVG_ARPA-FVG_meteo.fvg_2021_riepilogo.pdf",
+"pdf": "https://www.snpambiente.it/wp-content/uploads/2022/03/meteo.fvg_2021-riepilogo_it.pdf"
 },
 {
 "sez": "8. Documentazione",
 "desc": "Nordio et al., «Climate change on Friuli Venezia Giulia: rapid temperature rise…», EGU 2016:",
 "url": "https://meetingorganizer.copernicus.org/EGU2016/EGU2016-17017.pdf",
 "scaricato": true,
-"file": "METEO-FVG_EGU2016-17017_Nordio_climate-FVG.pdf"
+"file": "METEO-FVG_EGU2016-17017_Nordio_climate-FVG.pdf",
+"pdf": "https://meetingorganizer.copernicus.org/EGU2016/EGU2016-17017.pdf"
 },
 {
 "sez": "8. Documentazione",
 "desc": "Micheletti (OSMER), «Cambiamenti climatici in FVG», Neve e Valanghe 63:",
 "url": "https://aineva.it/wp-content/uploads/Pubblicazioni/Rivista63/NV63_4.pdf",
 "scaricato": true,
-"file": "METEO-FVG_AINEVA_NV63_Micheletti_clima-FVG.pdf"
+"file": "METEO-FVG_AINEVA_NV63_Micheletti_clima-FVG.pdf",
+"pdf": "https://aineva.it/wp-content/uploads/Pubblicazioni/Rivista63/NV63_4.pdf"
 },
 {
 "sez": "8. Documentazione",
@@ -329,21 +351,24 @@
 "desc": "Feudale et al., «A cloud-to-ground lightning climatology for north-eastern Italy», ASR 2013:",
 "url": "https://asr.copernicus.org/articles/10/77/2013/",
 "scaricato": true,
-"file": "METEO-FVG_ASR2013_Feudale_fulmini-FVG.pdf"
+"file": "METEO-FVG_ASR2013_Feudale_fulmini-FVG.pdf",
+"pdf": "https://asr.copernicus.org/articles/10/77/2013/asr-10-77-2013.pdf"
 },
 {
 "sez": "8. Documentazione",
 "desc": "Gladich, Gallai, Giaiotti, Stel, «On the evening onset of deep moist convection in complex orography» (FVG), EMS 2009:",
 "url": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-279.pdf",
 "scaricato": true,
-"file": "METEO-FVG_EMS2009-279_Gladich_evening-convection.pdf"
+"file": "METEO-FVG_EMS2009-279_Gladich_evening-convection.pdf",
+"pdf": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-279.pdf"
 },
 {
 "sez": "8. Documentazione",
 "desc": "Miglietta et al., supercella sulla pianura del FVG del 12/09/2012, QJRMS:",
 "url": "https://www2.mmm.ucar.edu/people/rotunno/Papers/Miglietta+QJ.pdf",
 "scaricato": true,
-"file": "METEO-FVG_QJ_Miglietta_supercella-FVG.pdf"
+"file": "METEO-FVG_QJ_Miglietta_supercella-FVG.pdf",
+"pdf": "https://www2.mmm.ucar.edu/people/rotunno/Papers/Miglietta+QJ.pdf"
 },
 {
 "sez": "8. Documentazione",
@@ -360,13 +385,15 @@
 "desc": "Miglietta et al., «Severe convective weather in Italy… TIM campaign», NHESS 2026:",
 "url": "https://nhess.copernicus.org/articles/26/3395/2026/nhess-26-3395-2026.pdf",
 "scaricato": true,
-"file": "METEO-FVG_NHESS2026_Miglietta_TIM.pdf"
+"file": "METEO-FVG_NHESS2026_Miglietta_TIM.pdf",
+"pdf": "https://nhess.copernicus.org/articles/26/3395/2026/nhess-26-3395-2026.pdf"
 },
 {
 "sez": "E. Documenti tecnici e manuali",
 "desc": "Soaringmeteo, guida «soarV2» (FR): come leggere le mappe di previsione per il volo",
 "url": "https://soaringmeteo.org/soarV2FR.pdf",
 "scaricato": true,
-"file": "METEO-FVG_soaringmeteo_soarV2FR.pdf"
+"file": "METEO-FVG_soaringmeteo_soarV2FR.pdf",
+"pdf": "https://soaringmeteo.org/soarV2FR.pdf"
 }
 ]

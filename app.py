@@ -1131,6 +1131,7 @@ import json, math, os
 import pandas as pd
 import streamlit as st
 import pydeck as pdk
+import streamlit.components.v1 as components
 import sys as _sys
 M = _sys.modules[__name__]   # il motore meteo e' definito qui sopra
 
@@ -1237,10 +1238,11 @@ def giudizio(v, deg, s):
 def analisi(la, lo):
     return M.analizza(la, lo)
 
-def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420):
+def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420, key=None, spiega=None):
+    """Mappa dei punti. Con key= diventa cliccabile e ritorna il nome del punto scelto."""
     m = b.dropna(subset=["lat","lon"]).copy()
     if not len(m):
-        st.info("Nessun punto con questi filtri."); return
+        st.info("Nessun punto con questi filtri."); return None
     if verdetti is not None:
         COL = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,170,20],
                "\U0001F534":[200,45,45],"⚪":[150,150,150]}
@@ -1254,16 +1256,48 @@ def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420):
     m["rad"] = [460 if t=="decollo" else (380 if t=="hike&fly" else 240) for t in m["tipo"]]
     m["sotto"] = [(f"{int(r['quota'])} m · " if val(r,'quota') else "")
                   + (str(r["vento"]) if val(r,"vento") else r["tipo"]) for _, r in m.iterrows()]
-    st.pydeck_chart(pdk.Deck(
-        layers=[pdk.Layer("ScatterplotLayer",
-                data=m[["lat","lon","col","rad","nome","etichetta","sotto"]],
+    m["salita"] = ["\U0001F97E via di salita descritta" if val(r,"partenza") else ""
+                   for _, r in m.iterrows()]
+    deck = pdk.Deck(
+        layers=[pdk.Layer("ScatterplotLayer", id="punti",
+                data=m[["lat","lon","col","rad","nome","etichetta","sotto","tipo","salita"]],
                 get_position=["lon","lat"], get_fill_color="col", get_radius="rad",
                 radius_min_pixels=5, radius_max_pixels=18, pickable=True, auto_highlight=True,
                 stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1)],
         map_style=None,
         initial_view_state=pdk.ViewState(latitude=float(m["lat"].mean()),
-                                         longitude=float(m["lon"].mean()), zoom=zoom)),
-        height=h)
+                                         longitude=float(m["lon"].mean()), zoom=zoom),
+        tooltip={"html": "<b>{nome}</b><br/>{tipo} · {etichetta}<br/>{sotto}<br/>{salita}"
+                         + ("<br/><i>clic per aprire la scheda e la salita</i>" if key else ""),
+                 "style": {"fontSize": "12px"}})
+    scelto = None
+    if key:
+        ev = st.pydeck_chart(deck, height=h, on_select="rerun",
+                             selection_mode="single-object", key=key)
+        try:
+            ogg = ev.selection["objects"].get("punti") or []
+            if ogg: scelto = ogg[0]["nome"]
+        except Exception:
+            scelto = None
+    else:
+        st.pydeck_chart(deck, height=h)
+    with st.expander("ℹ️ Come leggere la mappa"):
+        if verdetti is not None:
+            st.markdown("Ogni punto è un decollo. 🟢 si vola con il vento previsto, "
+                        "🟡 al limite, 🔴 vento sbagliato per quel decollo, ⚪ esposizione "
+                        "non nota. Passa sopra un punto per nome, quota ed esposizione.")
+        else:
+            st.markdown("Colore = attività principale del punto. Punti grandi = decolli, "
+                        "medi = hike & fly, piccoli = atterraggi e servizi. Passa sopra un "
+                        "punto per nome, quota ed esposizione; \U0001F97E indica che c'è la "
+                        "via di salita descritta."
+                        + (" **Clicca** un decollo per aprire sotto la sua scheda con la "
+                           "via di salita." if key else ""))
+            st.markdown("  ".join(f"<span class='chip' style='border-color:{hexa(a)}'>"
+                                  f"{ico(a)} {eti(a)}</span>" for a in ATTIVITA),
+                        unsafe_allow_html=True)
+        if spiega: st.markdown(spiega)
+    return scelto
 
 def scheda_sito(r, verdetto=None, motivo=None):
     a = r["att"] if isinstance(r["att"], list) else []
@@ -1293,6 +1327,52 @@ def scheda_sito(r, verdetto=None, motivo=None):
     if "url" in r.index and val(r, "url"):
         link.append(f"[relazione](https://{str(r['url']).lstrip('/')})")
     st.markdown(" · ".join(link))
+
+
+def _accesso(note):
+    """Estrae dalle note il pezzo che parla di come si arriva al decollo."""
+    import re
+    s = str(note or "")
+    m = re.search(r"(ACCESSO|SALITA|AVVICINAMENTO)\s*:\s*(.+?)(?=\s[A-Z]{4,}[ A-Z']*:|$)", s)
+    return m.group(2).strip() if m else ""
+
+def vie_di_salita(B, cliccato, att):
+    """Sezione 'Vie di salita': si apre sul decollo cliccato in mappa."""
+    dec = B[B["tipo"].isin(["decollo","hike&fly"])].sort_values("nome")
+    if not len(dec): return
+    st.markdown("<div id='vie-di-salita'></div>", unsafe_allow_html=True)
+    st.markdown("#### \U0001F97E Vie di salita")
+    nomi = list(dec["nome"])
+    con_via = set(dec[[bool(val(r,"partenza")) or bool(_accesso(r["note"]))
+                       for _, r in dec.iterrows()]]["nome"])
+    k = f"via_{att}"
+    if cliccato in nomi and st.session_state.get(f"{k}_ultimo") != cliccato:
+        st.session_state[k] = cliccato
+        st.session_state[f"{k}_ultimo"] = cliccato
+        components.html("<script>const e=window.parent.document.getElementById('vie-di-salita');"
+                        "if(e) e.scrollIntoView({behavior:'smooth', block:'start'});</script>",
+                        height=0)
+    scelta = st.selectbox("Decollo", nomi, key=k, index=None,
+                          placeholder="clicca un decollo sulla mappa o sceglilo qui",
+                          format_func=lambda n: ("\U0001F97E " if n in con_via else "") + n)
+    st.caption(f"{len(con_via)} decolli su {len(nomi)} hanno la salita descritta (\U0001F97E).")
+    if not scelta: return
+    r = dec[dec["nome"] == scelta].iloc[0]
+    via = str(val(r,"partenza") or "") or _accesso(r["note"])
+    righe = []
+    if val(r,"quota"): righe.append(("Quota decollo", f"{int(r['quota'])} m"))
+    if val(r,"disl"):  righe.append(("Dislivello a piedi", f"{int(r['disl'])} m"))
+    if val(r,"vento"): righe.append(("Esposizione", str(r["vento"])))
+    if val(r,"difficolta"):
+        d_ = str(r["difficolta"])
+        righe.append(("Difficoltà decollo", d_[4:] if d_.startswith("H&F ") else d_))
+    card(f"\U0001F97E {r['nome']}",
+         via if via else "Via di salita non ancora descritta per questo decollo: "
+                         "se la conosci, segnalala nella scheda Neve → Osservazioni.",
+         "g" if via else "n")
+    if righe: kv(righe)
+    with st.expander("Scheda completa del decollo"):
+        scheda_sito(r)
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
@@ -1326,7 +1406,7 @@ st.markdown("## \U0001FA82 Nordest")
 st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
 
 import montagna
-T_METEO, T_SITI, T_NEVE, T_ROTTE, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Siti di volo",
+T_METEO, T_SITI, T_NEVE, T_ROTTE, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Attività",
                                    "❄️  Neve per zona", "\U0001F9ED  Rotte di volo",
                                    "\U0001F527  Info"])
 
@@ -1371,6 +1451,46 @@ with T_METEO:
                 d_[a_] = M.punteggio(rr, a_)
             righe.append(d_)
 
+        # --- mappa regionale (in cima)
+        att_p = st.segmented_control(
+            "Attività", list(ATTIVITA), default="cross",
+            format_func=lambda a: f"{ico(a)} {eti(a)}", key="pano_att") or "cross"
+        # --- mappa regionale
+        st.markdown("#### La regione a colpo d'occhio")
+        COLP = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,180,20],
+                "\U0001F7E0":[226,116,28],"\U0001F534":[200,45,45]}
+        mp = pd.DataFrame([{
+            "nome": x["zona"], "lat": PUNTI_METEO[x["zona"]][0],
+            "lon": PUNTI_METEO[x["zona"]][1], "p": x[att_p][0],
+            "col": COLP[M.colore_punteggio(x[att_p][0])],
+            "rad": 3000 + x[att_p][0]*90, "perche": x[att_p][1],
+            "vento": (f"{x['r']['v700']:.0f} km/h {cardinale(x['r']['d700'])}"
+                      if pd.notna(x["r"]["v700"]) else "—"),
+            "tetto": (f"{x['r']['quota_termica']:.0f} m"
+                      if pd.notna(x["r"]["quota_termica"]) else "—")} for x in righe])
+        st.pydeck_chart(pdk.Deck(
+            layers=[
+                pdk.Layer("ScatterplotLayer", data=mp, get_position=["lon","lat"],
+                          get_fill_color="col", get_radius="rad", opacity=0.55,
+                          radius_min_pixels=14, radius_max_pixels=54, pickable=True,
+                          stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1),
+                pdk.Layer("TextLayer", data=mp, get_position=["lon","lat"], get_text="p",
+                          get_size=13, get_color=[20,20,20], size_units="'pixels'")],
+            map_style=None,
+            initial_view_state=pdk.ViewState(latitude=46.2, longitude=13.0, zoom=7.4),
+            tooltip={"html": "<b>{nome}</b><br/>{p}/100 · {perche}<br/>vento 700 hPa {vento} · tetto termiche {tetto}"}), height=420)
+        with st.expander("ℹ️ Come leggere la mappa"):
+            st.markdown("Ogni cerchio è una zona meteo. **Colore** = punteggio dell'attività "
+                        "scelta (🟢 buono, 🟡 discreto, 🟠 scarso, 🔴 no); **grandezza** e "
+                        "**numero** = punteggio su 100. Passa sopra un cerchio per il motivo, "
+                        "il vento a 700 hPa (~3000 m) e il tetto delle termiche. Il giorno si "
+                        "cambia con il cursore qui sopra.")
+        st.caption("Il punteggio pesa vento in quota, gradiente, tetto delle termiche, nuvole "
+                   "basse, instabilit\u00e0 e pioggia, con criteri diversi per ogni attivit\u00e0: "
+                   "il cross vuole gradiente e quota, il paralpinismo vuole aria calma e "
+                   "cielo pulito.")
+
+
         # --- le zone migliori, attivita' per attivita'
         st.markdown("#### Dove conviene andare")
         cc = st.columns(2)
@@ -1389,9 +1509,6 @@ with T_METEO:
                      CL.get(ic_, "n"))
 
         # --- tabella di tutte le zone
-        att_p = st.segmented_control(
-            "Ordina per", list(ATTIVITA), default="cross",
-            format_func=lambda a: f"{ico(a)} {eti(a)}", key="pano_att") or "cross"
         st.markdown(f"#### Tutte le zone \u2014 {eti(att_p)}")
         for x in sorted(righe, key=lambda z: -z[att_p][0]):
             rr, p_, why = x["r"], x[att_p][0], x[att_p][1]
@@ -1410,31 +1527,6 @@ with T_METEO:
                 f"<div class='kv'><span class='k'>Nubi basse</span><span class='v'>{nb_}</span></div>"
                 f"<div class='kv'><span class='k'>Pioggia</span><span class='v'>{pi_}</span></div>"
                 f"</div>", unsafe_allow_html=True)
-
-        # --- mappa regionale
-        st.markdown("#### La regione a colpo d'occhio")
-        COLP = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,180,20],
-                "\U0001F7E0":[226,116,28],"\U0001F534":[200,45,45]}
-        mp = pd.DataFrame([{
-            "nome": x["zona"], "lat": PUNTI_METEO[x["zona"]][0],
-            "lon": PUNTI_METEO[x["zona"]][1], "p": x[att_p][0],
-            "col": COLP[M.colore_punteggio(x[att_p][0])],
-            "rad": 3000 + x[att_p][0]*90} for x in righe])
-        st.pydeck_chart(pdk.Deck(
-            layers=[
-                pdk.Layer("ScatterplotLayer", data=mp, get_position=["lon","lat"],
-                          get_fill_color="col", get_radius="rad", opacity=0.55,
-                          radius_min_pixels=14, radius_max_pixels=54, pickable=True,
-                          stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1),
-                pdk.Layer("TextLayer", data=mp, get_position=["lon","lat"], get_text="p",
-                          get_size=13, get_color=[20,20,20], size_units="'pixels'")],
-            map_style=None,
-            initial_view_state=pdk.ViewState(latitude=46.2, longitude=13.0, zoom=7.4),
-            tooltip={"html": "<b>{nome}</b><br/>{p}/100"}), height=420)
-        st.caption("Il punteggio pesa vento in quota, gradiente, tetto delle termiche, nuvole "
-                   "basse, instabilit\u00e0 e pioggia, con criteri diversi per ogni attivit\u00e0: "
-                   "il cross vuole gradiente e quota, il paralpinismo vuole aria calma e "
-                   "cielo pulito.")
 
     st.divider()
     st.markdown("### Approfondimento su una localit\u00e0")
@@ -1657,7 +1749,8 @@ with T_SITI:
         f"\U0001F9ED {n_esp} con esposizione",
         *( [f"\U0001F4D0 {n_gr} con difficoltà"] if n_gr else [] ))),
         unsafe_allow_html=True)
-    mappa(B, zoom=8.1, ammesse={att}, h=430)
+    cliccato = mappa(B, zoom=8.1, ammesse={att}, h=430, key=f"mappa_{att}")
+    vie_di_salita(B, cliccato, att)
     q = st.text_input("Cerca", key=f"q_{att}",
                       placeholder="bora, cavi, vietato, navetta, biglietto…")
     gradi_pres = [g for g in ("1","2-","2","2+","3")
