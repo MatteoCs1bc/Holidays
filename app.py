@@ -739,12 +739,90 @@ ORARIE = (
 GIORNALIERE = ["temperature_2m_max","temperature_2m_min","precipitation_sum",
                "precipitation_probability_max","wind_speed_10m_max"]
 
+# Modello preferito per i primi giorni: ICON-2I di ItaliaMeteo-ARPAE (~2 km, 3 giorni,
+# aggiornato ogni 12 h). Dove non c'e' (oltre i 3 giorni, o variabili che non calcola come
+# lo strato limite e i livelli 800/600 hPa) si usa la scelta automatica di Open-Meteo.
+MODELLO_PREF = "italia_meteo_arpae_icon_2i"
+
+def _famiglia(nome):
+    """Raggruppa i livelli di pressione: temperature_850hPa -> temperature_hPa."""
+    import re as _re
+    return _re.sub(r"_\d+hPa$", "_hPa", nome)
+
+def _interpola_livelli(h, orarie, suf):
+    """ICON-2I ha 1000/925/850/700/500/250 hPa: i livelli mancanti (800, 600) si
+    ricavano interpolando in log(p) tra i due livelli vicini; le direzioni del vento
+    lungo l'arco piu' corto."""
+    import re as _re
+    for v in orarie:
+        m = _re.match(r"(.+)_(\d+)hPa$", v)
+        if not m or any(x is not None for x in (h.get(v + suf) or [])):
+            continue
+        base, lv = m.group(1), int(m.group(2))
+        sotto = [l for l in (1000, 925, 850, 700, 500, 250) if l > lv]
+        sopra = [l for l in (1000, 925, 850, 700, 500, 250) if l < lv]
+        if not sotto or not sopra:
+            continue
+        l1, l2 = min(sotto), max(sopra)
+        a, b = h.get(f"{base}_{l1}hPa{suf}"), h.get(f"{base}_{l2}hPa{suf}")
+        if not a or not b:
+            continue
+        w = (math.log(l1) - math.log(lv)) / (math.log(l1) - math.log(l2))
+        out = []
+        for x, y in zip(a, b):
+            if x is None or y is None:
+                out.append(None)
+            elif "direction" in base:
+                d = ((y - x + 180) % 360) - 180
+                out.append((x + w * d) % 360)
+            else:
+                out.append(x + w * (y - x))
+        h[v + suf] = out
+
+def _fondi(js, orarie):
+    """Unisce le due risposte: per ogni famiglia di variabili prende ICON-2I solo se ha
+    tutti i livelli, cosi' un profilo verticale non mescola due modelli."""
+    h = js.get("hourly", {})
+    suf_p, suf_b = "_" + MODELLO_PREF, "_best_match"
+    _interpola_livelli(h, orarie, suf_p)
+    fam = {}
+    for v in orarie:
+        fam.setdefault(_famiglia(v), []).append(v)
+    out = {"time": h["time"]}
+    usato = []
+    for f, vs in fam.items():
+        ok = all(any(x is not None for x in (h.get(v + suf_p) or [])) for v in vs)
+        for v in vs:
+            b = h.get(v + suf_b) or h.get(v) or [None] * len(h["time"])
+            if ok:
+                p_ = h.get(v + suf_p)
+                out[v] = [pv if pv is not None else bv for pv, bv in zip(p_, b)]
+            else:
+                out[v] = b
+        if ok: usato.append(f)
+    js["hourly"] = out
+    d = js.get("daily", {})
+    if d:
+        nd = {"time": d["time"]}
+        for k in GIORNALIERE:
+            b = d.get(k + suf_b) or d.get(k) or [None] * len(d["time"])
+            p_ = d.get(k + suf_p)
+            nd[k] = [pv if pv is not None else bv for pv, bv in zip(p_, b)] if p_ else b
+        js["daily"] = nd
+    js["_modello"] = f"ICON-2I per i primi giorni ({len(usato)}/{len(fam)} grandezze), poi automatico"
+    return js
+
 def _get(la, lo, orarie):
-    p = urllib.parse.urlencode({"latitude": la, "longitude": lo, "timezone": "auto",
-                                "forecast_days": 10, "daily": ",".join(GIORNALIERE),
-                                "hourly": ",".join(orarie)})
-    with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=25) as f:
-        return json.load(f)
+    base = {"latitude": la, "longitude": lo, "timezone": "auto", "forecast_days": 10,
+            "daily": ",".join(GIORNALIERE), "hourly": ",".join(orarie)}
+    try:
+        p = urllib.parse.urlencode({**base, "models": MODELLO_PREF + ",best_match"})
+        with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=25) as f:
+            return _fondi(json.load(f), orarie)
+    except Exception:
+        p = urllib.parse.urlencode(base)
+        with urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?" + p, timeout=25) as f:
+            return json.load(f)
 
 def scarica(la, lo):
     """Prova i nomi moderni, ripiega su quelli vecchi se l'API li rifiuta."""
@@ -1596,22 +1674,51 @@ with T_METEO:
         STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
                "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
                "Isoterma zero":"deg0"}
-        cw0, cw1, cw2 = st.columns([2,1,1])
+        # Modelli della carta Windy incorporata. ALADIN (CHMI, "czeAladin") su windy.com
+        # c'e' ma la carta incorporata non lo accetta: si apre col pulsante qui sotto.
+        MODELLI_W = {"AROME (Météo-France, famiglia ALADIN, ~1,3 km)": "arome",
+                     "ICON-D2 (DWD, ~2,2 km)": "iconD2", "ICON-EU (DWD, ~7 km)": "iconEu",
+                     "ECMWF (~9 km)": "ecmwf", "GFS (~22 km)": "gfs"}
+        fonte_c = st.radio("Carta", ["Windy", "Paragliding Map (volabilità dei siti)"],
+                           horizontal=True, key="w_fonte")
+        cw0, cw1 = st.columns([2,2])
         zw = cw0.selectbox("Centro della carta", list(PUNTI_METEO), key="w_zona")
-        strato = cw1.selectbox("Strato", list(STR), key="w_ov")
-        livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
         wla, wlo = PUNTI_METEO[zw]
-        components.iframe(
-            f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}"
-            f"&detailLat={wla}&detailLon={wlo}&zoom=7&level={LIV[livw]}"
-            f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
-            "&pressure=true&type=map&location=coordinates&detail=true"
-            "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
-        with st.expander("ℹ️ Come leggere la carta"):
-            st.markdown("Carta Windy con il modello ECMWF. Scegli lo **strato** (vento, "
-                        "raffiche, nuvole, base nubi, CAPE, pioggia, temperatura, pressione, "
-                        "zero termico) e la **quota**: 850 hPa ≈ 1500 m, 700 hPa ≈ 3000 m. "
-                        "In basso scorri le ore; clicca un punto per il meteogramma.")
+        if fonte_c == "Windy":
+            mod = cw1.selectbox("Modello", list(MODELLI_W), key="w_mod")
+            cw2, cw3 = st.columns(2)
+            strato = cw2.selectbox("Strato", list(STR), key="w_ov")
+            livw = cw3.selectbox("Quota", list(LIV), index=2, key="w_lv")
+            components.iframe(
+                f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}"
+                f"&detailLat={wla}&detailLon={wlo}&zoom=8&level={LIV[livw]}"
+                f"&overlay={STR[strato]}&product={MODELLI_W[mod]}&menu=&message=true&marker=true"
+                "&calendar=now&pressure=true&type=map&location=coordinates&detail=true"
+                "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
+            st.link_button("Apri su Windy con il modello ALADIN",
+                           f"https://www.windy.com/?czeAladin,{wla:.3f},{wlo:.3f},9",
+                           width="stretch")
+            with st.expander("ℹ️ Come leggere la carta"):
+                st.markdown("Carta Windy col **modello** scelto: di base AROME, il modello ad "
+                            "alta risoluzione della famiglia ALADIN, che vede meglio valli e "
+                            "brezze; ICON-D2 è l'alternativa ad alta risoluzione; ECMWF e GFS "
+                            "sono globali, più lisci. ALADIN vero e proprio Windy lo mostra solo "
+                            "sul suo sito: pulsante sopra. Scegli lo **strato** (vento, raffiche, "
+                            "nuvole, base nubi, CAPE, pioggia, temperatura, pressione, zero "
+                            "termico) e la **quota**: 850 hPa ≈ 1500 m, 700 hPa ≈ 3000 m. "
+                            "In basso scorri le ore; clicca un punto per il meteogramma. "
+                            "Non tutti gli strati esistono per tutti i modelli.")
+        else:
+            components.iframe(f"https://www.paraglidingmap.com/thirdpartywidget.aspx?"
+                              f"lat={wla}&lng={wlo}&zoom=9", height=480)
+            with st.expander("ℹ️ Come leggere la carta"):
+                st.markdown("Widget ufficiale di Paragliding Map: ogni decollo è colorato "
+                            "secondo la volabilità prevista (vento rispetto all'esposizione "
+                            "del decollo) e ci sono le stazioni meteo in tempo reale. Trascina "
+                            "e ingrandisci; clicca un decollo per i dettagli. Alcune funzioni "
+                            "sono solo per abbonati sul loro sito.")
+            st.caption("Paragliding Map permette di incorporare il widget; i suoi dati non "
+                       "vengono copiati nell'app.")
         st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
                     "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
                     "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
