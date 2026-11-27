@@ -1539,10 +1539,11 @@ st.markdown("## \U0001FA82 Nordest")
 st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
 
 import montagna
-import osservazioni
-T_METEO, T_SITI, T_NEVE, T_ROTTE, T_OSS, T_INFO = st.tabs(
+import osservazioni, tracce
+T_METEO, T_SITI, T_NEVE, T_ROTTE, T_TRC, T_OSS, T_INFO = st.tabs(
     ["\U0001F324️  Meteo", "\U0001FA82  Attività", "❄️  Neve per zona",
-     "\U0001F9ED  Rotte di volo", "\U0001F4DD  Osservazioni", "\U0001F527  Info"])
+     "\U0001F9ED  Rotte di volo", "\U0001F6F0️  Tracce", "\U0001F4DD  Osservazioni",
+     "\U0001F527  Info"])
 
 # ======================================================= METEO
 with T_METEO:
@@ -1981,6 +1982,10 @@ with T_NEVE:
 # ======================================================= ROTTE
 with T_ROTTE:
     montagna.scheda_rotte(card, kv, df)
+
+# ======================================================= TRACCE
+with T_TRC:
+    tracce.scheda_tracce(card, kv, df)
 
 # ======================================================= OSSERVAZIONI
 with T_OSS:

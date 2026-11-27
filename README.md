@@ -11,6 +11,7 @@ di decollo, direzione del vento, atterraggio, parcheggio e via di salita.
 - `montagna.py` — schede Neve per zona, Rotte di volo e Documenti
 - `manto.py` — diagnosi dello stato del manto e bollettino valanghe FVG
 - `osservazioni.py` — scheda Osservazioni sul campo
+- `tracce.py` — analisi delle tracce IGC
 - `documenti.json` — bibliografia meteo FVG con stato dei download
 - `siti_ne.json` — i punti
 - `build_ne.py` — rigenera `siti_ne.json` incrociando dati curati, Cammina e Vola e KML
@@ -70,6 +71,11 @@ crosta da pioggia, vento e accumuli sottovento, strati deboli persistenti.
 **🧭 Rotte di volo** — mappa con gli strati di thermal.kk7.ch (skyways e termiche,
 CC BY-NC-SA 4.0), le ipotesi di rotta e i decolli; per ogni rotta il ragionamento e il
 verdetto dei prossimi 3 giorni (strato limite, vento 850/700 hPa, nord in quota, pioggia).
+
+**🛰️ Tracce** — si caricano i file IGC dei voli (conservati nella cartella Drive "Tracce
+IGC"). Per ogni volo: termiche (spirali con salita), planate, vento stimato dalla deriva delle
+spirali, meteo previsto quel giorno. Su tutte le tracce: termiche di servizio, rotte tipiche
+(passaggi tra termiche ricorrenti) e come cambiano con vento a 700 hPa, periodo e ora.
 
 **📝 Osservazioni** — per ogni uscita (volo, scialpinismo, alpinismo, escursione) si
 registra cosa si è trovato; l'app salva insieme cosa prevedevano i modelli per quel posto e
