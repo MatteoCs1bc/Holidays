@@ -19,39 +19,68 @@ INIZIO_MESE, INIZIO_GIORNO = 11, 1                          # stagione dal 1 nov
 # Coordinate = punto rappresentativo in quota; q = quota di riferimento per il manto.
 # Sono APPROSSIMATE: si correggono qui. "osmer" = stazioni ARPA FVG vicine (da verificare).
 ZONE = [
- dict(id="dolfri", nome="Dolomiti Friulane", lat=46.390, lon=12.530, q=1800,
-      osmer="Forni di Sopra, Claut", note="Val Cimoliana, Monfalconi, Spalti di Toro"),
- dict(id="prealpi", nome="Prealpi Maniago–Aviano", lat=46.140, lon=12.560, q=1300,
-      osmer="Piancavallo, Barcis", note="Piancavallo, Raut, Cavallo"),
- dict(id="pesarina", nome="Val Pesarina", lat=46.525, lon=12.640, q=1600,
-      osmer="Forni Avoltri, Comeglians", note="Pradibosco, Siera, Clap Grande"),
- dict(id="sappada", nome="Sappada", lat=46.575, lon=12.700, q=1800,
-      osmer="Sappada / Forni Avoltri", note="Peralba, Siera, Lastroni"),
- dict(id="zoncolan", nome="Zona Zoncolan", lat=46.500, lon=12.925, q=1750,
-      osmer="Ravascletto, Comeglians", note="Zoncolan, Tamai, Arvenis"),
- dict(id="gemonese", nome="Gemonese", lat=46.300, lon=13.200, q=1500,
-      osmer="Gemona, Musi", note="Chiampon, Cuarnan, Glemina"),
- dict(id="tagliam", nome="Val Tagliamento", lat=46.420, lon=12.760, q=1500,
-      osmer="Enemonzo, Forni di Sopra", note="Ampezzo, Passo Pura, Forni di Sotto"),
+ dict(id="dolfri", nome="Dolomiti Friulane", lat=46.390, lon=12.530, q=1800, micro="IT-36-PN-01",
+      osmer="Forni di Sopra, Claut", note="Val Cimoliana, Monfalconi, Spalti di Toro",
+      webcam=[("Forni di Sopra — Malga Varmost 1737 m", "https://www.fornidisopra.it/en/webcam-forni-di-sopra-eng")]),
+ dict(id="prealpi", nome="Prealpi Maniago–Aviano", lat=46.140, lon=12.560, q=1300, micro="IT-36-PN-01",
+      osmer="Piancavallo, Barcis", note="Piancavallo, Raut, Cavallo",
+      webcam=[("Piancavallo — Sauc 1592 m", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="pesarina", nome="Val Pesarina", lat=46.525, lon=12.640, q=1600, micro="IT-36-UD-01",
+      osmer="Forni Avoltri, Comeglians", note="Pradibosco, Siera, Clap Grande",
+      webcam=[("Ovaro — Casera Mimoias", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="sappada", nome="Sappada", lat=46.575, lon=12.700, q=1800, micro="IT-36-UD-01",
+      osmer="Sappada / Forni Avoltri", note="Peralba, Siera, Lastroni",
+      webcam=[("Panomax Sappada", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="zoncolan", nome="Zona Zoncolan", lat=46.500, lon=12.925, q=1750, micro="IT-36-UD-01",
+      osmer="Ravascletto, Comeglians", note="Zoncolan, Tamai, Arvenis",
+      webcam=[("Monte Zoncolan 1709 m", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="gemonese", nome="Gemonese", lat=46.300, lon=13.200, q=1500, micro="IT-36-UD-05",
+      osmer="Gemona, Musi", note="Chiampon, Cuarnan, Glemina", webcam=[]),
+ dict(id="tagliam", nome="Val Tagliamento", lat=46.420, lon=12.760, q=1500, micro="IT-36-PN-01",
+      osmer="Enemonzo, Forni di Sopra", note="Ampezzo, Passo Pura, Forni di Sotto",
+      webcam=[("Forni di Sopra — Kolorman", "https://www.fornidisopra.it/en/webcam-forni-di-sopra-eng")]),
  dict(id="avostanis", nome="Carnia — Avostanis / Monte Croce", lat=46.580, lon=13.000, q=1900,
-      osmer="Paluzza, Timau", note="Avostanis, Pal Piccolo, Passo Monte Croce Carnico"),
+      micro="IT-36-UD-02", osmer="Paluzza, Timau",
+      note="Avostanis, Pal Piccolo, Passo Monte Croce Carnico", webcam=[]),
  dict(id="amariana", nome="Carnia — Amariana / Verzegnis", lat=46.395, lon=13.000, q=1600,
-      osmer="Tolmezzo, Enemonzo", note="Amariana, Verzegnis, Lago di Cavazzo"),
- dict(id="tramontina", nome="Zona Tramontina", lat=46.300, lon=12.790, q=1400,
-      osmer="Chievolis, Meduno", note="Val Tramontina, Val Meduna"),
- dict(id="sernio", nome="Sernio / Grauzaria", lat=46.475, lon=13.170, q=1800,
-      osmer="Paularo, Moggio", note="Sernio, Grauzaria, Val Aupa"),
- dict(id="zuc", nome="Zuc dal Bôr / Cjavals", lat=46.450, lon=13.270, q=1900,
-      osmer="Pontebba, Moggio", note="Zuc dal Bôr, Cjavals, Val Aupa / Val Alba"),
- dict(id="resia", nome="Val Resia", lat=46.370, lon=13.350, q=1700,
-      osmer="Musi, Resia", note="Sella Carnizza, Canin sud"),
- dict(id="raccolana", nome="Val Raccolana", lat=46.390, lon=13.470, q=1800,
-      osmer="Sella Nevea", note="Sella Nevea, Montasio, Canin nord"),
- dict(id="tarvisio", nome="Pontebba – Tarvisio", lat=46.520, lon=13.420, q=1600,
-      osmer="Tarvisio, Pontebba, Malborghetto", note="Pramollo, Lussari, Val Canale"),
- dict(id="mangart", nome="Zona Mangart", lat=46.445, lon=13.650, q=2000,
-      osmer="Fusine / Tarvisio", note="Mangart, Laghi di Fusine, Ponze"),
+      micro="IT-36-PN-02", osmer="Tolmezzo, Enemonzo", note="Amariana, Verzegnis, Lago di Cavazzo",
+      webcam=[]),
+ dict(id="tramontina", nome="Zona Tramontina", lat=46.300, lon=12.790, q=1400, micro="IT-36-PN-02",
+      osmer="Chievolis, Meduno", note="Val Tramontina, Val Meduna", webcam=[]),
+ dict(id="sernio", nome="Sernio / Grauzaria", lat=46.475, lon=13.170, q=1800, micro="IT-36-UD-02",
+      osmer="Paularo, Moggio", note="Sernio, Grauzaria, Val Aupa", webcam=[]),
+ dict(id="zuc", nome="Zuc dal Bôr / Cjavals", lat=46.450, lon=13.270, q=1900, micro="IT-36-UD-02",
+      osmer="Pontebba, Moggio", note="Zuc dal Bôr, Cjavals, Val Aupa / Val Alba", webcam=[]),
+ dict(id="resia", nome="Val Resia", lat=46.370, lon=13.350, q=1700, micro="IT-36-UD-05",
+      osmer="Musi, Resia", note="Sella Carnizza, Canin sud",
+      webcam=[("Kanin 2224 m (lato sloveno)", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="raccolana", nome="Val Raccolana", lat=46.390, lon=13.470, q=1800, micro="IT-36-UD-04",
+      osmer="Sella Nevea; campo neve Gilberti–Funifor 1840 m", note="Sella Nevea, Montasio, Canin nord",
+      webcam=[("Sella Nevea — Rifugio Gilberti 1842 m", "https://www.snow-online.com/webcams_friuli-venezia-giulia/"),
+              ("Sella Nevea — Modeon del Buinz (Panomax)", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="tarvisio", nome="Pontebba – Tarvisio", lat=46.520, lon=13.420, q=1600, micro="IT-36-UD-02",
+      osmer="Tarvisio, Pontebba, Malborghetto; Monte Lussari 1770 m",
+      note="Pramollo, Lussari, Val Canale (Lussari e Tarvisio già nelle Alpi Giulie)",
+      webcam=[("Monte Lussari 1747 m", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
+ dict(id="mangart", nome="Zona Mangart", lat=46.445, lon=13.650, q=2000, micro="IT-36-UD-03",
+      osmer="Fusine / Tarvisio", note="Mangart, Laghi di Fusine, Ponze",
+      webcam=[("Monte Lussari 1747 m", "https://www.snow-online.com/webcams_friuli-venezia-giulia/")]),
 ]
+WEBCAM_FVG = "https://www.snow-online.com/webcams_friuli-venezia-giulia/"
+for _z in ZONE:
+    _z["webcam"] = [(n, WEBCAM_FVG if u == "https://www.snow-online.com/webcams_friuli-venezia-giulia/" else u) for n, u in _z["webcam"]]
+
+
+def zona_vicina(lat, lon, max_km=18):
+    """Zona neve/meteo più vicina a un punto (decollo, osservazione)."""
+    import math
+    best, dmin = None, 1e9
+    for z in ZONE:
+        dk = math.hypot((lat - z["lat"]) * 111, (lon - z["lon"]) * 77)
+        if dk < dmin:
+            best, dmin = z, dk
+    return best if dmin <= max_km else None
+
 
 GIORN = ["temperature_2m_max", "temperature_2m_min", "precipitation_sum", "rain_sum",
          "snowfall_sum", "wind_speed_10m_max", "wind_gusts_10m_max",
@@ -211,32 +240,49 @@ ETI_LIV = {"r": "\U0001F534 attenzione alta", "o": "\U0001F7E0 marcato",
 
 
 # ------------------------------------------------------------------ UI NEVE
+@st.cache_data(ttl=3 * 3600, show_spinner=False)
+def bollettino_cache(oggi_iso):
+    import manto
+    return manto.bollettino(date.fromisoformat(oggi_iso))
+
+
+def dati_neve(oggi):
+    """Stagione per le 16 zone, tabelle giornaliere e diagnosi di oggi (in cache)."""
+    import manto
+    raw = scarica_stagione(oggi.isoformat())
+    tab = {z["id"]: tabella_zona(r, z["q"]) for z, r in zip(ZONE, raw)}
+    dia = {z["id"]: manto.diagnosi(tab[z["id"]], oggi, z["q"]) for z in ZONE}
+    return tab, dia
+
+
 def scheda_neve(card, kv):
+    import manto
     oggi = date.today()
     ini = inizio_stagione(oggi)
-    st.markdown("#### ❄️ Manto nevoso per zona")
-    st.caption(f"Stagione dal {ini:%d/%m/%Y}. Ogni zona è letta alla sua quota di riferimento "
-               "con i modelli di Open-Meteo: neve fresca, pioggia, zero termico, vento al suolo "
-               "e a 700 hPa (~3000 m), notti serene. Ultimi giorni = analisi del modello, "
-               "prossimi 7 = previsione. Le stazioni ARPA-OSMER sono indicate per il confronto.")
-    st.warning("È un diario meteo, NON un bollettino valanghe. Prima di uscire leggi il "
-               "bollettino di ARPA FVG e quello AINEVA.", icon="⚠️")
+    st.markdown("#### ❄️ Stato del manto: sci o picca e ramponi?")
+    st.caption(f"Stagione dal {ini:%d/%m/%Y}. Per ogni zona, alla sua quota di riferimento: "
+               "quanta neve c'è, se è fresca, se ha trasformato, se di notte rigela o se il "
+               "freddo la tiene ferma, se il vento l'ha spostata e dove. Dati dei modelli "
+               "(Open-Meteo), bollettino valanghe FVG (AINEVA) e osservazioni sul campo; "
+               "le regole vengono dai manuali AINEVA e CAI in cartella.")
+    st.warning("Non sostituisce il bollettino valanghe né la valutazione sul posto.",
+               icon="⚠️")
     c1, c2, c3 = st.columns(3)
-    c1.link_button("Bollettino neve e valanghe FVG", "https://www.meteo.fvg.it/neve.php",
-                   width="stretch")
-    c2.link_button("AINEVA bollettini", "https://bollettini.aineva.it/",
-                   width="stretch")
-    c3.link_button("Stazioni ARPA-OSMER", "https://www.meteo.fvg.it/",
-                   width="stretch")
+    c1.link_button("Bollettino valanghe FVG", "https://bollettini.aineva.it/", width="stretch")
+    c2.link_button("ARPA FVG — neve", "https://www.meteo.fvg.it/", width="stretch")
+    c3.link_button("Webcam FVG", WEBCAM_FVG, width="stretch")
     try:
-        with st.spinner("Scarico la stagione per 16 zone…"):
-            raw = scarica_stagione(oggi.isoformat())
+        with st.spinner("Leggo la stagione per 16 zone…"):
+            tab, dia = dati_neve(oggi)
     except Exception as e:
         st.error(f"Open-Meteo non risponde ({e}). Riprova tra poco.")
         return
-    tab = {z["id"]: tabella_zona(r, z["q"]) for z, r in zip(ZONE, raw)}
+    try:
+        bol = bollettino_cache(oggi.isoformat())
+    except Exception:
+        bol = {}
 
-    # --- quadro riassuntivo
+    # --- quadro: condizione per zona
     righe = []
     for z in ZONE:
         d = tab[z["id"]]
@@ -244,8 +290,13 @@ def scheda_neve(card, kv):
         o = o.iloc[0] if len(o) else d.iloc[-1]
         pass7 = d[(d["data"] > oggi - timedelta(days=7)) & (d["data"] <= oggi)]
         fut = d[d["data"] > oggi]
+        g = dia[z["id"]]
+        b = bol.get(z["micro"], {})
         righe.append({
             "Zona": z["nome"], "Quota": z["q"],
+            "Condizione": f"{g['emoji']} {g['titolo']}" if g else "—",
+            "Cosa serve": g["attrezzatura"] if g else "—",
+            "Bollettino": manto.NOME_GRADO.get(b.get("grado"), "—"),
             "Stato": ETI_LIV[stato_zona(d, oggi)],
             "Neve al suolo (mod.) cm": round(_n(o["neve_suolo"])),
             "Fresca 72h cm": round(_n(o["hn72"])),
@@ -256,14 +307,33 @@ def scheda_neve(card, kv):
             "Vento 700 oggi": f"{_n(o['v700_max']):.0f} {card8(o['v700_dir'])}",
             "Neve prossimi 7 gg cm": round(fut["snowfall_sum"].sum()),
         })
-    st.dataframe(pd.DataFrame(righe), hide_index=True, width="stretch")
-    st.caption("La neve al suolo è quella della cella del modello: in valli strette e "
-               "versanti al sole può essere molto diversa dalla realtà. Le soglie sono "
-               "indicative: neve 72 h ≥ 30 cm, pioggia su neve, vento 700 hPa ≥ 40 km/h "
-               "con neve fresca, zero termico 300 m sopra la quota, notti serene ≤ −8 °C.")
 
-    # --- mappa con scelta del parametro
-    mappa_neve(righe, tab, oggi)
+    # --- mappa con scelta del parametro (in cima)
+    mappa_neve(righe, tab, oggi, dia, bol)
+
+    st.markdown("#### Oggi, zona per zona")
+    st.dataframe(pd.DataFrame(righe)[["Zona", "Quota", "Condizione", "Cosa serve", "Bollettino",
+                                      "Neve al suolo (mod.) cm", "Fresca 72h cm",
+                                      "Zero term. oggi m", "Vento 700 oggi"]],
+                 hide_index=True, width="stretch")
+
+    # --- prossimi giorni: per programmare la gita
+    st.markdown("#### Prossimi giorni — per programmare la gita")
+    giorni = [oggi + timedelta(days=i) for i in range(0, 6)]
+    prev = []
+    for z in ZONE:
+        riga = {"Zona": z["nome"]}
+        for g in giorni:
+            x = manto.diagnosi(tab[z["id"]], g, z["q"])
+            riga[f"{g:%a %d}"] = f"{x['emoji']} {x['titolo'].split(' (')[0].split(':')[0]}" \
+                if x else "—"
+        prev.append(riga)
+    st.dataframe(pd.DataFrame(prev), hide_index=True, width="stretch")
+    with st.expander("ℹ️ Come leggere la previsione"):
+        for k, (e, ttl, _, att) in manto.TIPI.items():
+            st.markdown(f"{e} **{ttl}** — {att}")
+        st.caption("La condizione è quella del mattino alla quota della zona. I giorni "
+                   "futuri usano la previsione del modello: più è lontano, meno è affidabile.")
 
     # --- dettaglio
     st.divider()
@@ -271,14 +341,37 @@ def scheda_neve(card, kv):
     scelta = st.selectbox("Zona da guardare nel dettaglio", nomi, key="neve_zona")
     z = ZONE[nomi.index(scelta)]
     d = tab[z["id"]]
-    lv = stato_zona(d, oggi)
-    card(f"{z['nome']} · {z['q']} m", f"{z['note']}<br>Stazioni OSMER vicine: {z['osmer']} "
-         f"(da verificare)<br>Punto: {z['lat']:.3f}, {z['lon']:.3f}", lv if lv != "g" else "g")
+    g = dia[z["id"]]
+    if g:
+        testo = (f"<b>{g['attrezzatura']}</b><br>"
+                 + (f"☀️ {g['sole']}<br>" if g["sole"] else "")
+                 + (f"\U0001F311 {g['ombra']}<br>" if g["ombra"] else "")
+                 + "<br>".join("· " + p for p in g["perche"]))
+        if g["problemi"]:
+            testo += "<br><b>Problemi tipici:</b> " + ", ".join(g["problemi"])
+        card(f"{g['emoji']} {z['nome']} · {z['q']} m — {g['titolo']}", testo,
+             {"rigelo": "g", "polvere": "b", "assesta": "b", "fredda": "b", "scarsa": "n",
+              "ventata": "o", "bagnata": "o", "crosta": "r"}[g["tipo"]])
+    b = bol.get(z["micro"])
+    if b:
+        pr = "".join(f"<br>· {p['tipo']} {p['quota']} " + (" ".join(p["esposizioni"]))
+                     for p in b["problemi"])
+        card(f"\U0001F4CB Bollettino valanghe — {manto.MICRO[z['micro']]}: "
+             f"{manto.NOME_GRADO.get(b['grado'], '—')}",
+             f"valido {b['valido']}{pr}<br><span style='opacity:.75'>{b['testo'][:600]}</span>",
+             {1: "g", 2: "y", 3: "o", 4: "r", 5: "r"}.get(b["grado"], "n"))
+    else:
+        st.caption(f"Bollettino valanghe per {manto.MICRO[z['micro']]} non disponibile oggi "
+                   "(di solito esce da dicembre).")
+    kv([("Microzona del bollettino", manto.MICRO[z["micro"]] + " (assegnazione da verificare)"),
+        ("Stazioni vicine", z["osmer"]),
+        ("Webcam", " · ".join(f"[{n}]({u})" for n, u in z["webcam"]) or "—"),
+        ("Gruppi", z["note"])])
     idx = d.set_index(pd.to_datetime(d["data"]))
     st.markdown("**Neve fresca e pioggia (giornaliere)**")
     st.bar_chart(idx[["snowfall_sum", "rain_sum"]].rename(
         columns={"snowfall_sum": "neve cm", "rain_sum": "pioggia mm"}), height=220)
-    st.markdown(f"**Zero termico (max e min del giorno) rispetto alla quota {z['q']} m**")
+    st.markdown(f"**Zero termico e temperature rispetto alla quota {z['q']} m**")
     zt = idx[["zt_max", "zt_min"]].rename(columns={"zt_max": "zero term. max",
                                                    "zt_min": "zero term. min"})
     zt["quota zona"] = z["q"]
@@ -288,40 +381,53 @@ def scheda_neve(card, kv):
         st.markdown("**Neve al suolo (modello, cm)**")
         st.area_chart(idx[["neve_suolo"]].rename(columns={"neve_suolo": "cm"}), height=180)
     with c2:
-        st.markdown("**Vento: raffica al suolo e 700 hPa (km/h)**")
-        st.line_chart(idx[["wind_gusts_10m_max", "v700_max"]].rename(
-            columns={"wind_gusts_10m_max": "raffica", "v700_max": "700 hPa"}), height=180)
+        st.markdown("**Minima della notte e massima (°C)**")
+        st.line_chart(idx[["temperature_2m_min", "temperature_2m_max"]].rename(
+            columns={"temperature_2m_min": "minima", "temperature_2m_max": "massima"}),
+            height=180)
+    st.markdown("**Vento: raffica al suolo e 700 hPa (km/h)**")
+    st.line_chart(idx[["wind_gusts_10m_max", "v700_max"]].rename(
+        columns={"wind_gusts_10m_max": "raffica", "v700_max": "700 hPa"}), height=160)
 
-    st.markdown("**Diario della stagione**")
-    for _, r in d.sort_values("data", ascending=False).iterrows():
-        fut = r["data"] > oggi
-        if not r["eventi"] and not fut and r["data"] < oggi - timedelta(days=14):
-            continue
-        testo = "<br>".join(f"{ETI_LIV[l].split()[0]} {t}" for l, t in r["eventi"]) \
-                or "nessun evento rilevante"
-        sotto = (f"neve {_n(r['snowfall_sum']):.0f} cm · pioggia {_n(r['rain_sum']):.0f} mm · "
-                 f"T {_n(r['temperature_2m_min']):.0f}/{_n(r['temperature_2m_max']):.0f} °C · "
-                 f"zero term. {_n(r['zt_min']):.0f}–{_n(r['zt_max']):.0f} m · "
-                 f"raffica {_n(r['wind_gusts_10m_max']):.0f} km/h · 700 hPa "
-                 f"{_n(r['v700_max']):.0f} da {card8(r['v700_dir'])}<br>{testo}")
-        liv = max((e[0] for e in r["eventi"]), key="byor".find, default="n") \
-            if r["eventi"] else "n"
-        sfera = "\U0001F52E " if fut else ""
-        card(sfera + f"{r['data']:%a %d/%m}" + (" · previsione" if fut else ""), sotto, liv)
-    st.caption("I giorni senza eventi più vecchi di 2 settimane sono nascosti.")
-    oss_z = [o for o in leggi_osservazioni() if o.get("zona") == z["nome"]]
+    import osservazioni as OS
+    oss_z = [o for o in OS.leggi() if o.get("zona") == z["nome"]]
     if oss_z:
-        st.markdown(f"**\U0001F463 Osservazioni sul campo — {len(oss_z)}**")
-        for o in sorted(oss_z, key=lambda o: o.get("data", ""), reverse=True)[:10]:
-            card(f"\U0001F463 {o.get('data','')} · {o.get('quota','')} m · {o.get('esposizione','')}",
-                 riassunto_oss(o), "b")
+        st.markdown(f"**\U0001F463 Osservazioni sul campo in questa zona — {len(oss_z)}**")
+        for o in sorted(oss_z, key=lambda o: str(o.get("data", "")), reverse=True)[:8]:
+            OS.card_oss(o, card)
+
+    with st.expander("Diario della stagione"):
+        for _, r in d.sort_values("data", ascending=False).iterrows():
+            fut = r["data"] > oggi
+            if not r["eventi"] and not fut and r["data"] < oggi - timedelta(days=14):
+                continue
+            x = manto.diagnosi(d, r["data"], z["q"])
+            testo = "<br>".join(f"{ETI_LIV[l].split()[0]} {t}" for l, t in r["eventi"]) \
+                    or "nessun evento rilevante"
+            sotto = ((f"<b>{x['emoji']} {x['titolo']}</b><br>" if x else "")
+                     + f"neve {_n(r['snowfall_sum']):.0f} cm · pioggia {_n(r['rain_sum']):.0f} mm · "
+                     f"T {_n(r['temperature_2m_min']):.0f}/{_n(r['temperature_2m_max']):.0f} °C · "
+                     f"zero term. {_n(r['zt_min']):.0f}–{_n(r['zt_max']):.0f} m · "
+                     f"raffica {_n(r['wind_gusts_10m_max']):.0f} km/h · 700 hPa "
+                     f"{_n(r['v700_max']):.0f} da {card8(r['v700_dir'])}<br>{testo}")
+            liv = max((e[0] for e in r["eventi"]), key="byor".find, default="n") \
+                if r["eventi"] else "n"
+            sfera = "\U0001F52E " if fut else ""
+            card(sfera + f"{r['data']:%a %d/%m}" + (" · previsione" if fut else ""), sotto, liv)
+        st.caption("I giorni senza eventi più vecchi di 2 settimane sono nascosti.")
     with st.expander("Tabella completa della zona"):
         st.dataframe(d.drop(columns=["eventi", "q"]), hide_index=True)
         st.download_button("Scarica CSV", d.drop(columns=["eventi"]).to_csv(index=False),
                            file_name=f"neve_{z['id']}_{oggi}.csv")
 
     st.divider()
-    sezione_osservazioni(card)
+    st.markdown("#### \U0001F4DA Cosa dicono i manuali")
+    for tit, txt, fonte, url in manto.SAPERE:
+        with st.expander(tit):
+            st.markdown(txt)
+            st.caption(f"Fonte: [{fonte}]({url})")
+    st.caption("Le tue uscite si registrano nella scheda \U0001F4DD Osservazioni: vengono "
+               "confrontate con quello che il modello prevedeva per quella zona e quel giorno.")
 
 
 
@@ -364,26 +470,39 @@ def _classe(v, soglie):
     return 1 + sum(v >= s for s in soglie)
 
 
-def mappa_neve(righe, tab, oggi):
+def mappa_neve(righe, tab, oggi, dia=None, bol=None):
+    import manto
+    dia = dia or {}; bol = bol or {}
     st.markdown("#### \U0001F5FA️ Mappa delle zone")
-    par = st.selectbox("Parametro da vedere sulla mappa", list(PARAM_NEVE), key="neve_par")
-    col, soglie, um, spieg = PARAM_NEVE[par]
-    oss = leggi_osservazioni()
+    opz = ["Condizione del manto (sci / ramponi)", "Grado del bollettino valanghe"] + list(PARAM_NEVE)
+    par = st.selectbox("Parametro da vedere sulla mappa", opz, key="neve_par")
+    import osservazioni as OS
+    oss = OS.leggi()
     pts = []
     for z, rr in zip(ZONE, righe):
         d = tab[z["id"]]
         o = d[d["data"] == oggi]
         o = o.iloc[0] if len(o) else d.iloc[-1]
-        if col == "Stato":
-            liv = stato_zona(d, oggi); colr = COL_STATO[liv]; testo = ""
-        elif col == "_v700":
-            v = _n(o["v700_max"]); colr = SCALA[_classe(v, soglie)]
-            testo = f"{v:.0f}"
+        g = dia.get(z["id"])
+        testo = ""
+        if par.startswith("Condizione"):
+            colr = g["colore"] if g else [150, 150, 150]; testo = g["emoji"] if g else ""
+        elif par.startswith("Grado"):
+            gr = bol.get(z["micro"], {}).get("grado", 0)
+            colr = manto.COL_GRADO.get(gr, [150, 150, 150]); testo = str(gr) if gr else "?"
         else:
-            v = rr[col]; colr = SCALA[_classe(v, soglie)]; testo = f"{v:.0f}"
+            col, soglie, um, spieg = PARAM_NEVE[par]
+            if col == "Stato":
+                colr = COL_STATO[stato_zona(d, oggi)]
+            elif col == "_v700":
+                v = _n(o["v700_max"]); colr = SCALA[_classe(v, soglie)]; testo = f"{v:.0f}"
+            else:
+                v = rr[col]; colr = SCALA[_classe(v, soglie)]; testo = f"{v:.0f}"
         n_oss = sum(1 for x in oss if x.get("zona") == z["nome"])
         pts.append(dict(nome=z["nome"], lat=z["lat"], lon=z["lon"], col=colr, testo=testo,
-                        quota=z["q"], stato=rr["Stato"], hn72=rr["Fresca 72h cm"],
+                        quota=z["q"], cond=(f"{g['emoji']} {g['titolo']}" if g else ""),
+                        att=(g["attrezzatura"] if g else ""), bol=rr["Bollettino"],
+                        micro=manto.MICRO[z["micro"]], hn72=rr["Fresca 72h cm"],
                         suolo=rr["Neve al suolo (mod.) cm"], zt=rr["Zero term. oggi m"],
                         vento=rr["Vento 700 oggi"], pioggia=rr["Pioggia 7 gg mm"],
                         prev=rr["Neve prossimi 7 gg cm"],
@@ -391,18 +510,20 @@ def mappa_neve(righe, tab, oggi):
     m = pd.DataFrame(pts)
     deck = pdk.Deck(
         layers=[pdk.Layer("ScatterplotLayer", id="zone", data=m, get_position=["lon", "lat"],
-                          get_fill_color="col", get_radius=2600, opacity=0.8,
-                          radius_min_pixels=12, radius_max_pixels=30, pickable=True,
+                          get_fill_color="col", get_radius=2600, opacity=0.85,
+                          radius_min_pixels=13, radius_max_pixels=30, pickable=True,
                           stroked=True, get_line_color=[255, 255, 255], line_width_min_pixels=1),
                 pdk.Layer("TextLayer", data=m, get_position=["lon", "lat"], get_text="testo",
-                          get_size=12, get_color=[15, 15, 15], size_units="'pixels'")],
+                          get_size=13, get_color=[15, 15, 15], size_units="'pixels'",
+                          character_set="auto")],
         map_style=None,
         initial_view_state=pdk.ViewState(latitude=46.40, longitude=13.05, zoom=8.2),
-        tooltip={"html": "<b>{nome}</b> · {quota} m<br/>{stato}<br/>neve fresca 72 h: {hn72} cm"
-                         "<br/>neve al suolo (mod.): {suolo} cm<br/>zero termico oggi: {zt} m"
-                         "<br/>vento 700 hPa: {vento} km/h<br/>pioggia 7 gg: {pioggia} mm"
-                         "<br/>neve prevista 7 gg: {prev} cm<br/>{oss}",
-                 "style": {"fontSize": "12px"}})
+        tooltip={"html": "<b>{nome}</b> · {quota} m<br/><b>{cond}</b><br/>{att}"
+                         "<br/>bollettino ({micro}): {bol}"
+                         "<br/>neve fresca 72 h: {hn72} cm · al suolo (mod.): {suolo} cm"
+                         "<br/>zero termico oggi: {zt} m · vento 700 hPa: {vento} km/h"
+                         "<br/>pioggia 7 gg: {pioggia} mm · neve prevista 7 gg: {prev} cm<br/>{oss}",
+                 "style": {"fontSize": "12px", "maxWidth": "320px"}})
     ev = st.pydeck_chart(deck, height=460, on_select="rerun", selection_mode="single-object",
                          key="neve_mappa")
     try:
@@ -413,128 +534,27 @@ def mappa_neve(righe, tab, oggi):
     except Exception:
         pass
     with st.expander("ℹ️ Come leggere la mappa"):
-        st.markdown(f"**{par}** — {spieg}")
-        if soglie:
-            classi = [f"< {soglie[0]}"] + [f"{a}–{b}" for a, b in zip(soglie, soglie[1:])] \
-                     + [f"≥ {soglie[-1]}"]
-            st.markdown("  ".join(
-                f"<span class='chip' style='background:rgb({c[0]},{c[1]},{c[2]});color:#111'>"
-                f"{k} {um}</span>" for k, c in zip(classi, SCALA[1:])), unsafe_allow_html=True)
-        st.markdown("Il numero nel cerchio è il valore del parametro. Passa sopra una zona per "
-                    "vedere tutti i valori; **clicca** per aprirne il dettaglio qui sotto.")
-
-
-# ------------------------------------------------------------------ OSSERVAZIONI
-# Archivio: se nei secrets di Streamlit c'è OSSERVAZIONI_URL (web app di Google Apps Script
-# collegata al foglio "Neve FVG — osservazioni"), le osservazioni vanno lì e si rileggono da
-# lì. Altrimenti restano in osservazioni.json sul server, che si azzera a ogni riavvio.
-FILE_OSS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "osservazioni.json")
-CAMPI_OSS = ["data", "zona", "luogo", "quota", "esposizione", "neve_suolo", "superficie",
-             "segnali", "attivita", "note", "autore", "inserita"]
-SUPERFICIE = ["polverosa", "ventata / lastroni", "crosta portante", "crosta non portante",
-              "bagnata / marcia", "primaverile (firn)", "brina di superficie", "ghiaccio",
-              "poca neve, sassi"]
-SEGNALI = ["valanghe spontanee recenti", "whumpf / assestamenti", "fessurazioni",
-           "accumuli da vento", "cornici", "neve fresca > 30 cm", "pioggia su neve",
-           "forte rialzo termico"]
-
-
-OSSERVAZIONI_URL = ""   # indirizzo della web app Apps Script del foglio osservazioni
-
-
-def _url_oss():
-    try:
-        return st.secrets.get("OSSERVAZIONI_URL", "") or OSSERVAZIONI_URL
-    except Exception:
-        return OSSERVAZIONI_URL
-
-
-@st.cache_data(ttl=120, show_spinner=False)
-def _leggi_remoto(url):
-    return _json(url + ("&" if "?" in url else "?") + "azione=leggi", timeout=20)
-
-
-def leggi_osservazioni():
-    url = _url_oss()
-    if url:
-        try:
-            r = _leggi_remoto(url)
-            return r if isinstance(r, list) else r.get("righe", [])
-        except Exception:
-            pass
-    try:
-        return json.load(open(FILE_OSS, encoding="utf-8"))
-    except Exception:
-        return []
-
-
-def salva_osservazione(o):
-    url = _url_oss()
-    if url:
-        req = urllib.request.Request(url, data=json.dumps(o).encode("utf-8"),
-                                     headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=20) as f:
-            f.read()
-        _leggi_remoto.clear()
-        return "foglio"
-    tutte = leggi_osservazioni(); tutte.append(o)
-    json.dump(tutte, open(FILE_OSS, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    return "locale"
-
-
-def riassunto_oss(o):
-    pezzi = []
-    if o.get("luogo"): pezzi.append(f"<b>{o['luogo']}</b>")
-    if o.get("neve_suolo") not in (None, ""): pezzi.append(f"neve al suolo {o['neve_suolo']} cm")
-    if o.get("superficie"): pezzi.append(f"superficie: {o['superficie']}")
-    if o.get("segnali"): pezzi.append(f"⚠️ {o['segnali']}")
-    if o.get("attivita"): pezzi.append(f"attività: {o['attivita']}")
-    if o.get("note"): pezzi.append(str(o["note"]))
-    if o.get("autore"): pezzi.append(f"<i>— {o['autore']}</i>")
-    return "<br>".join(pezzi)
-
-
-def sezione_osservazioni(card):
-    st.markdown("#### \U0001F463 Osservazioni sul campo")
-    st.caption("Sei stato in una zona? Scrivi cosa hai trovato: servono a correggere quello "
-               "che dice il modello. Compaiono nel dettaglio della zona e sulla mappa.")
-    if not _url_oss():
-        st.info("Archivio provvisorio: le osservazioni restano sul server finché l'app non "
-                "viene riavviata. Per tenerle per sempre va collegato il foglio Google "
-                "(OSSERVAZIONI_URL nei secrets). Intanto puoi scaricarle qui sotto.", icon="ℹ️")
-    with st.form("oss_form", clear_on_submit=True):
-        c1, c2 = st.columns(2)
-        zona = c1.selectbox("Zona", [z["nome"] for z in ZONE])
-        data = c2.date_input("Giorno", value=date.today(), format="DD/MM/YYYY")
-        luogo = st.text_input("Dove di preciso", placeholder="es. canale nord dello Zuc dal Bôr")
-        c1, c2, c3 = st.columns(3)
-        quota = c1.number_input("Quota (m)", 0, 3000, 1600, 50)
-        espo = c2.selectbox("Esposizione", ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "varie"])
-        suolo = c3.number_input("Neve al suolo (cm)", 0, 600, 0, 5)
-        sup = st.multiselect("Neve in superficie", SUPERFICIE)
-        seg = st.multiselect("Segnali di pericolo", SEGNALI)
-        att = st.text_input("Cosa facevi", placeholder="scialpinismo, ciaspole, hike & fly…")
-        note = st.text_area("Note", placeholder="strati, test fatti, valanghe viste, vento…")
-        autore = st.text_input("Nome (facoltativo)")
-        ok = st.form_submit_button("Salva osservazione", type="primary")
-    if ok:
-        o = dict(data=data.isoformat(), zona=zona, luogo=luogo, quota=int(quota),
-                 esposizione=espo, neve_suolo=int(suolo), superficie=", ".join(sup),
-                 segnali=", ".join(seg), attivita=att, note=note, autore=autore,
-                 inserita=datetime.now().isoformat(timespec="minutes"))
-        try:
-            dove = salva_osservazione(o)
-            st.success("Salvata nel foglio Google." if dove == "foglio"
-                       else "Salvata (archivio provvisorio sul server).")
-        except Exception as e:
-            st.error(f"Non sono riuscito a salvarla ({e}). Riprova.")
-    tutte = leggi_osservazioni()
-    if tutte:
-        df = pd.DataFrame(tutte)
-        df = df[[c for c in CAMPI_OSS if c in df.columns]].sort_values("data", ascending=False)
-        st.dataframe(df, hide_index=True, width="stretch")
-        st.download_button("Scarica le osservazioni (CSV)", df.to_csv(index=False),
-                           file_name="osservazioni_neve.csv")
+        if par.startswith("Condizione"):
+            st.markdown("Colore = stato della neve in superficie stamattina alla quota della "
+                        "zona, e quindi cosa serve:")
+            for k, (e, ttl, c, att) in manto.TIPI.items():
+                st.markdown(f"<span class='chip' style='background:rgb({c[0]},{c[1]},{c[2]});"
+                            f"color:#111'>{e} {ttl}</span> {att}", unsafe_allow_html=True)
+        elif par.startswith("Grado"):
+            st.markdown("Grado di pericolo valanghe del bollettino FVG (AINEVA) per la "
+                        "microzona della zona: 1 debole, 2 moderato, 3 marcato, 4 forte, "
+                        "5 molto forte. «?» = bollettino non emesso.")
+        else:
+            col, soglie, um, spieg = PARAM_NEVE[par]
+            st.markdown(f"**{par}** — {spieg}")
+            if soglie:
+                classi = [f"< {soglie[0]}"] + [f"{a}–{b}" for a, b in zip(soglie, soglie[1:])] \
+                         + [f"≥ {soglie[-1]}"]
+                st.markdown("  ".join(
+                    f"<span class='chip' style='background:rgb({c[0]},{c[1]},{c[2]});color:#111'>"
+                    f"{k} {um}</span>" for k, c in zip(classi, SCALA[1:])), unsafe_allow_html=True)
+        st.markdown("Passa sopra una zona per vedere tutti i valori; **clicca** per aprirne il "
+                    "dettaglio più sotto.")
 
 
 # ------------------------------------------------------------------ ROTTE
@@ -760,13 +780,19 @@ DOC_PROGETTO = [
     ("Bibliografia ragionata v2", DRIVE + "1hwr6PAHeUvNFyB3fg6CahcDyf6OVanE7p3MKx2YtVso"),
     ("Indice del progetto", DRIVE + "1oXhyOR1wiXUM2hS7VBY1O0C3S7An_qPkF1EeiUgc0Sc"),
     ("Trascrizione conferenza Virgilio", DRIVE + "1kAKH1n0NDCytpAdhy1BGmN5TxpvGK88qkz7LlG-yamw"),
+    ("Cartella PDF bibliografia (meteo, volo, AINEVA)",
+     "https://drive.google.com/drive/folders/17PRzNeDO-KsKKZj_DwNYga5uZN5PsLMI"),
+    ("Cartella neve e valanghe (manuali AINEVA, relazioni)",
+     "https://drive.google.com/drive/folders/1EaZviMGHvZ8kwHyqkFjtEkG5B2qWVTZa"),
+    ("Foglio osservazioni sul campo",
+     "https://docs.google.com/spreadsheets/d/124cwhH6L0UFop5UX_NMeneAV1SKdeRpv_l8rebKN5Jg/edit"),
 ]
 
 
 def scheda_documenti(card):
     st.markdown("#### \U0001F4DA Documenti meteo FVG e volo")
     st.caption("Documenti del progetto su Drive (2.16 - METEO FVG) e bibliografia. "
-               "✅ = PDF scaricato (nome file indicato) · ❌ = non scaricabile · \U0001F517 = solo pagina web "
+               "✅ = PDF nella cartella Drive del progetto · ❌ = non scaricabile · \U0001F517 = solo pagina web "
                "(articolo HTML, a pagamento o da acquistare).")
     for t, u in DOC_PROGETTO:
         st.markdown(f"- [{t}]({u})")

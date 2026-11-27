@@ -1371,6 +1371,21 @@ def vie_di_salita(B, cliccato, att):
                          "se la conosci, segnalala nella scheda Neve → Osservazioni.",
          "g" if via else "n")
     if righe: kv(righe)
+    zv = montagna.zona_vicina(float(r["lat"]), float(r["lon"]))
+    if zv:
+        try:
+            import manto
+            from datetime import date as _d
+            _tab, _dia = montagna.dati_neve(_d.today())
+            g_ = _dia.get(zv["id"])
+            if g_:
+                card(f"{g_['emoji']} Neve oggi nella zona {zv['nome']} ({zv['q']} m)",
+                     f"{g_['titolo']} — {g_['attrezzatura']}<br>"
+                     f"<span style='opacity:.7'>Dettagli nella scheda Neve per zona.</span>",
+                     "b")
+        except Exception:
+            st.caption(f"Zona neve: {zv['nome']} (dati non disponibili ora).")
+    st.markdown(f"[Termiche e skyways su kk7]({montagna.link_kk7(float(r['lat']), float(r['lon']), 13)})")
     with st.expander("Scheda completa del decollo"):
         scheda_sito(r)
 
@@ -1406,9 +1421,10 @@ st.markdown("## \U0001FA82 Nordest")
 st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
 
 import montagna
-T_METEO, T_SITI, T_NEVE, T_ROTTE, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Attività",
-                                   "❄️  Neve per zona", "\U0001F9ED  Rotte di volo",
-                                   "\U0001F527  Info"])
+import osservazioni
+T_METEO, T_SITI, T_NEVE, T_ROTTE, T_OSS, T_INFO = st.tabs(
+    ["\U0001F324️  Meteo", "\U0001FA82  Attività", "❄️  Neve per zona",
+     "\U0001F9ED  Rotte di volo", "\U0001F4DD  Osservazioni", "\U0001F527  Info"])
 
 # ======================================================= METEO
 with T_METEO:
@@ -1490,6 +1506,76 @@ with T_METEO:
                    "il cross vuole gradiente e quota, il paralpinismo vuole aria calma e "
                    "cielo pulito.")
 
+
+        # --- siti volabili (vento a 700 hPa della zona meteo piu' vicina, giorno scelto)
+        st.markdown(f"#### Siti volabili — {pd.Timestamp(gsel).strftime('%a %d/%m')}")
+        vz = {}
+        for nome_, (t_, _, _) in pano.items():
+            sub = t_[t_["g"] == gsel]
+            if len(sub): vz[nome_] = (sub.iloc[0]["v700"], sub.iloc[0]["d700"])
+        B = solo(att_p); B = B[B["tipo"].isin(["decollo","hike&fly"])]
+        verdetti, motivi = {}, {}
+        for _, x in B.iterrows():
+            vk = VIN_FLAT.get(x["nome"])
+            if vk and vz:
+                zn = min(vz, key=lambda n: dist_km(float(x["lat"]), float(x["lon"]),
+                                                    *PUNTI_METEO[n]))
+                ic2, why = giudizio(vz[zn][0], vz[zn][1], vk)
+                verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"], zn)
+            else:
+                verdetti[x["nome"]] = "⚪"
+        cnt = {k: sum(1 for z in verdetti.values() if z==k)
+               for k in ["\U0001F7E2","\U0001F7E1","\U0001F534","⚪"]}
+        s1,s2_,s3,s4 = st.columns(4)
+        s1.metric("\U0001F7E2 Si vola", cnt["\U0001F7E2"])
+        s2_.metric("\U0001F7E1 Al limite", cnt["\U0001F7E1"])
+        s3.metric("\U0001F534 No", cnt["\U0001F534"])
+        s4.metric("⚪ Ignoto", cnt["⚪"])
+        mappa(B, zoom=7.8, verdetti=verdetti, h=430,
+              spiega="Il vento usato per ogni decollo è quello a 700 hPa (~3000 m) della "
+                     "zona meteo più vicina, nel giorno scelto sopra. Il semaforo confronta "
+                     "solo quel vento con l'esposizione del decollo: brezza di valle, "
+                     "inversioni e stato del terreno li valuti tu.")
+        for stato, tit in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
+                           ("\U0001F534","Da escludere")]:
+            bl = B[[verdetti.get(n)==stato for n in B["nome"]]]
+            if not len(bl): continue
+            with st.expander(f"{stato} {tit} — {len(bl)}"):
+                for _, x in bl.sort_values("nome").iterrows():
+                    w = motivi.get(x["nome"])
+                    st.markdown(f"**{x['nome']}** — {w[0] if w else ''}"
+                                + (f" *(meteo: {w[2]})*" if w else ""))
+                    if w and w[1]: st.caption(w[1])
+
+        # --- carte e mappe (Windy ecc.)
+        st.markdown("#### Carte e mappe")
+        LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
+               "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
+        STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
+               "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
+               "Isoterma zero":"deg0"}
+        cw0, cw1, cw2 = st.columns([2,1,1])
+        zw = cw0.selectbox("Centro della carta", list(PUNTI_METEO), key="w_zona")
+        strato = cw1.selectbox("Strato", list(STR), key="w_ov")
+        livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
+        wla, wlo = PUNTI_METEO[zw]
+        components.iframe(
+            f"https://embed.windy.com/embed2.html?lat={wla}&lon={wlo}"
+            f"&detailLat={wla}&detailLon={wlo}&zoom=7&level={LIV[livw]}"
+            f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
+            "&pressure=true&type=map&location=coordinates&detail=true"
+            "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
+        with st.expander("ℹ️ Come leggere la carta"):
+            st.markdown("Carta Windy con il modello ECMWF. Scegli lo **strato** (vento, "
+                        "raffiche, nuvole, base nubi, CAPE, pioggia, temperatura, pressione, "
+                        "zero termico) e la **quota**: 850 hPa ≈ 1500 m, 700 hPa ≈ 3000 m. "
+                        "In basso scorri le ore; clicca un punto per il meteogramma.")
+        st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
+                    "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
+                    "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
+                    "· [Radar Protezione Civile](https://radar.protezionecivile.it/) "
+                    f"· [meteo-parapente](https://meteo-parapente.com/#/{wla},{wlo},11)")
+        st.divider()
 
         # --- le zone migliori, attivita' per attivita'
         st.markdown("#### Dove conviene andare")
@@ -1661,66 +1747,9 @@ with T_METEO:
                           height=210)
         st.caption(f"Medie della fascia 11-16. Ultimo scaricamento: {quando}.")
 
-        # ---- mappa dei siti volabili
-        st.divider()
-        st.markdown("#### Siti volabili con questo meteo")
-        v, d = r["v700"], r["d700"]
-        att_f = st.segmented_control("Attività", list(ATTIVITA), default="cross",
-                                     format_func=lambda a: f"{ico(a)} {eti(a)}", key="sv_a") or "cross"
-        B = solo(att_f); B = B[B["tipo"].isin(["decollo","hike&fly"])]
-        verdetti, motivi = {}, {}
-        for _, x in B.iterrows():
-            vk = VIN_FLAT.get(x["nome"])
-            if vk:
-                ic2, why = giudizio(v, d, vk)
-                verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"])
-            else:
-                verdetti[x["nome"]] = "⚪"
-        cnt = {k: sum(1 for z in verdetti.values() if z==k)
-               for k in ["\U0001F7E2","\U0001F7E1","\U0001F534","⚪"]}
-        s1,s2_,s3,s4 = st.columns(4)
-        s1.metric("\U0001F7E2 Si vola", cnt["\U0001F7E2"])
-        s2_.metric("\U0001F7E1 Al limite", cnt["\U0001F7E1"])
-        s3.metric("\U0001F534 No", cnt["\U0001F534"])
-        s4.metric("⚪ Ignoto", cnt["⚪"])
-        mappa(B, zoom=7.8, verdetti=verdetti, h=430)
-        for stato, tit in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
-                           ("\U0001F534","Da escludere")]:
-            bl = B[[verdetti.get(n)==stato for n in B["nome"]]]
-            if not len(bl): continue
-            with st.expander(f"{stato} {tit} — {len(bl)}"):
-                for _, x in bl.sort_values("nome").iterrows():
-                    w = motivi.get(x["nome"])
-                    st.markdown(f"**{x['nome']}** — {w[0] if w else ''}")
-                    if w and w[1]: st.caption(w[1])
-        st.caption("Il semaforo guarda solo il gradiente a 700 hPa contro l'esposizione del "
-                   "decollo. Brezza di valle, inversione locale e stato del terreno li vedi tu.")
     except Exception as e:
         st.warning("Non riesco a raggiungere Open-Meteo adesso.")
         st.caption(f"({type(e).__name__}) Serve connessione internet.")
-
-    st.divider()
-    st.markdown("#### Carte e mappe")
-    import streamlit.components.v1 as components
-    LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
-           "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
-    STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
-           "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
-           "Isoterma zero":"deg0"}
-    cw1, cw2 = st.columns(2)
-    strato = cw1.selectbox("Strato", list(STR), key="w_ov")
-    livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
-    components.iframe(
-        f"https://embed.windy.com/embed2.html?lat={float(la)}&lon={float(lo)}"
-        f"&detailLat={float(la)}&detailLon={float(lo)}&zoom=7&level={LIV[livw]}"
-        f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
-        "&pressure=true&type=map&location=coordinates&detail=true"
-        "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
-    st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
-                "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
-                "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
-                "· [Radar Protezione Civile](https://radar.protezionecivile.it/) "
-                f"· [meteo-parapente](https://meteo-parapente.com/#/{float(la)},{float(lo)},11)")
 
     st.divider()
     st.markdown("#### Come funziona il tempo in Friuli")
@@ -1803,6 +1832,10 @@ with T_NEVE:
 # ======================================================= ROTTE
 with T_ROTTE:
     montagna.scheda_rotte(card, kv, df)
+
+# ======================================================= OSSERVAZIONI
+with T_OSS:
+    osservazioni.scheda_osservazioni(card, kv, df)
 
 # ======================================================= INFO
 with T_INFO:

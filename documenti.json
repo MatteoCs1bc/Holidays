@@ -24,9 +24,10 @@
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
 "desc": "Vraciu, Antonescu, Visoiu, «Thermal Convection Forecast using a Theoretical Model Calibrated with Statistical Data from Soaring Flights» (preprint). Previsione della velocità delle termiche tarata sui voli",
 "url": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub",
-"scaricato": true,
+"scaricato": false,
 "file": "METEO-FVG_Vraciu_thermal-forecast-preprint.pdf",
-"pdf": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub"
+"pdf": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub",
+"errore": "il sito blocca lo scarico automatico: aprilo dal link"
 },
 {
 "sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
@@ -80,9 +81,10 @@
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
 "desc": "★ Serafin, Zardi, Rotach et al. (2018), «Exchange Processes in the Atmospheric Boundary Layer Over Mountainous Terrain», Atmosphere 9(3) (open access). Review su brezze, strato convettivo e strati stabili in quota",
 "url": "https://www.mdpi.com/2073-4433/9/3/102",
-"scaricato": true,
+"scaricato": false,
 "file": "METEO-FVG_Atmosphere2018_Serafin_ABL-mountains.pdf",
-"pdf": "https://www.mdpi.com/2073-4433/9/3/102/pdf"
+"pdf": "https://www.mdpi.com/2073-4433/9/3/102/pdf",
+"errore": "il sito blocca lo scarico automatico: aprilo dal link"
 },
 {
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
@@ -96,14 +98,14 @@
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
 "desc": "Coppola (2021), tesi Unibo, parapendio strumentato sul Monte Avena (Feltrino)",
 "url": "https://amslaurea.unibo.it/id/eprint/23468/",
-"scaricato": true,
+"scaricato": false,
 "file": "METEO-FVG_Coppola2021_tesi_parapendio-Avena.pdf"
 },
 {
 "sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
 "desc": "Nardon (2024), tesi Polimi, umidità del suolo e termiche con WRF e tracce di parapendio",
 "url": "https://www.politesi.polimi.it/handle/10589/217993",
-"scaricato": true,
+"scaricato": false,
 "file": "METEO-FVG_Nardon2024_tesi_Polimi_umidita-termiche.pdf"
 },
 {
@@ -395,5 +397,53 @@
 "scaricato": true,
 "file": "METEO-FVG_soaringmeteo_soarV2FR.pdf",
 "pdf": "https://soaringmeteo.org/soarV2FR.pdf"
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "AINEVA, Inverno 2024/25 in Friuli Venezia Giulia (pillole della stagione)",
+"url": "https://aineva.it/wp-content/uploads/Relazioni_stagionali_2024-2025/FVG_sito.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "AINEVA, Incidenti nella stagione 2024/25",
+"url": "https://aineva.it/wp-content/uploads/Relazioni_stagionali_2024-2025/incidenti-2024-2025_sito.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "Neve e Valanghe n. 98",
+"url": "https://aineva.it/wp-content/uploads/Pubblicazioni/Rivista98/NV_98.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "Resoconto 2024-25, relazione FVG",
+"url": "https://aineva.it/wp-content/uploads/Pubblicazioni/Resoconto2024-25/05_FVG-1.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "AINEVA, La neve (copia sul sito CAI Conegliano)",
+"url": "https://archivio.caiconegliano.it/Salp/La%20Neve.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "AINEVA, Le valanghe (2021)",
+"url": "https://aineva.it/wp-content/uploads/Pubblicazioni/levalanghe_ita_2021.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "AINEVA, Il bollettino valanghe e la scala di pericolo",
+"url": "https://aineva.it/wp-content/uploads/Pubblicazioni/il-bollettino-valanghe-e-la-scala-di-pericolo-2021.pdf",
+"scaricato": true
+},
+{
+"sez": "F. Neve e valanghe (AINEVA)",
+"desc": "Classificazione internazionale della neve stagionale al suolo (AINEVA, su richiesta)",
+"url": "https://aineva.it/en/pubblicazioni/international-classification-of-snow-on-the-ground/",
+"scaricato": false
 }
 ]

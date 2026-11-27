@@ -9,6 +9,8 @@ di decollo, direzione del vento, atterraggio, parcheggio e via di salita.
 
 - `app.py` — interfaccia, dati, classificazione e motore meteo in un file solo
 - `montagna.py` — schede Neve per zona, Rotte di volo e Documenti
+- `manto.py` — diagnosi dello stato del manto e bollettino valanghe FVG
+- `osservazioni.py` — scheda Osservazioni sul campo
 - `documenti.json` — bibliografia meteo FVG con stato dei download
 - `siti_ne.json` — i punti
 - `build_ne.py` — rigenera `siti_ne.json` incrociando dati curati, Cammina e Vola e KML
@@ -56,19 +58,24 @@ poi **decolli e atterraggi separati**, con esposizione, difficoltà di decollo,
 dislivello e via di salita dove ci sono. Filtro per grado di difficoltà e legenda
 della scala Cammina e Vola.
 
-**❄️ Neve per zona** — 16 zone (Dolomiti Friulane, Prealpi Maniago–Aviano, Val Pesarina,
-Sappada, Zoncolan, Gemonese, Val Tagliamento, Avostanis/Monte Croce, Amariana/Verzegnis,
-Tramontina, Sernio/Grauzaria, Zuc dal Bôr/Cjavals, Val Resia, Val Raccolana,
-Pontebba–Tarvisio, Mangart). Diario giornaliero dal 1° novembre, letto da Open-Meteo alla
-quota di riferimento della zona: neve fresca 24/72 h, pioggia, zero termico, vento al suolo
-e a 700 hPa, notti serene; più la previsione a 7 giorni. Regole semplici segnalano pioggia
-su neve, accumuli da vento (con i versanti sottovento), fusione e rigelo, rialzi termici,
-brina/sfaccettamento. Non sostituisce il bollettino valanghe. Zone e quote si correggono
-in `ZONE` dentro `montagna.py`.
+**❄️ Neve per zona** — obiettivo: capire lo stato del manto, cioè se servono sci o picca
+e ramponi. 16 zone, ognuna assegnata a una microzona del bollettino valanghe FVG (AINEVA,
+regione IT-36), con stazioni e webcam vicine. In cima la mappa con il parametro a scelta
+(condizione del manto, grado del bollettino, neve fresca, neve al suolo, zero termico, vento,
+pioggia, neve prevista); poi la tabella di oggi, la previsione dei prossimi giorni per
+programmare la gita e il dettaglio di zona. La diagnosi (`manto.py`) segue i manuali AINEVA:
+neve fresca, assestamento, freddo che non trasforma, fusione e rigelo, notte senza rigelo,
+crosta da pioggia, vento e accumuli sottovento, strati deboli persistenti.
 
 **🧭 Rotte di volo** — mappa con gli strati di thermal.kk7.ch (skyways e termiche,
 CC BY-NC-SA 4.0), le ipotesi di rotta e i decolli; per ogni rotta il ragionamento e il
 verdetto dei prossimi 3 giorni (strato limite, vento 850/700 hPa, nord in quota, pioggia).
+
+**📝 Osservazioni** — per ogni uscita (volo, scialpinismo, alpinismo, escursione) si
+registra cosa si è trovato; l'app salva insieme cosa prevedevano i modelli per quel posto e
+quel giorno e mostra il confronto, la mappa delle uscite e quanto ci prendono le previsioni
+zona per zona. Archivio: foglio Google "Neve FVG — osservazioni sul campo" tramite una web
+app Apps Script (`OSSERVAZIONI_URL` in `osservazioni.py`).
 
 **🔧 Info** — documenti meteo FVG (Drive e bibliografia), le quattro attività, stato della documentazione zona per zona,
 gite, fonti, legenda.
