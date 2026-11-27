@@ -1,0 +1,372 @@
+[
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "★ Hernández-Aguayo, Cristelli, Benzaquen (2026), «From Flight Logs to Atmospheric Science: Paragliders as Convection Sensors…», arXiv 2608.00241. 110 mila voli francesi incrociati con ERA5: lo strato limite è il primo predittore delle termiche",
+"url": "https://arxiv.org/pdf/2608.00241",
+"scaricato": true,
+"file": "METEO-FVG_HernandezAguayo2026_paragliders-convection.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Palenik e Spengler (Univ. Bergen), «THERMAL: Sampling Atmospheric Convection Using Paragliders», EGU 2022. Tracce di gara usate per classificare la convezione",
+"url": "https://meetingorganizer.copernicus.org/EGU22/EGU22-5352.html"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Sigrist (2006), «Use of Topographic Elevation Models to Identify Thermal Hotspots in Alpine Areas», Technical Soaring. Mappe di irraggiamento (TherMap) confrontate con le tracce di volo; buon accordo nelle Alpi",
+"url": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/view/186",
+"scaricato": true,
+"file": "METEO-FVG_Sigrist2006_thermal-hotspots_TechSoaring.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Vraciu, Antonescu, Visoiu, «Thermal Convection Forecast using a Theoretical Model Calibrated with Statistical Data from Soaring Flights» (preprint). Previsione della velocità delle termiche tarata sui voli",
+"url": "https://www.preprints.org/frontend/manuscript/24b4aaefc56d60b466a8607151363e8a/download_pub",
+"scaricato": true,
+"file": "METEO-FVG_Vraciu_thermal-forecast-preprint.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "EGU 2018-10409, «The determination of the Atmospheric Boundary Layer structure used in sailplane flights». Dati IGC di alianti confrontati con la rianalisi ERA-Interim",
+"url": "https://meetingorganizer.copernicus.org/EGU2018/EGU2018-10409.pdf",
+"scaricato": true,
+"file": "METEO-FVG_EGU2018-10409_ABL-sailplane.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Predelli e Niederhagen, «Humidity, the Dominating Force of Thermal Updrafts» (oltre 90 ore di misure da aliante): l'umidità conta quanto la temperatura",
+"url": "https://arxiv.org/pdf/2110.09573",
+"scaricato": true,
+"file": "METEO-FVG_Predelli_humidity-thermals.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Predelli (2024), «On the horizontal movement of thermal updrafts…», Technical Soaring: le termiche restano verticali anche con vento",
+"url": "https://ts.journals.publicknowledgeproject.org/index.php/ts/article/view/2327",
+"scaricato": true,
+"file": "METEO-FVG_Predelli2024_thermals-wind_TechSoaring.pdf"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Shannon et al. (2002), pellicani usati come sensori di termiche in terreno complesso, Boundary-Layer Meteorology 104. Il profilo di intensità delle termiche in montagna è simile a quello in pianura",
+"url": "https://pubs.usgs.gov/publication/1016311"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Bohrer et al. (2012), stima di ascendenze termiche e orografiche da dati meteo e topografici (aquile e avvoltoi), Ecology Letters. Il metodo è applicabile anche al volo libero",
+"url": "https://pubmed.ncbi.nlm.nih.gov/22077120/"
+},
+{
+"sez": "A. Paper che usano i voli (parapendio, alianti, uccelli) per misurare l'atmosfera",
+"desc": "Treep et al. (2016), GPS di uccelli veleggiatori per osservare lo strato limite, BAMS",
+"url": "https://pure.uva.nl/ws/files/2698765/175904_Using_high_resolution_GPS_tracking_data.pdf",
+"errore": "il sito rimanda al login UvA"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "★ Zardi e Whiteman (2013), «Diurnal Mountain Wind Systems», capitolo del libro Mountain Weather Research and Forecasting (Springer). Il testo di riferimento su brezze di pendio, di valle e monte-pianura e sulle transizioni del mattino e della sera. Zardi è il relatore del Sem04 già in cartella",
+"url": "https://home.chpc.utah.edu/~whiteman/homepage/articles/ZardiWhiteman_2012.pdf",
+"scaricato": true,
+"file": "METEO-FVG_ZardiWhiteman_DiurnalMountainWinds.pdf"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "★ Serafin, Zardi, Rotach et al. (2018), «Exchange Processes in the Atmospheric Boundary Layer Over Mountainous Terrain», Atmosphere 9(3) (open access). Review su brezze, strato convettivo e strati stabili in quota",
+"url": "https://www.mdpi.com/2073-4433/9/3/102",
+"scaricato": true,
+"file": "METEO-FVG_Atmosphere2018_Serafin_ABL-mountains.pdf"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "Laiti, Zardi et al. (2014), Ora del Garda da misure con motoaliante, ACP. L'esempio più vicino a noi di brezza lago-valle misurata in volo",
+"url": "https://acp.copernicus.org/articles/14/9771/2014/",
+"scaricato": true,
+"file": "METEO-FVG_ACP2014_Laiti_OraGarda.pdf"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "Coppola (2021), tesi Unibo, parapendio strumentato sul Monte Avena (Feltrino)",
+"url": "https://amslaurea.unibo.it/id/eprint/23468/",
+"scaricato": true,
+"file": "METEO-FVG_Coppola2021_tesi_parapendio-Avena.pdf"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "Nardon (2024), tesi Polimi, umidità del suolo e termiche con WRF e tracce di parapendio",
+"url": "https://www.politesi.polimi.it/handle/10589/217993",
+"scaricato": true,
+"file": "METEO-FVG_Nardon2024_tesi_Polimi_umidita-termiche.pdf"
+},
+{
+"sez": "B. Strato limite e brezze in montagna (la fisica del volo in Alpi)",
+"desc": "Campagna TEAMx 2024-2025 (Valle dell'Inn): lidar, droni e torri sullo strato limite di montagna; risultati in uscita a EGU/EMS 2026",
+"url": "https://meetingorganizer.copernicus.org/EGU26/session/56285"
+},
+{
+"sez": "C. Föhn, onde e rotori (sicurezza)",
+"desc": "Saigger e Gohm (2022), föhn nella Valle dell'Inn (progetto PIANO): ingresso del föhn associato a onda di gravità e rotore persistente, Weather Clim. Dyn",
+"url": "https://wcd.copernicus.org/articles/3/279/2022/",
+"scaricato": true,
+"file": "METEO-FVG_WCD2022_Saigger_foehn-Inn.pdf"
+},
+{
+"sez": "C. Föhn, onde e rotori (sicurezza)",
+"desc": "DHV, rapporto di incidente mortale all'Elfer (Stubai, 2019): decollo nel lee con föhn in arrivo, chiusura da rotore a circa 30 m dal suolo",
+"url": "https://www.dhv.de/media/seiten/02_fliegen/Sicherheit/Unfaelle/Dateien/Unfallberichte/2019/DHV-Unfallbericht_Elfer_22_10_19.pdf",
+"errore": "link non più valido (404)"
+},
+{
+"sez": "C. Föhn, onde e rotori (sicurezza)",
+"desc": "DHV-Magazin, articolo di Volker Schwaniz sul föhn: quando il vento da sud è föhn, e i limiti della previsione (in tedesco)",
+"url": "https://www.dhv.de/media/jahre/2024/07_wetter/Wetterwissen/DHVmagazin_Artikel/F%C3%B6hn/8_2013_180_foehn.pdf",
+"scaricato": true,
+"file": "METEO-FVG_DHV_Schwaniz_Foehn.pdf"
+},
+{
+"sez": "C. Föhn, onde e rotori (sicurezza)",
+"desc": "Föhn Working Group, «INN – Föhn – LOWI Best Practices» per piloti (aeroporto di Innsbruck): fasi del föhn e segnali",
+"url": "https://Innsbruck-airport.com/fileadmin/userdaten/docs/f%C3%B6hn-inn-best-practices-rev1-short-version.pdf",
+"errore": "link non più valido (404)"
+},
+{
+"sez": "C. Föhn, onde e rotori (sicurezza)",
+"desc": "Analisi di 487 incidenti di parapendio nelle Alpi: dopo l'errore del pilota, la seconda causa è il vento (Sportverletz Sportschaden 2020)",
+"url": "https://pubmed.ncbi.nlm.nih.gov/32663899/"
+},
+{
+"sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
+"desc": "Giaiotti, Pucillo, Stel (OSMER), «Ground wind convergence as deep convection trigger», ECSS 2007",
+"url": "https://www.essl.org/ECSS/2007/abs/06-Forecasts/1178176255.pucillo-1-sec06.oral.pdf",
+"scaricato": true,
+"file": "METEO-FVG_ECSS2007_Pucillo_convergenza.pdf"
+},
+{
+"sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
+"desc": "Giaiotti et al., «Breeze transients as triggers…», EMS 2010: inizio e inversione delle brezze creano microconvergenze sui pendii",
+"url": "https://meetingorganizer.copernicus.org/EMS2010/EMS2010-755.pdf",
+"scaricato": true,
+"file": "METEO-FVG_EMS2010-755_Giaiotti_breeze-transients.pdf"
+},
+{
+"sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
+"desc": "Poljak et al. (2014), brezza e temporali nell'Adriatico nord-orientale, Ann. Geophys",
+"url": "https://angeo.copernicus.org/articles/32/401/2014/angeo-32-401-2014.pdf",
+"scaricato": true,
+"file": "METEO-FVG_ANGEO2014_Poljak_brezza-Adriatico.pdf"
+},
+{
+"sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
+"desc": "Cross Country, «Fifty Ways to Fly Better», capitolo sulla convergenza di brezza: come riconoscerla e da che lato volarla",
+"url": "https://xcmag.com/?p=32213"
+},
+{
+"sez": "D. Convergenze e brezza di mare (la «convergenza A4»)",
+"desc": "Gliding UK, «Exploiting opposing airmasses» (convergenze in montagna e in pianura)",
+"url": "https://www.gliding.co.uk/wp-content/uploads/2014/10/febmar02exploitingopposingairmasses.pdf",
+"errore": "link non più valido (404)"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "★ WMO Technical Note 203 / WMO-No. 1038 (2009), «Handbook of meteorological forecasting for soaring flight», curato dal panel meteo OSTIV",
+"url": "https://www.pa.op.dlr.de/ostiv/Projects/handbook.htm"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "OSTIV Meteorological Panel: un panel che collega ricerca e sport dell'aria, con newsletter mensile da dicembre 2026 (iscrizione a met@ostiv.org); tra i fondatori T. Lezuo di XC Therm.  — poster ICAM 2025 con l'elenco degli strumenti: https://ostiv.org/files/ostiv-docs/met/OSTIV_MET_Panel_scientific_poster_ICAM_2025.pdf",
+"url": "https://ostiv.org/sections/scientific-section/meteorological-panel.html"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "OSTIV Meteorological Panel: un panel che collega ricerca e sport dell'aria, con newsletter mensile da dicembre 2026 (iscrizione a met@ostiv.org); tra i fondatori T. Lezuo di XC Therm. https://ostiv.org/sections/scientific-section/meteorological-panel.html — poster ICAM 2025 con l'elenco degli strumenti:",
+"url": "https://ostiv.org/files/ostiv-docs/met/OSTIV_MET_Panel_scientific_poster_ICAM_2025.pdf",
+"scaricato": true,
+"file": "METEO-FVG_OSTIV_MET_poster_ICAM2025.pdf"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "Technical Soaring (rivista OSTIV, dal 1950), archivio open access",
+"url": "https://ts.journals.publicknowledgeproject.org/"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "RASP/BLIPMAP (Glendening, «Dr. Jack»): guida ai parametri W*, rapporto spinta/shear e Hcrit.  — interpretazione pratica di J. Oberson (soaringmeteo.ch): https://soaringmeteo.org/blipmap.pdf e https://soaringmeteo.org/rasp.pdf",
+"url": "https://rkriz.net/Projects/RASP/GUIDE.html"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "RASP/BLIPMAP (Glendening, «Dr. Jack»): guida ai parametri W*, rapporto spinta/shear e Hcrit. https://rkriz.net/Projects/RASP/GUIDE.html — interpretazione pratica di J. Oberson (soaringmeteo.ch):  e https://soaringmeteo.org/rasp.pdf",
+"url": "https://soaringmeteo.org/blipmap.pdf",
+"errore": "il file non risponde"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "RASP/BLIPMAP (Glendening, «Dr. Jack»): guida ai parametri W*, rapporto spinta/shear e Hcrit. https://rkriz.net/Projects/RASP/GUIDE.html — interpretazione pratica di J. Oberson (soaringmeteo.ch): https://soaringmeteo.org/blipmap.pdf e",
+"url": "https://soaringmeteo.org/rasp.pdf",
+"errore": "il file non risponde"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "Allen (2006, NASA Dryden), «Updraft Model for Development of Autonomous Soaring UAVs»: il modello standard della termica (w* e zi)",
+"url": "https://ntrs.nasa.gov/citations/20060004052",
+"scaricato": true,
+"file": "METEO-FVG_NASA2006_Allen_updraft-model.pdf"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "Meteoblue, guida al meteogramma termico (indici, gradiente, shear)",
+"url": "https://content.meteoblue.com/en/private-customers/website-help/aviation/thermal-forecast/"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "★ AINEVA, «Meteorologia alpina» (Micheletti, OSMER, con Marigo e Pelosini), manuale in italiano: brezze, inversioni, tipi di tempo sulle Alpi",
+"url": "https://aineva.it/wp-content/uploads/2015/11/Manuale_meteo.pdf",
+"scaricato": true,
+"file": "METEO-FVG_AINEVA_Manuale_meteorologia_alpina.pdf"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "S. Nordio (OSMER), «Appunti di meteorologia alpina», programma del corso: configurazioni stagionali e rischio meteo in montagna",
+"url": "https://www.turismofvg.it/proxyvfs.axd/null/r333201?ext=.pdf",
+"scaricato": true,
+"file": "METEO-FVG_Nordio_Appunti_meteorologia_alpina.pdf"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "CAI Conegliano, corso «Nuvolando – Meteorologia alpina» (2014), docente istruttore di parapendio e consigliere FIVL",
+"url": "https://www.caiconegliano.it/sites/default/files/corso_metereologia_alpina_2014.pdf",
+"errore": "link non più valido (404)"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "Rivista FIVL «Volo Libero», archivio dei numeri in PDF",
+"url": "https://vololibero.fivl.it/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "★ Honza Rejmanek (meteorologo, 4 Red Bull X-Alps), rubrica meteo di Cross Country. Tra gli articoli: valli con brezze invertite, heat low, «spring bounce», venti di caduta. Riassunto di dieci anni:  — indice della rubrica: https://xcmag.com/fly-better/weather/",
+"url": "https://xcmag.com/magazine-articles/honza-rejmanek-10-years-of-what-i-know-about-the-weather/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "★ Honza Rejmanek (meteorologo, 4 Red Bull X-Alps), rubrica meteo di Cross Country. Tra gli articoli: valli con brezze invertite, heat low, «spring bounce», venti di caduta. Riassunto di dieci anni: https://xcmag.com/magazine-articles/honza-rejmanek-10-years-of-what-i-know-about-the-weather/ — indice della rubrica:",
+"url": "https://xcmag.com/fly-better/weather/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Podcast Cloudbase Mayhem, ep. 49, «Honza Rejmanek and Understanding the Invisible»: gust front, Skew-T, conoscenza locale",
+"url": "https://www.cloudbasemayhem.com/?p=2275"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Masterclass Cross Country con Matthew Scutter (SkySight) sulle previsioni per i giorni da cross e con Rejmanek",
+"url": "https://xcmag.com/tag/weather/page/4"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Bollettino meteo per piloti a Bassano (Kelly Farina): un modello di servizio locale replicabile per Gemona e Bordano",
+"url": "https://xcmag.com/tag/weather/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Damiano Zanocco: corsi di meteorologia per piloti, volume fotografico «Sulle Nuvole» e DVD in time-lapse delle nubi (VareseNews, 2011)",
+"url": "https://www.varesenews.it/2011/09/deltaplano-e-parapendio-cosa-succede-fino-a-ottobre/108281/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Marco Virgilio: archivio di articoli su ilMeteo.net; con Colucci e Stel ha fondato «Meteorologica», la rivista dell'Unione Meteorologica del FVG.  — https://meetingorganizer.copernicus.org/EMS2009/EMS2009-525-3.pdf",
+"url": "https://www.ilmeteo.net/autore/marco-virgilio/"
+},
+{
+"sez": "F. Interviste, podcast e rubriche",
+"desc": "Marco Virgilio: archivio di articoli su ilMeteo.net; con Colucci e Stel ha fondato «Meteorologica», la rivista dell'Unione Meteorologica del FVG. https://www.ilmeteo.net/autore/marco-virgilio/ —",
+"url": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-525-3.pdf",
+"scaricato": true,
+"file": "METEO-FVG_EMS2009-525_Virgilio.pdf"
+},
+{
+"sez": "G. Strumenti basati sui dati di volo",
+"desc": "WeGlide Copilot «Thermal Hotspots»: 10 milioni di termiche da alianti, mappe per fascia oraria e per direzione del vento",
+"url": "https://magazine.weglide.org/thermal-hotspots-gliding-copilot-weglide/"
+},
+{
+"sez": "8. Documentazione",
+"desc": "ARPA FVG-OSMER, report «meteo.fvg — riepilogo» annuali:",
+"url": "https://www.snpambiente.it/wp-content/uploads/2022/03/meteo.fvg_2021-riepilogo_it.pdf",
+"scaricato": true,
+"file": "METEO-FVG_ARPA-FVG_meteo.fvg_2021_riepilogo.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Nordio et al., «Climate change on Friuli Venezia Giulia: rapid temperature rise…», EGU 2016:",
+"url": "https://meetingorganizer.copernicus.org/EGU2016/EGU2016-17017.pdf",
+"scaricato": true,
+"file": "METEO-FVG_EGU2016-17017_Nordio_climate-FVG.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Micheletti (OSMER), «Cambiamenti climatici in FVG», Neve e Valanghe 63:",
+"url": "https://aineva.it/wp-content/uploads/Pubblicazioni/Rivista63/NV63_4.pdf",
+"scaricato": true,
+"file": "METEO-FVG_AINEVA_NV63_Micheletti_clima-FVG.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Flapp, «In FVG danni dal vento forte e allagamenti» (Vaia), Ecoscienza 6/2018:",
+"url": "https://aggiornati.arpae.it/it/ecoscienza/numeri-ecoscienza/anno-2018/numero-6-anno-2018/clima-e-meteo/in-friuli-venezia-giulia-danni-da-vento-forte-e-allagamenti"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Manzato, elenco pubblicazioni (climatologia temporali, grandine, pioggia a 6 ore in FVG):",
+"url": "https://digilander.libero.it/agostino.manzato/work/publications.html"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Manzato et al., «Trends of sounding-derived indices and observations in NE Italy in the last 30 years», ECSS 2023:",
+"url": "https://meetingorganizer.copernicus.org/ECSS2023/ECSS2023-3.html"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Feudale et al., «A cloud-to-ground lightning climatology for north-eastern Italy», ASR 2013:",
+"url": "https://asr.copernicus.org/articles/10/77/2013/",
+"scaricato": true,
+"file": "METEO-FVG_ASR2013_Feudale_fulmini-FVG.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Gladich, Gallai, Giaiotti, Stel, «On the evening onset of deep moist convection in complex orography» (FVG), EMS 2009:",
+"url": "https://meetingorganizer.copernicus.org/EMS2009/EMS2009-279.pdf",
+"scaricato": true,
+"file": "METEO-FVG_EMS2009-279_Gladich_evening-convection.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Miglietta et al., supercella sulla pianura del FVG del 12/09/2012, QJRMS:",
+"url": "https://www2.mmm.ucar.edu/people/rotunno/Papers/Miglietta+QJ.pdf",
+"scaricato": true,
+"file": "METEO-FVG_QJ_Miglietta_supercella-FVG.pdf"
+},
+{
+"sez": "8. Documentazione",
+"desc": "De Martin, Manzato et al. (2024), «European record-breaking hailstorms in northern Italy on 19 and 24 July 2023»:",
+"url": "https://cris.unibo.it/handle/11585/999148"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Manzato et al. (2026), grandinata di Azzano Decimo del 1/8/2021, Frontiers:",
+"url": "https://www.frontiersin.org/journals/environmental-science/articles/10.3389/fenvs.2025.1735866/full"
+},
+{
+"sez": "8. Documentazione",
+"desc": "Miglietta et al., «Severe convective weather in Italy… TIM campaign», NHESS 2026:",
+"url": "https://nhess.copernicus.org/articles/26/3395/2026/nhess-26-3395-2026.pdf",
+"scaricato": true,
+"file": "METEO-FVG_NHESS2026_Miglietta_TIM.pdf"
+},
+{
+"sez": "E. Documenti tecnici e manuali",
+"desc": "Soaringmeteo, guida «soarV2» (FR): come leggere le mappe di previsione per il volo",
+"url": "https://soaringmeteo.org/soarV2FR.pdf",
+"scaricato": true,
+"file": "METEO-FVG_soaringmeteo_soarV2FR.pdf"
+}
+]

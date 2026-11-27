@@ -1237,38 +1237,10 @@ def giudizio(v, deg, s):
 def analisi(la, lo):
     return M.analizza(la, lo)
 
-ETI_TIPO = {"decollo":"\U0001FA82 decollo ufficiale", "hike&fly":"\U0001F97E decollo hike & fly",
-            "atterraggio":"\U0001F3AF atterraggio", "parcheggio":"\U0001F17F️ parcheggio",
-            "impianto":"\U0001F6A0 impianto", "zona":"⚠️ regola di zona"}
-COL_ATTERRAGGIO = [40, 130, 205]
-COL_SERVIZIO    = [145, 145, 145]
-
-def _tooltip(r):
-    """La tendina che compare passando il cursore sul punto."""
-    def pulito(x, n):
-        x = str(x or "").replace("\n", " ").strip()
-        return (x[:n] + "…") if len(x) > n else x
-    testa = []
-    if val(r, "quota"): testa.append(f"{int(r['quota'])} m")
-    if val(r, "disl"):  testa.append(f"↗ {int(r['disl'])} m")
-    if val(r, "vento"): testa.append(f"\U0001F9ED {r['vento']}")
-    d = str(val(r, "difficolta") or "")
-    if d.startswith("H&F "): testa.append(f"decollo {d[4:]}")
-    elif d:                  testa.append(d)
-    # Streamlit non lascia passare l'html nel tooltip: testo semplice, a capo veri
-    h = [pulito(r["nome"], 60), ETI_TIPO.get(r["tipo"], r["tipo"])]
-    if testa:              h.append(" · ".join(testa))
-    if val(r, "partenza"): h.append("↑ " + pulito(r["partenza"], 150))
-    if val(r, "note"):     h.append(pulito(r["note"], 200))
-    h.append("— clicca per la scheda completa")
-    return "\n".join(h)
-
-def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420, key=None):
-    """Disegna la mappa e restituisce il punto cliccato, se c'e'."""
-    m = b.dropna(subset=["lat","lon"]).copy().reset_index(drop=True)
+def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420):
+    m = b.dropna(subset=["lat","lon"]).copy()
     if not len(m):
-        st.info("Nessun punto con questi filtri."); return None
-    m["_k"] = range(len(m))
+        st.info("Nessun punto con questi filtri."); return
     if verdetti is not None:
         COL = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,170,20],
                "\U0001F534":[200,45,45],"⚪":[150,150,150]}
@@ -1279,99 +1251,19 @@ def mappa(b, zoom=8, ammesse=None, verdetti=None, h=420, key=None):
         m["_a"] = [att_prim(a if isinstance(a,list) else [], ammesse) for a in m["att"]]
         m["col"] = [rgb(a) for a in m["_a"]]
         m["etichetta"] = [eti(a) for a in m["_a"]]
-    m["tip"] = [_tooltip(r) for _, r in m.iterrows()]
-
-    dec = m[m["tipo"].isin(["decollo","hike&fly"])].copy()
-    atr = m[m["tipo"] == "atterraggio"].copy()
-    srv = m[m["tipo"].isin(["parcheggio","impianto","zona"])].copy()
-    atr["col"] = [COL_ATTERRAGGIO] * len(atr)
-    srv["col"] = [COL_SERVIZIO] * len(srv)
-    COLS = ["lat","lon","col","nome","etichetta","tip","_k"]
-
-    def strato(nome_l, g, raggio, minpx, linea, largh=1.4):
-        return pdk.Layer("ScatterplotLayer", id=nome_l, data=g[COLS],
-                         get_position=["lon","lat"], get_fill_color="col",
-                         get_radius=raggio, radius_min_pixels=minpx, radius_max_pixels=20,
-                         pickable=True, auto_highlight=True, stroked=True,
-                         get_line_color=linea, line_width_min_pixels=largh)
-    livelli = []
-    if len(srv): livelli.append(strato("servizi", srv, 200, 3, [255,255,255], 0.6))
-    if len(atr): livelli.append(strato("atterraggi", atr, 300, 5, [255,255,255]))
-    if len(dec): livelli.append(strato("decolli", dec, 480, 7, [25,25,25]))
-
-    ev = st.pydeck_chart(
-        pdk.Deck(layers=livelli, map_style=None,
-                 initial_view_state=pdk.ViewState(latitude=float(m["lat"].mean()),
-                                                  longitude=float(m["lon"].mean()), zoom=zoom),
-                 tooltip={"text": "{tip}",
-                          "style": {"backgroundColor": "rgba(18,18,20,.94)", "color": "#f2f2f2",
-                                    "fontSize": "12px", "maxWidth": "320px", "padding": "9px 11px",
-                                    "borderRadius": "9px", "lineHeight": "1.5",
-                                    "whiteSpace": "pre-line"}}),
-        height=h, key=key, on_select="rerun", selection_mode="single-object")
-
-    leg = ["<span class='chip'>decollo = cerchio grande col bordo scuro</span>",
-           "<span class='chip'>\U0001F535 atterraggio = pallino blu</span>"]
-    if len(srv): leg.append("<span class='chip'>⚪ parcheggi e impianti</span>")
-    st.markdown("".join(leg), unsafe_allow_html=True)
-
-    try:
-        for v in (ev.selection.get("objects") or {}).values():
-            if v:
-                return m.iloc[int(v[0]["_k"])]
-    except Exception:
-        pass
-    return None
-
-def punto_scelto(sel, verdetto=None, motivo=None):
-    """Scheda del punto cliccato sulla mappa."""
-    if sel is None: return
-    st.markdown(f"##### \U0001F4CD {sel['nome']}")
-    scheda_sito(sel, verdetto, motivo)
-    st.caption("Clicca di nuovo sul punto, o su un punto vuoto della mappa, per chiudere.")
-
-# ---------------------------------------------------------------- carte
-W_LIV = {"Superficie":"surface", "850 hPa (~1500 m)":"850h", "700 hPa (~3000 m)":"700h",
-         "600 hPa (~4200 m)":"600h", "500 hPa (~5500 m)":"500h"}
-W_STR = {"Vento":"wind", "Raffiche":"gust", "Nuvole":"clouds", "Base nubi":"cbase",
-         "CAPE":"cape", "Pioggia":"rain", "Temperatura":"temp", "Pressione":"pressure",
-         "Isoterma zero":"deg0"}
-
-def mp_link(la, lo, zoom=12, giorno=None, ora="12:00"):
-    g = giorno or pd.Timestamp.now(tz="Europe/Rome").strftime("%Y-%m-%d")
-    return f"https://meteo-parapente.com/v5/#/{float(la):.4f},{float(lo):.4f},{zoom}/{g}/{ora}"
-
-def carte_e_mappe(la, lo, zoom=7, chiave="t", titolo="Carte e mappe"):
-    import streamlit.components.v1 as components
-    st.markdown(f"#### {titolo}")
-    fonte = st.radio("Carta", ["Windy", "meteo-parapente"], horizontal=True,
-                     key=f"cm_f_{chiave}", label_visibility="collapsed")
-    if fonte == "Windy":
-        c1, c2 = st.columns(2)
-        strato = c1.selectbox("Strato", list(W_STR), key=f"w_ov_{chiave}")
-        livw   = c2.selectbox("Quota", list(W_LIV), index=2, key=f"w_lv_{chiave}")
-        components.iframe(
-            f"https://embed.windy.com/embed2.html?lat={float(la)}&lon={float(lo)}"
-            f"&detailLat={float(la)}&detailLon={float(lo)}&zoom={zoom}&level={W_LIV[livw]}"
-            f"&overlay={W_STR[strato]}&product=ecmwf&menu=&message=true&marker=true"
-            "&calendar=now&pressure=true&type=map&location=coordinates&detail=true"
-            "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
-    else:
-        c1, c2 = st.columns(2)
-        g = c1.date_input("Giorno", pd.Timestamp.now(tz="Europe/Rome").date(),
-                          key=f"mp_g_{chiave}", format="DD/MM/YYYY")
-        ora = c2.selectbox("Ora", [f"{h:02d}:00" for h in range(7, 20)], index=5,
-                           key=f"mp_o_{chiave}")
-        components.iframe(mp_link(la, lo, max(zoom, 9), str(g), ora), height=520)
-        st.caption("Il tuo abbonamento vale dentro il riquadro solo se il browser accetta i "
-                   "cookie di terze parti: se ti dà il profilo gratuito, apri il link qui sotto "
-                   "in una scheda tua. Cliccando un punto dentro la carta si apre il windgram.")
-    st.markdown(
-        f"[meteo-parapente]({mp_link(la, lo, 11)}) "
-        "· [Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
-        "· [Meteociel ECMWF](https://www.meteociel.fr/modeles/ecmwf_hres.php) "
-        "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
-        "· [Radar Protezione Civile](https://radar.protezionecivile.it/)")
+    m["rad"] = [460 if t=="decollo" else (380 if t=="hike&fly" else 240) for t in m["tipo"]]
+    m["sotto"] = [(f"{int(r['quota'])} m · " if val(r,'quota') else "")
+                  + (str(r["vento"]) if val(r,"vento") else r["tipo"]) for _, r in m.iterrows()]
+    st.pydeck_chart(pdk.Deck(
+        layers=[pdk.Layer("ScatterplotLayer",
+                data=m[["lat","lon","col","rad","nome","etichetta","sotto"]],
+                get_position=["lon","lat"], get_fill_color="col", get_radius="rad",
+                radius_min_pixels=5, radius_max_pixels=18, pickable=True, auto_highlight=True,
+                stroked=True, get_line_color=[255,255,255], line_width_min_pixels=1)],
+        map_style=None,
+        initial_view_state=pdk.ViewState(latitude=float(m["lat"].mean()),
+                                         longitude=float(m["lon"].mean()), zoom=zoom)),
+        height=h)
 
 def scheda_sito(r, verdetto=None, motivo=None):
     a = r["att"] if isinstance(r["att"], list) else []
@@ -1416,7 +1308,6 @@ with st.sidebar:
     serv = st.checkbox("Mostra parcheggi e impianti", value=False)
     pos = st.text_input("La tua posizione — lat, lon", placeholder="46.27, 13.14")
 
-POS = None
 base = df[df["zona"].isin(z_sel) & df["aff"].isin(aff_sel)].copy()
 if not serv: base = base[~base["tipo"].isin(["parcheggio","impianto"])]
 if pos.strip():
@@ -1424,7 +1315,6 @@ if pos.strip():
         a_, b_ = [float(x) for x in pos.replace(";",",").split(",")[:2]]
         base["dist"] = [dist_km(a_,b_,la,lo) for la,lo in zip(base["lat"], base["lon"])]
         base = base.sort_values("dist")
-        POS = (a_, b_)
     except Exception:
         st.sidebar.error("Formato: 46.27, 13.14")
 base = base.reset_index(drop=True)
@@ -1435,7 +1325,9 @@ def solo(a):
 st.markdown("## \U0001FA82 Nordest")
 st.caption("Friuli · Carnia · Alpi Giulie · Slovenia di confine · Alpago · bellunese")
 
-T_METEO, T_SITI, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Siti di volo",
+import montagna
+T_METEO, T_SITI, T_NEVE, T_ROTTE, T_INFO = st.tabs(["\U0001F324️  Meteo", "\U0001FA82  Siti di volo",
+                                   "❄️  Neve per zona", "\U0001F9ED  Rotte di volo",
                                    "\U0001F527  Info"])
 
 # ======================================================= METEO
@@ -1456,82 +1348,19 @@ with T_METEO:
                 if res: out[nome] = res
         return out
 
+    st.markdown("### Colpo d'occhio sulla regione")
     pano = panoramica()
-    giorni_comuni = sorted(set.intersection(*[set(t_["g"]) for t_, _, _ in pano.values()])) \
-        if pano else []
-
-    # ============================================== 1. carte, in cima a tutto
-    carte_e_mappe(POS[0] if POS else 46.22, POS[1] if POS else 13.05, zoom=7, chiave="reg",
-                  titolo="Carte e mappe")
-
-    # ============================================== 2. siti volabili, subito sotto
-    st.divider()
-    st.markdown("### Siti volabili")
     if not pano:
-        st.caption("Senza Open-Meteo il semaforo non c'\u00e8: la mappa resta colorata per attivit\u00e0.")
-    gsel = None
+        st.warning("Non riesco a raggiungere Open-Meteo adesso: la panoramica resta vuota.")
+        giorni_comuni = []
+    else:
+        giorni_comuni = sorted(set.intersection(*[set(t_["g"]) for t_, _, _ in pano.values()]))
+
     if giorni_comuni:
         gsel = st.select_slider(
             "Giorno", giorni_comuni, value=giorni_comuni[0],
             format_func=lambda x: pd.Timestamp(x).strftime("%a %d/%m"), key="gpano")
-    att_f = st.segmented_control("Attivit\u00e0", list(ATTIVITA), default="cross",
-                                 format_func=lambda a: f"{ico(a)} {eti(a)}",
-                                 key="sv_a") or "cross"
 
-    @st.cache_data(show_spinner=False)
-    def zona_vicina(lat, lon):
-        return min(PUNTI_METEO, key=lambda z: dist_km(lat, lon, *PUNTI_METEO[z]))
-
-    vento_zona = {}
-    if pano and gsel:
-        for nz, (t_, _qs, _qd) in pano.items():
-            sub = t_[t_["g"] == gsel]
-            if len(sub):
-                vento_zona[nz] = (sub.iloc[0]["v700"], sub.iloc[0]["d700"])
-
-    B = solo(att_f)
-    B = B[B["tipo"].isin(["decollo", "hike&fly", "atterraggio"])]
-    Bdec = B[B["tipo"].isin(["decollo", "hike&fly"])]
-    verdetti, motivi = {}, {}
-    for _, x in Bdec.iterrows():
-        vk = VIN_FLAT.get(x["nome"])
-        vd = vento_zona.get(zona_vicina(float(x["lat"]), float(x["lon"]))) if vento_zona else None
-        if vk and vd and pd.notna(vd[0]):
-            ic2, why = giudizio(vd[0], vd[1], vk)
-            verdetti[x["nome"]] = ic2
-            motivi[x["nome"]] = (why, vk["nota"])
-        else:
-            verdetti[x["nome"]] = "\u26AA"
-    cnt = {k: sum(1 for z in verdetti.values() if z == k)
-           for k in ["\U0001F7E2", "\U0001F7E1", "\U0001F534", "\u26AA"]}
-    st.markdown("".join(f"<span class='chip'>{t}</span>" for t in (
-        f"\U0001F7E2 {cnt['\U0001F7E2']} si vola", f"\U0001F7E1 {cnt['\U0001F7E1']} al limite",
-        f"\U0001F534 {cnt['\U0001F534']} no", f"\u26AA {cnt['\u26AA']} senza vincoli noti",
-        f"\U0001F3AF {len(B) - len(Bdec)} atterraggi")), unsafe_allow_html=True)
-    sel_sv = mappa(B, zoom=7.8, verdetti=verdetti if vento_zona else None,
-                   ammesse={att_f}, h=440, key="mp_sv")
-    if sel_sv is not None:
-        w = motivi.get(sel_sv["nome"])
-        punto_scelto(sel_sv, verdetti.get(sel_sv["nome"]), w[0] if w else None)
-    with st.expander("Elenco per semaforo"):
-        for stato, tit in [("\U0001F7E2", "Si vola"), ("\U0001F7E1", "Al limite"),
-                           ("\U0001F534", "Da escludere")]:
-            bl = Bdec[[verdetti.get(n) == stato for n in Bdec["nome"]]]
-            if not len(bl): continue
-            st.markdown(f"**{stato} {tit} — {len(bl)}**")
-            for _, x in bl.sort_values("nome").iterrows():
-                w = motivi.get(x["nome"])
-                st.markdown(f"- **{x['nome']}** — {w[0] if w else ''}")
-        st.caption("Il semaforo confronta il vento a 700 hPa della zona meteo pi\u00f9 vicina con "
-                   "l'esposizione del decollo. Brezza di valle, inversione locale e stato del "
-                   "terreno li vedi tu.")
-
-    # ============================================== 3. colpo d'occhio sulla regione
-    st.divider()
-    st.markdown("### Colpo d'occhio sulla regione")
-    if not pano:
-        st.warning("Non riesco a raggiungere Open-Meteo adesso: la panoramica resta vuota.")
-    if giorni_comuni:
         righe = []
         for nome, (t_, qs_, qd_) in pano.items():
             sub = t_[t_["g"] == gsel]
@@ -1541,7 +1370,6 @@ with T_METEO:
             for a_ in ATTIVITA:
                 d_[a_] = M.punteggio(rr, a_)
             righe.append(d_)
-
 
         # --- le zone migliori, attivita' per attivita'
         st.markdown("#### Dove conviene andare")
@@ -1560,9 +1388,29 @@ with T_METEO:
                      f"<span style='font-size:.78rem;opacity:.65'>poi: {secondi}</span>",
                      CL.get(ic_, "n"))
 
+        # --- tabella di tutte le zone
         att_p = st.segmented_control(
             "Ordina per", list(ATTIVITA), default="cross",
             format_func=lambda a: f"{ico(a)} {eti(a)}", key="pano_att") or "cross"
+        st.markdown(f"#### Tutte le zone \u2014 {eti(att_p)}")
+        for x in sorted(righe, key=lambda z: -z[att_p][0]):
+            rr, p_, why = x["r"], x[att_p][0], x[att_p][1]
+            ic_ = M.colore_punteggio(p_)
+            v_ = (f"{rr['v700']:.0f} km/h {cardinale(rr['d700'])}"
+                  if pd.notna(rr["v700"]) else "\u2014")
+            qt_ = f"{rr['quota_termica']:.0f} m" if pd.notna(rr["quota_termica"]) else "\u2014"
+            nb_ = f"{rr['nuv_bassa']:.0f}%" if pd.notna(rr["nuv_bassa"]) else "\u2014"
+            pi_ = f"{rr['pioggia']:.0f}%" if pd.notna(rr["pioggia"]) else "\u2014"
+            st.markdown(
+                f"<div class='card {CL.get(ic_,'n')}'>"
+                f"<h4>{ic_} {x['zona']} <span style='float:right;opacity:.6'>{p_}/100</span></h4>"
+                f"<div class='sub'>{why}</div>"
+                f"<div class='kv'><span class='k'>Vento 700 hPa</span><span class='v'>{v_}</span></div>"
+                f"<div class='kv'><span class='k'>Tetto termiche</span><span class='v'>{qt_}</span></div>"
+                f"<div class='kv'><span class='k'>Nubi basse</span><span class='v'>{nb_}</span></div>"
+                f"<div class='kv'><span class='k'>Pioggia</span><span class='v'>{pi_}</span></div>"
+                f"</div>", unsafe_allow_html=True)
+
         # --- mappa regionale
         st.markdown("#### La regione a colpo d'occhio")
         COLP = {"\U0001F7E2":[34,160,70],"\U0001F7E1":[225,180,20],
@@ -1587,26 +1435,6 @@ with T_METEO:
                    "basse, instabilit\u00e0 e pioggia, con criteri diversi per ogni attivit\u00e0: "
                    "il cross vuole gradiente e quota, il paralpinismo vuole aria calma e "
                    "cielo pulito.")
-
-        with st.expander(f"Tutte le zone, una per una — {eti(att_p)}"):
-            for x in sorted(righe, key=lambda z: -z[att_p][0]):
-                rr, p_, why = x["r"], x[att_p][0], x[att_p][1]
-                ic_ = M.colore_punteggio(p_)
-                v_ = (f"{rr['v700']:.0f} km/h {cardinale(rr['d700'])}"
-                      if pd.notna(rr["v700"]) else "\u2014")
-                qt_ = f"{rr['quota_termica']:.0f} m" if pd.notna(rr["quota_termica"]) else "\u2014"
-                nb_ = f"{rr['nuv_bassa']:.0f}%" if pd.notna(rr["nuv_bassa"]) else "\u2014"
-                pi_ = f"{rr['pioggia']:.0f}%" if pd.notna(rr["pioggia"]) else "\u2014"
-                st.markdown(
-                    f"<div class='card {CL.get(ic_,'n')}'>"
-                    f"<h4>{ic_} {x['zona']} <span style='float:right;opacity:.6'>{p_}/100</span></h4>"
-                    f"<div class='sub'>{why}</div>"
-                    f"<div class='kv'><span class='k'>Vento 700 hPa</span><span class='v'>{v_}</span></div>"
-                    f"<div class='kv'><span class='k'>Tetto termiche</span><span class='v'>{qt_}</span></div>"
-                    f"<div class='kv'><span class='k'>Nubi basse</span><span class='v'>{nb_}</span></div>"
-                    f"<div class='kv'><span class='k'>Pioggia</span><span class='v'>{pi_}</span></div>"
-                    f"</div>", unsafe_allow_html=True)
-
 
     st.divider()
     st.markdown("### Approfondimento su una localit\u00e0")
@@ -1741,12 +1569,66 @@ with T_METEO:
                           height=210)
         st.caption(f"Medie della fascia 11-16. Ultimo scaricamento: {quando}.")
 
-        st.markdown(f"Su questo punto: [windgram meteo-parapente]({mp_link(la, lo, 12)}) · "
-                    f"[Windy](https://www.windy.com/{float(la):.4f}/{float(lo):.4f}"
-                    f"?ecmwf,{float(la):.4f},{float(lo):.4f},10)")
+        # ---- mappa dei siti volabili
+        st.divider()
+        st.markdown("#### Siti volabili con questo meteo")
+        v, d = r["v700"], r["d700"]
+        att_f = st.segmented_control("Attività", list(ATTIVITA), default="cross",
+                                     format_func=lambda a: f"{ico(a)} {eti(a)}", key="sv_a") or "cross"
+        B = solo(att_f); B = B[B["tipo"].isin(["decollo","hike&fly"])]
+        verdetti, motivi = {}, {}
+        for _, x in B.iterrows():
+            vk = VIN_FLAT.get(x["nome"])
+            if vk:
+                ic2, why = giudizio(v, d, vk)
+                verdetti[x["nome"]] = ic2; motivi[x["nome"]] = (why, vk["nota"])
+            else:
+                verdetti[x["nome"]] = "⚪"
+        cnt = {k: sum(1 for z in verdetti.values() if z==k)
+               for k in ["\U0001F7E2","\U0001F7E1","\U0001F534","⚪"]}
+        s1,s2_,s3,s4 = st.columns(4)
+        s1.metric("\U0001F7E2 Si vola", cnt["\U0001F7E2"])
+        s2_.metric("\U0001F7E1 Al limite", cnt["\U0001F7E1"])
+        s3.metric("\U0001F534 No", cnt["\U0001F534"])
+        s4.metric("⚪ Ignoto", cnt["⚪"])
+        mappa(B, zoom=7.8, verdetti=verdetti, h=430)
+        for stato, tit in [("\U0001F7E2","Si vola"),("\U0001F7E1","Al limite"),
+                           ("\U0001F534","Da escludere")]:
+            bl = B[[verdetti.get(n)==stato for n in B["nome"]]]
+            if not len(bl): continue
+            with st.expander(f"{stato} {tit} — {len(bl)}"):
+                for _, x in bl.sort_values("nome").iterrows():
+                    w = motivi.get(x["nome"])
+                    st.markdown(f"**{x['nome']}** — {w[0] if w else ''}")
+                    if w and w[1]: st.caption(w[1])
+        st.caption("Il semaforo guarda solo il gradiente a 700 hPa contro l'esposizione del "
+                   "decollo. Brezza di valle, inversione locale e stato del terreno li vedi tu.")
     except Exception as e:
         st.warning("Non riesco a raggiungere Open-Meteo adesso.")
         st.caption(f"({type(e).__name__}) Serve connessione internet.")
+
+    st.divider()
+    st.markdown("#### Carte e mappe")
+    import streamlit.components.v1 as components
+    LIV = {"Superficie":"surface","850 hPa (~1500 m)":"850h","700 hPa (~3000 m)":"700h",
+           "600 hPa (~4200 m)":"600h","500 hPa (~5500 m)":"500h"}
+    STR = {"Vento":"wind","Raffiche":"gust","Nuvole":"clouds","Base nubi":"cbase",
+           "CAPE":"cape","Pioggia":"rain","Temperatura":"temp","Pressione":"pressure",
+           "Isoterma zero":"deg0"}
+    cw1, cw2 = st.columns(2)
+    strato = cw1.selectbox("Strato", list(STR), key="w_ov")
+    livw = cw2.selectbox("Quota", list(LIV), index=2, key="w_lv")
+    components.iframe(
+        f"https://embed.windy.com/embed2.html?lat={float(la)}&lon={float(lo)}"
+        f"&detailLat={float(la)}&detailLon={float(lo)}&zoom=7&level={LIV[livw]}"
+        f"&overlay={STR[strato]}&product=ecmwf&menu=&message=true&marker=true&calendar=now"
+        "&pressure=true&type=map&location=coordinates&detail=true"
+        "&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1", height=480)
+    st.markdown("[Wetterzentrale](https://www.wetterzentrale.de/en/topkarten.php?model=ecm&var=1) "
+                "· [Meteociel](https://www.meteociel.fr/modeles/ecmwf_cartes.php) "
+                "· [ARPA FVG OSMER](https://www.meteo.fvg.it/) "
+                "· [Radar Protezione Civile](https://radar.protezionecivile.it/) "
+                f"· [meteo-parapente](https://meteo-parapente.com/#/{float(la)},{float(lo)},11)")
 
     st.divider()
     st.markdown("#### Come funziona il tempo in Friuli")
@@ -1775,23 +1657,21 @@ with T_SITI:
         f"\U0001F9ED {n_esp} con esposizione",
         *( [f"\U0001F4D0 {n_gr} con difficoltà"] if n_gr else [] ))),
         unsafe_allow_html=True)
-    punto_scelto(mappa(B, zoom=8.1, ammesse={att}, h=430, key=f"mp_{att}"))
-
-    with st.expander("Cerca e filtra"):
-        q = st.text_input("Cerca", key=f"q_{att}",
-                          placeholder="bora, cavi, vietato, navetta, biglietto…")
-        gradi_pres = [g for g in ("1","2-","2","2+","3")
-                      if (dec["difficolta"].astype(str) == "H&F " + g).any()]
-        scelti = []
-        if gradi_pres:
-            scelti = st.multiselect("Difficoltà di decollo (scala Cammina e Vola)", gradi_pres,
-                                    key=f"g_{att}", placeholder="tutti i gradi",
-                                    help="Vuoto = tutti, compresi i punti senza valutazione")
+    mappa(B, zoom=8.1, ammesse={att}, h=430)
+    q = st.text_input("Cerca", key=f"q_{att}",
+                      placeholder="bora, cavi, vietato, navetta, biglietto…")
+    gradi_pres = [g for g in ("1","2-","2","2+","3")
+                  if (dec["difficolta"].astype(str) == "H&F " + g).any()]
+    if gradi_pres:
+        scelti = st.multiselect("Difficoltà di decollo (scala Cammina e Vola)", gradi_pres,
+                                key=f"g_{att}", placeholder="tutti i gradi",
+                                help="Vuoto = tutti, compresi i punti senza valutazione")
+        if scelti:
+            dec = dec[dec["difficolta"].astype(str).isin(["H&F " + g for g in scelti])]
+        with st.expander("Cosa vogliono dire i gradi"):
             for g, testo in SCALA_CEV:
                 st.markdown(f"**Grado {g}** — {testo}")
             st.caption("Scala di camminaevola.it. Riguarda il decollo, non la salita.")
-    if scelti:
-        dec = dec[dec["difficolta"].astype(str).isin(["H&F " + g for g in scelti])]
     def filtra(b):
         if not q or not len(b): return b
         ql = q.lower()
@@ -1799,41 +1679,42 @@ with T_SITI:
                   for _, x in b.iterrows()]]
     dec, att_l, altro = filtra(dec), filtra(att_l), filtra(altro)
 
-    def elenco(b, titolo, chiave, colonne=True):
-        """Tabella compatta: una riga per punto, la scheda si apre selezionandola."""
-        if not len(b):
-            return
-        st.markdown(f"**{titolo} — {len(b)}**")
-        b = b.sort_values(["zona","nome"]).reset_index(drop=True)
-        vista = pd.DataFrame({
-            "Nome": b["nome"],
-            "Zona": [z.split(" ",1)[-1] for z in b["zona"]],
-            "Quota": pd.array([int(x) if pd.notna(x) and x else None for x in b["quota"]],
-                              dtype="Int64"),
-            "Esposizione": ["" if (pd.isna(x) or not str(x).strip()) else str(x)
-                            for x in b["vento"]],
-            "Dec.": [str(x)[4:] if str(x).startswith("H&F ") else "" for x in b["difficolta"]],
-        })
-        if not colonne:
-            vista = vista.drop(columns=["Esposizione","Dec."])
-        ev = st.dataframe(vista, hide_index=True, use_container_width=True,
-                          height=min(360, 38 + 35*len(vista)),
-                          on_select="rerun", selection_mode="single-row", key=chiave)
-        try:
-            r_ = ev.selection["rows"]
-        except Exception:
-            r_ = []
-        if r_:
-            punto_scelto(b.iloc[int(r_[0])])
-
-    elenco(dec, "\U0001FA82 Decolli", f"td_{att}")
+    st.markdown(f"#### \U0001FA82 Decolli — {len(dec)}")
     if not len(dec): st.info("Nessun decollo con questi filtri.")
-    elenco(att_l, "\U0001F3AF Atterraggi", f"ta_{att}", colonne=False)
-    elenco(altro, "⚠️ Regole e servizi", f"ts_{att}", colonne=False)
-    st.caption("Clicca una riga, o un punto sulla mappa, per aprire la scheda completa.")
+    for z in [z for z in ORDINE if z in set(dec["zona"])]:
+        st.markdown(f"*{z}*")
+        for _, r in dec[dec["zona"]==z].sort_values("nome").iterrows():
+            e_ = val(r,"vento") or "esposizione da verificare"
+            qt = f" · {int(r['quota'])} m" if val(r,"quota") else ""
+            d_ = str(val(r,"difficolta") or "")
+            gr = f" · dec. {d_[4:]}" if d_.startswith("H&F ") else ""
+            with st.expander(f"{r['nome']} — \U0001F9ED {e_}{qt}{gr}"):
+                scheda_sito(r)
+    if len(att_l):
+        st.markdown(f"#### \U0001F3AF Atterraggi — {len(att_l)}")
+        for z in [z for z in ORDINE if z in set(att_l["zona"])]:
+            st.markdown(f"*{z}*")
+            for _, r in att_l[att_l["zona"]==z].sort_values("nome").iterrows():
+                with st.expander(r["nome"]):
+                    scheda_sito(r)
+    if len(altro):
+        st.markdown(f"#### ⚠️ Regole e servizi — {len(altro)}")
+        for _, r in altro.sort_values("nome").iterrows():
+            with st.expander(r["nome"]):
+                scheda_sito(r)
+
+# ======================================================= NEVE
+with T_NEVE:
+    montagna.scheda_neve(card, kv)
+
+# ======================================================= ROTTE
+with T_ROTTE:
+    montagna.scheda_rotte(card, kv, df)
 
 # ======================================================= INFO
 with T_INFO:
+    montagna.scheda_documenti(card)
+    st.divider()
     st.markdown("#### Le quattro attività")
     for a, cfg in ATTIVITA.items():
         b = solo(a)
